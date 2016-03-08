@@ -22,7 +22,7 @@ use Xpressengine\Support\Exceptions\AccessDeniedHttpException;
 use Xpressengine\Plugins\Comment\Exceptions\NotMatchCertifyKeyException;
 use Xpressengine\Plugins\Comment\Exceptions\UnknownIdentifierException;
 use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
-use DynamicField;
+use XeDynamicField;
 use Gate;
 use Xpressengine\User\Models\User;
 
