@@ -68,7 +68,7 @@ class Plugin extends AbstractPlugin
      * @param null $installedVersion install version
      * @return bool
      */
-    public function checkInstall($installedVersion = null)
+    public function checkInstalled($installedVersion = null)
     {
         return \Schema::hasTable($this->targetTable);
     }
