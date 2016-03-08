@@ -11,7 +11,7 @@ use Hash;
 use Auth;
 use XeDB;
 use Counter;
-use Skin;
+use XeSkin;
 use XeStorage;
 use Xpressengine\Media\Models\Image;
 use Xpressengine\Permission\Instance;
@@ -41,7 +41,7 @@ class UserController extends Controller
     {
         $plugin = app('xe.plugin.comment');
         $this->handler = $plugin->getHandler();
-        $this->skin = Skin::getAssigned($plugin->getId());
+        $this->skin = XeSkin::getAssigned($plugin->getId());
     }
 
     public function index()

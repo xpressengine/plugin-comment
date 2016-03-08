@@ -1,13 +1,13 @@
-{{ Frontend::css(app('xe.plugin.comment')->assetPath() . '/css/default.css')->load() }}
-{{ Frontend::css('/assets/vendor/core/css/temporary.css')->load() }}
+{{ XeFrontend::css(app('xe.plugin.comment')->assetPath() . '/css/default.css')->load() }}
+{{ XeFrontend::css('/assets/vendor/core/css/temporary.css')->load() }}
 
-{{ Frontend::css('/assets/common/css/dropdown.css')->load() }}
-{{ Frontend::js('/assets/vendor/core/js/toggleMenu.js')->appendTo('head')->load() }}
+{{ XeFrontend::css('/assets/common/css/dropdown.css')->load() }}
+{{ XeFrontend::js('/assets/vendor/core/js/toggleMenu.js')->appendTo('head')->load() }}
 
 @if($config->get('useWysiwyg'))
-{{ Frontend::css('/plugins/ckeditor/assets/ckeditor/xe3.css')->load() }}
+{{ XeFrontend::css('/plugins/ckeditor/assets/ckeditor/xe3.css')->load() }}
 
-{{ Frontend::js([
+{{ XeFrontend::js([
     '/plugins/ckeditor/assets/ckeditor/ckeditor.js',
     '/plugins/ckeditor/assets/ckeditor/styles.js',
     '/plugins/ckeditor/assets/ckeditor/xe3.js',
@@ -15,7 +15,7 @@
     ])->appendTo('body')->load() }}
 @endif
 
-{{ Frontend::translation(['xe::autoSave', 'xe::tempSave']) }}
+{{ XeFrontend::translation(['xe::autoSave', 'xe::tempSave']) }}
 
 
 <div class="comment_header">
