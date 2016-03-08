@@ -7,7 +7,7 @@ use Validator;
 use Xpressengine\Permission\Action;
 use Xpressengine\Permission\Grant;
 use XePresenter;
-use Xpressengine\Plugins\Comment\Models\Comment;
+use XeConfig;
 
 class ManagerController extends Controller
 {
@@ -23,18 +23,32 @@ class ManagerController extends Controller
         XePresenter::setSettingsSkin($plugin->getId());
     }
 
+    protected function getInstances()
+    {
+        $map = XeConfig::get('comment_map');
+        $instanceIds = [];
+        foreach ($map as $instanceId) {
+            $instanceIds[] = $instanceId;
+        }
+
+        return $instanceIds;
+    }
+
     public function index()
     {
         Input::flash();
 
         $model = $this->handler->createModel();
-        $query = $model->newQuery()->where('status', 'public');
+        $query = $model->newQuery()
+            ->whereIn('instanceId', $this->getInstances())
+            ->where('status', 'public');
 
         if ($options = Input::get('options')) {
             list($searchField, $searchValue) = explode('|', $options);
 
             $query->where($searchField, $searchValue);
         }
+
         $comments = $query->paginate();
 
         return XePresenter::make('index', compact('comments'));
@@ -47,7 +61,9 @@ class ManagerController extends Controller
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
-        $comments = $model->newQuery()->whereIn('id', $commentIds)->get();
+        $comments = $model->newQuery()
+            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('id', $commentIds)->get();
 
         foreach ($comments as $comment) {
             $comment->approved = $approved;
@@ -68,7 +84,9 @@ class ManagerController extends Controller
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
-        $comments = $model->newQuery()->whereIn('id', $commentIds)->get();
+        $comments = $model->newQuery()
+            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('id', $commentIds)->get();
 
         foreach ($comments as $comment) {
             $this->handler->trash($comment);
@@ -86,7 +104,9 @@ class ManagerController extends Controller
         Input::flash();
 
         $model = $this->handler->createModel();
-        $comments = $model->newQuery()->where('status', 'trash')->get();
+        $comments = $model->newQuery()
+            ->whereIn('instanceId', $this->getInstances())
+            ->where('status', 'trash')->paginate();
 
         return XePresenter::make('trash', compact('comments'));
     }
@@ -116,7 +136,9 @@ class ManagerController extends Controller
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
-        $comments = $model->newQuery()->whereIn('id', $commentIds)->get();
+        $comments = $model->newQuery()
+            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('id', $commentIds)->get();
 
         foreach ($comments as $comment) {
             $this->handler->restore($comment);
