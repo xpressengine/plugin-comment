@@ -13,7 +13,7 @@ namespace Xpressengine\Plugins\Comment;
 
 use Xpressengine\UIObject\AbstractUIObject;
 use View;
-use Frontend;
+use XeFrontend;
 use Skin;
 use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
 
@@ -62,9 +62,9 @@ class CommentUIObject extends AbstractUIObject
 
         $config = $handler->getConfig($instanceId);
 
-        Frontend::js('/assets/vendor/core/js/toggleMenu.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
-        Frontend::js('/assets/vendor/core/js/temporary.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
-        Frontend::js($plugin->assetPath() . '/service.js')->appendTo('head')->load();
+        XeFrontend::js('/assets/vendor/core/js/toggleMenu.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
+        XeFrontend::js('/assets/vendor/core/js/temporary.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
+        XeFrontend::js($plugin->assetPath().'/service.js')->appendTo('head')->load();
 
 //        $skin = Skin::getInstance($plugin->getId());
         $skin = Skin::getAssigned($plugin->getId());
