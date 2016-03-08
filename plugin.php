@@ -29,9 +29,9 @@ class Plugin extends AbstractPlugin
         // 기본 권한
         $handler->setPermission(null, $handler->getDefaultPermission());
         // 기본 설정
-        \Cfg::set('comment', $handler->getDefaultConfig());
-        if (\Cfg::get('comment_map') === null) {
-            \Cfg::set('comment_map', []);
+        \XeConfig::set('comment', $handler->getDefaultConfig());
+        if (\XeConfig::get('comment_map') === null) {
+            \XeConfig::set('comment_map', []);
         }
     }
 
