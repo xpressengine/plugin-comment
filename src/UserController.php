@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Database\QueryException;
 use Illuminate\Pagination\Paginator;
 use Input;
-use Presenter;
+use XePresenter;
 use Validator;
 use Hash;
 use Auth;
@@ -101,7 +101,7 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return Presenter::makeApi([
+        return XePresenter::makeApi([
             'totalCount' => $totalCount,
             'hasMore' => $comments->hasMorePages(),
             'items' => $content,
@@ -173,7 +173,7 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return Presenter::makeApi([
+        return XePresenter::makeApi([
             'items' => $content,
         ]);
     }
@@ -268,7 +268,7 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return Presenter::makeApi([
+        return XePresenter::makeApi([
             'items' => $content,
         ]);
     }
@@ -311,7 +311,7 @@ class UserController extends Controller
             $data = [];
         }
 
-        return Presenter::makeApi($data);
+        return XePresenter::makeApi($data);
     }
 
     public function voteOn()
@@ -342,7 +342,7 @@ class UserController extends Controller
             $data = [];
         }
 
-        return Presenter::makeApi($data);
+        return XePresenter::makeApi($data);
     }
 
     public function voteOff()
@@ -373,7 +373,7 @@ class UserController extends Controller
             $data = [];
         }
 
-        return Presenter::makeApi($data);
+        return XePresenter::makeApi($data);
     }
 
     public function voteUser()
@@ -388,7 +388,7 @@ class UserController extends Controller
 
         $content = $this->skin->setView('vote')->setData(['users' => $users])->render();
 
-        return Presenter::makeApi(['items' => $content]);
+        return XePresenter::makeApi(['items' => $content]);
     }
 
     public function form()
@@ -424,7 +424,7 @@ class UserController extends Controller
             $data = ['mode' => 'create'];
         }
 
-        return Presenter::makeApi($data);
+        return XePresenter::makeApi($data);
     }
 
     protected function getEditForm()
@@ -458,7 +458,7 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return Presenter::makeApi(['mode' => 'edit', 'html' => $content]);
+        return XePresenter::makeApi(['mode' => 'edit', 'html' => $content]);
     }
 
     protected function getReplyForm()
@@ -485,7 +485,7 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return Presenter::makeApi(['mode' => 'reply', 'html' => $content]);
+        return XePresenter::makeApi(['mode' => 'reply', 'html' => $content]);
     }
 
     protected function getCertifyForm($mode, $comment)
@@ -495,7 +495,7 @@ class UserController extends Controller
             'comment' => $comment
         ])->render();
 
-        return Presenter::makeApi(['mode' => 'certify', 'html' => $content]);
+        return XePresenter::makeApi(['mode' => 'certify', 'html' => $content]);
     }
 
     public function certify()
@@ -572,7 +572,7 @@ class UserController extends Controller
             $thumbnails = $mediaManager->createThumbnails($media, 'spill');
         }
 
-        return Presenter::makeApi([
+        return XePresenter::makeApi([
             'file' => $file,
             'media' => $media,
             'thumbnails' => $thumbnails,
@@ -619,7 +619,7 @@ class UserController extends Controller
         $string = Input::get('string');
 
         if (empty($string) === true) {
-            return Presenter::makeApi([]);
+            return XePresenter::makeApi([]);
         }
 
         /** @var \Xpressengine\Tag\TagHandler $tagHandler */
@@ -634,7 +634,7 @@ class UserController extends Controller
             ];
         }
 
-        return Presenter::makeApi($suggestions);
+        return XePresenter::makeApi($suggestions);
     }
 
     public function suggestionMention()
@@ -652,6 +652,6 @@ class UserController extends Controller
                 'profileImage' => $user->getProfileImage(),
             ];
         }
-        return Presenter::makeApi($suggestions);
+        return XePresenter::makeApi($suggestions);
     }
 }

@@ -6,7 +6,7 @@ use Input;
 use Validator;
 use Xpressengine\Permission\Action;
 use Xpressengine\Permission\Grant;
-use Presenter;
+use XePresenter;
 use Xpressengine\Plugins\Comment\Models\Comment;
 
 class ManagerController extends Controller
@@ -20,7 +20,7 @@ class ManagerController extends Controller
     {
         $plugin = app('xe.plugin.comment');
         $this->handler = $plugin->getHandler();
-        Presenter::setSettingsSkin($plugin->getId());
+        XePresenter::setSettingsSkin($plugin->getId());
     }
 
     public function index()
@@ -37,7 +37,7 @@ class ManagerController extends Controller
         }
         $comments = $query->paginate();
 
-        return Presenter::make('index', compact('comments'));
+        return XePresenter::make('index', compact('comments'));
     }
 
     public function approve()
@@ -88,7 +88,7 @@ class ManagerController extends Controller
         $model = $this->handler->createModel();
         $comments = $model->newQuery()->where('status', 'trash')->get();
 
-        return Presenter::make('trash', compact('comments'));
+        return XePresenter::make('trash', compact('comments'));
     }
 
     public function destroy()
