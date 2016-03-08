@@ -3,7 +3,7 @@ namespace Xpressengine\Plugins\Comment;
 
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\Trash\WasteInterface;
-use Trash;
+use XeTrash;
 
 class Waste implements WasteInterface
 {

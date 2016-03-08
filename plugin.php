@@ -7,7 +7,7 @@ use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\Translation\Translator;
 use Route;
 use Skin;
-use Trash;
+use XeTrash;
 use View;
 use Gate;
 
@@ -88,7 +88,7 @@ class Plugin extends AbstractPlugin
         Skin::setDefaultSkin($this->getId(), 'comment/skin/comment@default');
         Skin::setDefaultSettingsSkin($this->getId(), 'comment/settingsSkin/comment@default');
 
-        Trash::register(Waste::class);
+        XeTrash::register(Waste::class);
 
         $app = app();
 
