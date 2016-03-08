@@ -14,7 +14,7 @@ namespace Xpressengine\Plugins\Comment;
 use Xpressengine\UIObject\AbstractUIObject;
 use View;
 use XeFrontend;
-use Skin;
+use XeSkin;
 use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
 
 /**
@@ -67,7 +67,7 @@ class CommentUIObject extends AbstractUIObject
         XeFrontend::js($plugin->assetPath().'/service.js')->appendTo('head')->load();
 
 //        $skin = Skin::getInstance($plugin->getId());
-        $skin = Skin::getAssigned($plugin->getId());
+        $skin = XeSkin::getAssigned($plugin->getId());
         $view = $skin->setView('container')->setData(compact('config'))->render();
 
         $view = View::make(sprintf('%s::views.uio', $plugin->getId()),

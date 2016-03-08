@@ -6,7 +6,7 @@ use Xpressengine\Plugin\AbstractPlugin;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\Translation\Translator;
 use Route;
-use Skin;
+use XeSkin;
 use Trash;
 use View;
 use Gate;
@@ -85,8 +85,8 @@ class Plugin extends AbstractPlugin
 
         app('xe.uiobject')->setAlias('comment', 'uiobject/comment@comment');
 
-        Skin::setDefaultSkin($this->getId(), 'comment/skin/comment@default');
-        Skin::setDefaultSettingsSkin($this->getId(), 'comment/settingsSkin/comment@default');
+        XeSkin::setDefaultSkin($this->getId(), 'comment/skin/comment@default');
+        XeSkin::setDefaultSettingsSkin($this->getId(), 'comment/settingsSkin/comment@default');
 
         Trash::register(Waste::class);
 
