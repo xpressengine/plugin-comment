@@ -200,16 +200,16 @@ class ManagerController extends Controller
 
     private function makeGrant($inputs, $action)
     {
-        if ($inputs[$action . 'Mode'] === 'inherit') {
+        if (array_get($inputs, $action . 'Mode') === 'inherit') {
             return null;
         }
 
         return [
-            Grant::RATING_TYPE => $inputs[$action . 'Rating'],
-            Grant::GROUP_TYPE => isset($inputs[$action . 'Group']) ? $inputs[$action . 'Group'] : [],
-            Grant::USER_TYPE => explode(',', $inputs[$action . 'User']),
-            Grant::EXCEPT_TYPE => explode(',', $inputs[$action . 'Except']),
-            Grant::VGROUP_TYPE => isset($inputs[$action . 'VGroup']) ? $inputs[$action . 'VGroup'] : [],
+            Grant::RATING_TYPE => array_get($inputs, $action . 'Rating'),
+            Grant::GROUP_TYPE => array_get($inputs, $action . 'Group') ?: [],
+            Grant::USER_TYPE => array_filter(explode(',', array_get($inputs, $action . 'User'))),
+            Grant::EXCEPT_TYPE => array_filter(explode(',', array_get($inputs, $action . 'Except'))),
+            Grant::VGROUP_TYPE => array_get($inputs, $action . 'VGroup') ?: [],
         ];
     }
 }
