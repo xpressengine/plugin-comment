@@ -36,13 +36,13 @@ class ManageSection
             'create' => [
                 'mode' => $mode('create'),
                 'grant' => $permission['create'],
-                'title' => 'Create',
+                'title' => 'create',
                 'groups' => $allGroup,
             ],
             'download' => [
                 'mode' => $mode('download'),
                 'grant' => $permission['download'],
-                'title' => 'Download',
+                'title' => 'download',
                 'groups' => $allGroup,
             ]
         ];

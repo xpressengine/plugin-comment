@@ -180,7 +180,7 @@ class ManagerController extends Controller
         $this->handler->configure(Input::get('instanceId'), $configInputs);
 
         $grantInfo = [
-            'create' => $this->makeGrant($permInputs, 'download'),
+            'create' => $this->makeGrant($permInputs, 'create'),
             'download' => $this->makeGrant($permInputs, 'download'),
         ];
 
