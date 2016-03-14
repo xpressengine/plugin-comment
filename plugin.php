@@ -173,8 +173,9 @@ class Plugin extends AbstractPlugin
     public function getHandler()
     {
         if (!$this->handler) {
+            $proxyClass = app('xe.interception')->proxy(Handler::class);
             $counter = app('xe.counter')->make(app('request'), Handler::COUNTER_VOTE, ['assent', 'dissent']);
-            $this->handler = new Handler(
+            $this->handler = new $proxyClass(
                 app('xe.document'),
                 app('session.store'),
                 $counter,
