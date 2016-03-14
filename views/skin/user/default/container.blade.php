@@ -11,7 +11,7 @@
     '/plugins/ckeditor/assets/ckeditor/ckeditor.js',
     '/plugins/ckeditor/assets/ckeditor/styles.js',
     '/plugins/ckeditor/assets/ckeditor/xe3.js',
-    '/plugins/ckeditor_plugin/assets/plugins/append.js'
+    '/plugins/ckeditor/assets/plugins/append.js'
     ])->appendTo('body')->load() }}
 @endif
 
