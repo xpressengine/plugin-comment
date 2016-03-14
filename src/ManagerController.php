@@ -20,7 +20,7 @@ class ManagerController extends Controller
     {
         $plugin = app('xe.plugin.comment');
         $this->handler = $plugin->getHandler();
-        XePresenter::setSettingsSkin($plugin->getId());
+        XePresenter::setSettingsModule($plugin->getId());
     }
 
     protected function getInstances()
