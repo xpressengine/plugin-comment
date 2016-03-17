@@ -11,7 +11,7 @@
                                 <div class="slct_area" id="__xe_btn_options">
                                     <input type="hidden" name="options" value="{{ Input::old('options') }}">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="text"></span></a>
-                                    <div class="slct_lst trasition dropdown-menu">
+                                    <div class="slct_lst transition dropdown-menu">
                                         <ul>
                                             <li><a href="#" class="item" value="">{{ xe_trans('comment::manage.all') }}</a></li>
                                             <li><a href="#" class="item" value="display|visible">{{ xe_trans('comment::manage.public') }}</a></li>

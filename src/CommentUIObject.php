@@ -62,8 +62,8 @@ class CommentUIObject extends AbstractUIObject
 
         $config = $handler->getConfig($instanceId);
 
-        XeFrontend::js('/assets/vendor/core/js/toggleMenu.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
-        XeFrontend::js('/assets/vendor/core/js/temporary.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
+        XeFrontend::js('/assets/core/common/js/toggleMenu.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
+        XeFrontend::js('/assets/core/common/js/temporary.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
         XeFrontend::js($plugin->assetPath().'/service.js')->appendTo('head')->load();
 
 //        $skin = Skin::getInstance($plugin->getId());
