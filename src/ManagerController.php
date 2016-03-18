@@ -49,9 +49,13 @@ class ManagerController extends Controller
             $query->where($searchField, $searchValue);
         }
 
-        $comments = $query->paginate();
+        $comments = $query->with('target')->paginate();
 
-        return XePresenter::make('index', compact('comments'));
+        $map = $this->handler->getInstanceMap();
+        $menuItems = app('xe.menu')->createItemModel()->newQuery()
+            ->whereIn('id', array_keys($map))->get()->getDictionary();
+
+        return XePresenter::make('index', compact('comments', 'map', 'menuItems'));
     }
 
     public function approve()
