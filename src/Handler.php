@@ -96,6 +96,8 @@ class Handler
         $config->set($targetInstanceId, $commentInstanceId);
 
         $this->configs->modify($config);
+
+        $this->instanceMap = array_merge($this->instanceMap ?: [], [$targetInstanceId => $commentInstanceId]);
     }
 
     public function getInstanceMap()
@@ -116,22 +118,10 @@ class Handler
         $map = $this->getInstanceMap();
 
         return isset($map[$targetInstanceId]) ? $map[$targetInstanceId] : null;
-//        $config = $this->getMapConfig();
-//
-//        return $config->get($targetInstanceId);
     }
 
     public function getTargetInstanceId($instanceId)
     {
-//        $config = $this->getMapConfig();
-//        foreach ($config as $target => $id) {
-//            if ($id == $instanceId) {
-//                return $target;
-//            }
-//        }
-//
-//        return null;
-
         $map = $this->getInstanceMap();
         if ($key = array_search($instanceId, $map)) {
             return $key;

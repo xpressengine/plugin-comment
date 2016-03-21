@@ -4,7 +4,6 @@ namespace Xpressengine\Plugins\Comment;
 use App\Http\Controllers\Controller;
 use Input;
 use Validator;
-use Xpressengine\Permission\Action;
 use Xpressengine\Permission\Grant;
 use XePresenter;
 use XeConfig;
@@ -52,10 +51,21 @@ class ManagerController extends Controller
         $comments = $query->with('target')->paginate();
 
         $map = $this->handler->getInstanceMap();
-        $menuItems = app('xe.menu')->createItemModel()->newQuery()
+        $menuItems = app('xe.menu')->createItemModel()->newQuery()->with('route')
             ->whereIn('id', array_keys($map))->get()->getDictionary();
 
-        return XePresenter::make('index', compact('comments', 'map', 'menuItems'));
+        return XePresenter::make('index', [
+            'comments' => $comments,
+            'menuItem' => function ($comment) use ($menuItems, $map) {
+                return $menuItems[array_search($comment->instanceId, $map)];
+            },
+            'urlMake' => function ($comment, $menuItem) {
+                $module = app('xe.module');
+                return url($module->getModuleObject($menuItem->type)
+                        ->getTypeItem($comment->target->targetId)
+                        ->getLink($menuItem->route) . '#comment-'.$comment->id);
+            },
+        ]);
     }
 
     public function approve()
