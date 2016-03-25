@@ -64,8 +64,10 @@
                                             <tr>
                                                 <td><input type="checkbox" name="id[]" class="__xe_checkbox" value="{{ $comment->id }}"></td>
                                                 <td>
-                                                    {{--{{ str_repeat('&nbsp;&nbsp;', $comment->indent()) }}@if($comment->indent() > 0) ㄴ @endif--}}
-                                                    <b>[{{ $comment->instanceId }}]</b> {{ str_limit(strip_tags($comment->content), 100) }}
+                                                    <b>[{{ xe_trans($menuItem($comment)->title) }}]</b>
+                                                    <a href="{{ $urlMake($comment, $menuItem($comment)) }}" target="_blank">
+                                                    {{ str_limit(strip_tags($comment->content), 100) }}
+                                                    </a>
                                                 </td>
                                                 <td>{{ $comment->writer }}</td>
                                                 <td>{{ $comment->assentCount }} / {{ $comment->dissentCount }}</td>

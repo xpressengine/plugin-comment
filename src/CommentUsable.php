@@ -11,6 +11,8 @@
  */
 namespace Xpressengine\Plugins\Comment;
 
+use Xpressengine\Routing\InstanceRoute;
+
 /**
  * comment 를 사용하는 대상 객체 기능을 정의 함
  *
@@ -38,7 +40,15 @@ interface CommentUsable
     /**
      * Returns author
      *
-     * @return \Xpressengine\Member\Entities\MemberEntityInterface
+     * @return \Xpressengine\User\UserInterface
      */
     public function getAuthor();
+
+    /**
+     * Returns the link
+     *
+     * @param InstanceRoute $route route instance
+     * @return string
+     */
+    public function getLink(InstanceRoute $route);
 }

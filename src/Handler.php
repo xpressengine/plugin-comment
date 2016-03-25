@@ -34,6 +34,8 @@ class Handler
 
     protected $keygen;
 
+    protected $instanceMap;
+
     protected $model = Comment::class;
 
     private $defaultConfig = [
@@ -94,22 +96,35 @@ class Handler
         $config->set($targetInstanceId, $commentInstanceId);
 
         $this->configs->modify($config);
+
+        $this->instanceMap = array_merge($this->instanceMap ?: [], [$targetInstanceId => $commentInstanceId]);
+    }
+
+    public function getInstanceMap()
+    {
+        if (!$this->instanceMap) {
+            $this->instanceMap = [];
+            $config = $this->configs->get('comment_map');
+            foreach ($config as $target => $id) {
+                $this->instanceMap[$target] = $id;
+            }
+        }
+
+        return $this->instanceMap;
     }
 
     public function getInstanceId($targetInstanceId)
     {
-        $config = $this->configs->get('comment_map');
+        $map = $this->getInstanceMap();
 
-        return $config->get($targetInstanceId);
+        return isset($map[$targetInstanceId]) ? $map[$targetInstanceId] : null;
     }
 
     public function getTargetInstanceId($instanceId)
     {
-        $config = $this->configs->get('comment_map');
-        foreach ($config as $target => $id) {
-            if ($id == $instanceId) {
-                return $target;
-            }
+        $map = $this->getInstanceMap();
+        if ($key = array_search($instanceId, $map)) {
+            return $key;
         }
 
         return null;
