@@ -65,14 +65,15 @@
 
                 form.render(this._getFormBox());
 
-                var temporary = $('textarea', form.getDom()).temporary({
-                    key: 'comment|' + this.props.targetId,
-                    btnLoad: $('.__xe_temp_btn_load', form.getDom()),
-                    btnSave: $('.__xe_temp_btn_save', form.getDom()),
-                    container: $('.__xe_temp_container', form.getDom()),
-                    withForm: true,
-                    callback: function (data) { form.editorSync(); }
-                });
+                // todo: 임시 비 사용 처리
+                // var temporary = $('textarea', form.getDom()).temporary({
+                //     key: 'comment|' + this.props.targetId,
+                //     btnLoad: $('.__xe_temp_btn_load', form.getDom()),
+                //     btnSave: $('.__xe_temp_btn_save', form.getDom()),
+                //     container: $('.__xe_temp_container', form.getDom()),
+                //     withForm: true,
+                //     callback: function (data) { form.editorSync(); }
+                // });
 
             }.bind(this));
 
