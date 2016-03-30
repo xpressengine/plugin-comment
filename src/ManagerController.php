@@ -122,7 +122,16 @@ class ManagerController extends Controller
             ->whereIn('instanceId', $this->getInstances())
             ->where('status', 'trash')->paginate();
 
-        return XePresenter::make('trash', compact('comments'));
+        $map = $this->handler->getInstanceMap();
+        $menuItems = app('xe.menu')->createItemModel()->newQuery()->with('route')
+            ->whereIn('id', array_keys($map))->get()->getDictionary();
+
+        return XePresenter::make('trash', [
+            'comments' => $comments,
+            'menuItem' => function ($comment) use ($menuItems, $map) {
+                return $menuItems[array_search($comment->instanceId, $map)];
+            },
+        ]);
     }
 
     public function destroy()
