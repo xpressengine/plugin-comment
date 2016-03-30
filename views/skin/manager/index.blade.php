@@ -7,9 +7,7 @@
                         <h3 class="panel-title">{{ xe_trans('xe::comment') }} {{ xe_trans('xe::management') }}</h3>
                     </div>
                 </div>
-
                 <div class="panel-heading">
-
                     <div class="pull-left">
                         <form id="__xe_search_form">
                             <div id="__xe_btn_options" class="btn-group btn-fillter" role="group">

@@ -6,11 +6,11 @@
     <div class="panel collapsed-box __xe_section_box">
         <div class="panel-heading">
             <div class="row">
-                <p class="txt_tit">{{ xe_trans('comment::manage.setting.basic') }}</p>
+                <p class="text-title">{{ xe_trans('comment::manage.setting.basic') }}</p>
 
                 <div class="right_btn pull-right" role="button" data-toggle="collapse" data-parent="#accordion-comment" data-target="#commentBasic">
                     <!-- [D] 메뉴 닫기 시 버튼 클래스에 card_close 추가 및 item_container none/block 처리-->
-                    <button class="btn_clse ico_gray pull-left"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="blind">{{xe_trans('xe::menuClose')}}</span></button>
+                    <button class="btn_clse ico_gray pull-left"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="sr-only">{{xe_trans('xe::menuClose')}}</span></button>
                 </div>
 
             </div>
@@ -76,7 +76,7 @@
                                 <div class="col-sm-4">
                                     <select name="removeType" class="form-control">
                                         <option value="batch" @if($config->get('removeType') == 'batch') selected @endif>일괄 삭제</option>
-                                        <option value="blind" @if($config->get('removeType') == 'blind') selected @endif>해당 글 가리기</option>
+                                        <option value="sr-only" @if($config->get('removeType') == 'sr-only') selected @endif>해당 글 가리기</option>
                                     </select>
                                 </div>
 
@@ -123,11 +123,11 @@
     <div class="panel collapsed-box __xe_section_box">
         <div class="panel-heading">
             <div class="row">
-                <p class="txt_tit">{{ xe_trans('comment::manage.setting.skin') }}</p>
+                <p class="text-title">{{ xe_trans('comment::manage.setting.skin') }}</p>
 
                 <div class="right_btn pull-right" role="button" data-toggle="collapse" data-parent="#accordion-comment" data-target="#commentSkinSection">
                     <!-- [D] 메뉴 닫기 시 버튼 클래스에 card_close 추가 및 item_container none/block 처리-->
-                    <button class="btn_clse ico_gray pull-left"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="blind">{{xe_trans('xe::menuClose')}}</span></button>
+                    <button class="btn_clse ico_gray pull-left"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="sr-only">{{xe_trans('xe::menuClose')}}</span></button>
                 </div>
 
             </div>
@@ -145,11 +145,11 @@
     <div class="panel collapsed-box __xe_section_box">
         <div class="panel-heading">
             <div class="row">
-                <p class="txt_tit">{{ xe_trans('comment::manage.setting.dynamicField') }}</p>
+                <p class="text-title">{{ xe_trans('comment::manage.setting.dynamicField') }}</p>
 
                 <div class="right_btn pull-right" role="button" data-toggle="collapse" data-parent="#accordion-comment" data-target="#commentDynamicField">
                     <!-- [D] 메뉴 닫기 시 버튼 클래스에 card_close 추가 및 item_container none/block 처리-->
-                    <button class="btn_clse ico_gray pull-left"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="blind">{{xe_trans('xe::menuClose')}}</span></button>
+                    <button class="btn_clse ico_gray pull-left"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="sr-only">{{xe_trans('xe::menuClose')}}</span></button>
                 </div>
 
             </div>
@@ -166,11 +166,11 @@
     <div class="panel collapsed-box __xe_section_box">
         <div class="panel-heading">
             <div class="row">
-                <p class="txt_tit">{{ xe_trans('comment::manage.setting.toggleMenu') }}</p>
+                <p class="text-title">{{ xe_trans('comment::manage.setting.toggleMenu') }}</p>
 
                 <div class="right_btn pull-right" role="button" data-toggle="collapse" data-parent="#accordion-comment" data-target="#commentToggleMenu">
                     <!-- [D] 메뉴 닫기 시 버튼 클래스에 card_close 추가 및 item_container none/block 처리-->
-                    <button class="btn_clse ico_gray pull-left"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="blind">{{xe_trans('xe::menuClose')}}</span></button>
+                    <button class="btn_clse ico_gray pull-left"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="sr-only">{{xe_trans('xe::menuClose')}}</span></button>
                 </div>
 
             </div>

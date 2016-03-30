@@ -1,8 +1,7 @@
 {{ XeFrontend::css(app('xe.plugin.comment')->assetPath() . '/css/default.css')->load() }}
-{{ XeFrontend::css('/assets/vendor/core/css/temporary.css')->load() }}
+{{ XeFrontend::css('/assets/core/common/css/temporary.css')->load() }}
 
-{{ XeFrontend::css('/assets/common/css/dropdown.css')->load() }}
-{{ XeFrontend::js('/assets/vendor/core/js/toggleMenu.js')->appendTo('head')->load() }}
+{{ XeFrontend::js('/assets/core/common/js/toggleMenu.js')->appendTo('head')->load() }}
 
 @if($config->get('useWysiwyg'))
 {{ XeFrontend::css('/plugins/ckeditor/assets/ckeditor/xe3.css')->load() }}
