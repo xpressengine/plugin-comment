@@ -714,4 +714,4 @@
     window.comment = comment;
 
     return comment;
-})(typeof window !== "undefined" ? window : this, XE.jQuery);
+})(typeof window !== "undefined" ? window : this, jQuery);
