@@ -1,101 +1,96 @@
-<div class="panel">
-    <div class="panel-heading">
-        <div class="row">
-            <div class="col-sm-12">
-
-                <div class="admin_card">
-                    <div class="card_tit">
-
-                        <div class="form-inline pull-left">
-                            <form id="__xe_search_form">
-                                <div class="slct_area" id="__xe_btn_options">
-                                    <input type="hidden" name="options" value="{{ Input::old('options') }}">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="text"></span></a>
-                                    <div class="slct_lst transition dropdown-menu">
-                                        <ul>
-                                            <li><a href="#" class="item" value="">{{ xe_trans('comment::manage.all') }}</a></li>
-                                            <li><a href="#" class="item" value="display|visible">{{ xe_trans('comment::manage.public') }}</a></li>
-                                            <li><a href="#" class="item" value="display|secret">{{ xe_trans('comment::manage.secret') }}</a></li>
-                                            <li><a href="#" class="item" value="approved|approved">{{ xe_trans('comment::manage.approved.approved') }}</a></li>
-                                            <li><a href="#" class="item" value="approved|waiting">{{ xe_trans('comment::manage.approved.waiting') }}</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="pull-right __xe_tools">
-                            <button type="button" class="btn_setting" data-mode="trash">
-                                <i class="xi-trash"></i>
-                                {{ xe_trans('comment::trash') }}
-                            </button>
-                            <button type="button" class="btn_setting" data-mode="reject">
-                                <i class="xi-close-circle"></i>
-                                {{ xe_trans('comment::manage.approved.reject') }}
-                            </button>
-                            <button type="button" class="btn_setting" data-mode="approve">
-                                <i class="xi-check-circle"></i>
-                                {{ xe_trans('comment::manage.approved.approve') }}
-                            </button>
-                        </div>
-
+<div class="row">
+    <div class="col-sm-12">
+        <div class="panel-group">
+            <div class="panel">
+                <div class="panel-heading">
+                    <div class="pull-left">
+                        <h3 class="panel-title">{{ xe_trans('xe::comment') }} {{ xe_trans('xe::management') }}</h3>
                     </div>
-                    <div class="card_cont">
-
-                        <div class="box box-primary mg-bottom">
-                            <form id="__xe_form_list" method="post">
-                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                <div class="box-body no-padding">
-                                    <table class="table table-hover">
-                                        <thead>
-                                        <tr>
-                                            <th><input type="checkbox" id="__xe_check-all"></th>
-                                            <th>{{ xe_trans('comment::content') }}</th>
-                                            <th>{{ xe_trans('comment::author') }}</th>
-                                            <th><i class="xi-thumbs-up"></i> / <i class="xi-thumbs-down"></i></th>
-                                            <th>{{ xe_trans('comment::date.create') }}</th>
-                                            <th>{{ xe_trans('comment::ip') }}</th>
-                                            <th>{{ xe_trans('comment::display') }}</th>
-                                            <th>{{ xe_trans('comment::approve') }}</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        @foreach($comments as $comment)
-                                            <tr>
-                                                <td><input type="checkbox" name="id[]" class="__xe_checkbox" value="{{ $comment->id }}"></td>
-                                                <td>
-                                                    <b>[{{ xe_trans($menuItem($comment)->title) }}]</b>
-                                                    <a href="{{ $urlMake($comment, $menuItem($comment)) }}" target="_blank">
-                                                    {{ str_limit(strip_tags($comment->content), 100) }}
-                                                    </a>
-                                                </td>
-                                                <td>{{ $comment->writer }}</td>
-                                                <td>{{ $comment->assentCount }} / {{ $comment->dissentCount }}</td>
-                                                <td>{{ str_replace('-', '.', substr($comment->createdAt, 0, 16)) }}</td>
-                                                <td>{{ $comment->ipaddress }}</td>
-                                                <td>{{ $comment->display }}</td>
-                                                <td>{{ $comment->approved }}</td>
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </form>
+                </div>
+                <div class="panel-heading">
+                    <div class="pull-left">
+                        <form id="__xe_search_form">
+                            <div id="__xe_btn_options" class="btn-group btn-fillter" role="group">
+                                <input type="hidden" name="options" value="{{ Input::old('options') }}">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><strong>필터</strong></li>
+                                    <li class="active"><a href="#" value="">{{ xe_trans('comment::manage.all') }}</a></li>
+                                    <li><a href="#" value="display|visible">{{ xe_trans('comment::manage.public') }}</a></li>
+                                    <li><a href="#" value="display|secret">{{ xe_trans('comment::manage.secret') }}</a></li>
+                                    <li><a href="#" value="approved|approved">{{ xe_trans('comment::manage.approved.approved') }}</a></li>
+                                    <li><a href="#" value="approved|waiting">{{ xe_trans('comment::manage.approved.waiting') }}</a></li>
+                                </ul>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="pull-right">
+                        <div class="btn-group __xe_tools" role="group" aria-label="...">
+                            <button type="button" class="btn btn-default" data-mode="trash">{{ xe_trans('comment::trash') }}</button>
+                            <button type="button" class="btn btn-default" data-mode="reject">{{ xe_trans('comment::manage.approved.reject') }}</button>
+                            <button type="button" class="btn btn-default" data-mode="approve">{{ xe_trans('comment::manage.approved.approve') }}</button>
                         </div>
+                    </div>
 
+                </div>
+                <div class="table-responsive">
+                    <form id="__xe_form_list" method="post">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col"><input type="checkbox" id="__xe_check-all"></th>
+                                <th scope="col">{{ xe_trans('comment::content') }}</th>
+                                <th scope="col">{{ xe_trans('comment::author') }}</th>
+                                <th scope="col"><i class="xi-thumbs-up"></i> / <i class="xi-thumbs-down"></i></th>
+                                <th scope="col">{{ xe_trans('comment::date.create') }}</th>
+                                <th scope="col">{{ xe_trans('comment::ip') }}</th>
+                                <th scope="col">{{ xe_trans('comment::display') }}</th>
+                                <th scope="col">{{ xe_trans('comment::approve') }}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($comments as $comment)
+                            <tr>
+                                <td><input type="checkbox" name="id[]" class="__xe_checkbox" value="{{ $comment->id }}"></td>
+                                <td>
+
+                                    <strong>[{{ xe_trans($menuItem($comment)->title) }}]</strong>
+                                    {{ str_limit(strip_tags($comment->content), 100) }}
+                                    <a href="{{ $urlMake($comment, $menuItem($comment)) }}" target="_blank">
+                                        <i class="xi-external-link"></i>
+                                    </a>
+                                </td>
+                                <td><a href="#">{{ $comment->writer }}</a></td>
+                                <td>{{ $comment->assentCount }} / {{ $comment->dissentCount }}</td>
+                                <td><a href="#">{{ str_replace('-', '.', substr($comment->createdAt, 0, 16)) }}</a></td>
+                                <td><a href="#">{{ $comment->ipaddress }}</a></td>
+                                <td><span class="label label-green">{{ $comment->display }}</span></td>
+                                <td><span class="label label-grey">{{ $comment->approved }}</span></td>
+                            </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+                <div class="panel-footer">
+                    <div class="pull-left">
+                        <nav>
+                            {!! $comments->render() !!}
+                        </nav>
                     </div>
                 </div>
 
             </div>
         </div>
-
-        <nav class="text-center">{!! $comments->render() !!}</nav>
-
     </div>
 </div>
 
+
 <script type="text/javascript">
-    window.onload = function () {
+    $(function () {
         $('#__xe_check-all').change(function () {
             if ($(this).is(':checked')) {
                 $('input.__xe_checkbox').prop('checked', true);
@@ -123,43 +118,41 @@
             eval('actions.' + mode + '($f)');
         });
 
-//        $('#__xe_btn_options > a').click(function (e) {
-//            e.preventDefault();
-//            $(this).parent().toggleClass('open');
-//        });
 
-        $('#__xe_btn_options .item').click(function (e, flag) {
+        $('#__xe_btn_options li > a').click(function (e, flag) {
             e.preventDefault();
 
             $('#__xe_btn_options input').val($(this).attr('value'));
-            $('#__xe_btn_options .text').text($(this).text());
+
+            $('#__xe_btn_options li').removeClass('active');
+            $(this).closest('li').addClass('active');
 
             if (flag !== true) {
                 $(this).closest('form').submit();
             }
         }).each(function () {
-            if ($(this).attr('value') == "{{ Input::old('options') }}") {
+            if ($(this).attr('value') == $('#__xe_btn_options input').val()) {
                 $(this).triggerHandler('click', [true]);
             }
         });
-    };
 
-    var actions = {
-        approve: function ($f) {
-            $('<input>').attr('type', 'hidden').attr('name', 'approved').val('approved').appendTo($f);
+        var actions = {
+            approve: function ($f) {
+                $('<input>').attr('type', 'hidden').attr('name', 'approved').val('approved').appendTo($f);
 
-            $f.attr('action', '{{ route('manage.comment.approve') }}');
-            $f.submit();
-        },
-        reject: function ($f) {
-            $('<input>').attr('type', 'hidden').attr('name', 'approved').val('rejected').appendTo($f);
+                $f.attr('action', '{{ route('manage.comment.approve') }}');
+                $f.submit();
+            },
+            reject: function ($f) {
+                $('<input>').attr('type', 'hidden').attr('name', 'approved').val('rejected').appendTo($f);
 
-            $f.attr('action', '{{ route('manage.comment.approve') }}');
-            $f.submit();
-        },
-        trash: function ($f) {
-            $f.attr('action', '{{ route('manage.comment.totrash') }}');
-            $f.submit();
-        }
-    };
+                $f.attr('action', '{{ route('manage.comment.approve') }}');
+                $f.submit();
+            },
+            trash: function ($f) {
+                $f.attr('action', '{{ route('manage.comment.totrash') }}');
+                $f.submit();
+            }
+        };
+    });
 </script>
