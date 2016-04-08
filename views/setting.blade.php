@@ -31,6 +31,10 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>{{ xe_trans('comment::manage.useApprove') }}</label>
+                                <label>
+                                    <input type="checkbox" class="__xe_inherit" {{ $config->getPure('useApprove') === null ? 'checked' : '' }}>
+                                    {{ xe_trans('xe::inheritMode') }}
+                                </label>
                                 <select name="useApprove" class="form-control">
                                     <option value="true" @if($config->get('useApprove')) selected @endif>On</option>
                                     <option value="false" @if(!$config->get('useApprove')) selected @endif>Off</option>
@@ -40,6 +44,10 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>{{ xe_trans('comment::manage.secret') }}</label>
+                                <label>
+                                    <input type="checkbox" class="__xe_inherit" {{ $config->getPure('secret') === null ? 'checked' : '' }}>
+                                    {{ xe_trans('xe::inheritMode') }}
+                                </label>
                                 <select name="secret" class="form-control">
                                     <option value="true" @if($config->get('secret')) selected @endif>On</option>
                                     <option value="false" @if(!$config->get('secret')) selected @endif>Off</option>
@@ -52,6 +60,10 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>{{ xe_trans('comment::manage.assent') }}</label>
+                                <label>
+                                    <input type="checkbox" class="__xe_inherit" {{ $config->getPure('useAssent') === null ? 'checked' : '' }}>
+                                    {{ xe_trans('xe::inheritMode') }}
+                                </label>
                                 <select name="useAssent" class="form-control">
                                     <option value="true" @if($config->get('useAssent')) selected @endif>On</option>
                                     <option value="false" @if(!$config->get('useAssent')) selected @endif>Off</option>
@@ -61,6 +73,10 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>{{ xe_trans('comment::manage.dissent') }}</label>
+                                <label>
+                                    <input type="checkbox" class="__xe_inherit" {{ $config->getPure('useDissent') === null ? 'checked' : '' }}>
+                                    {{ xe_trans('xe::inheritMode') }}
+                                </label>
                                 <select name="useDissent" class="form-control">
                                     <option value="true" @if($config->get('useDissent')) selected @endif>On</option>
                                     <option value="false" @if(!$config->get('useDissent')) selected @endif>Off</option>
@@ -73,12 +89,20 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>{{ xe_trans('comment::manage.perPage') }}</label>
+                                <label>
+                                    <input type="checkbox" class="__xe_inherit" {{ $config->getPure('perPage') === null ? 'checked' : '' }}>
+                                    {{ xe_trans('xe::inheritMode') }}
+                                </label>
                                 <input type="text" class="form-control" name="perPage" value="{{ $config->get('perPage') }}">
                             </div>
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>{{ xe_trans('comment::manage.wysiwyg') }}</label>
+                                <label>
+                                    <input type="checkbox" class="__xe_inherit" {{ $config->getPure('useWysiwyg') === null ? 'checked' : '' }}>
+                                    {{ xe_trans('xe::inheritMode') }}
+                                </label>
                                 <select name="useWysiwyg" class="form-control">
                                     <option value="true" @if($config->get('useWysiwyg')) selected @endif>On</option>
                                     <option value="false" @if(!$config->get('useWysiwyg')) selected @endif>Off</option>
@@ -91,6 +115,10 @@
                         {{--<div class="col-sm-6">--}}
                             {{--<div class="form-group">--}}
                                 {{--<label>{{ xe_trans('comment::manage.removeType') }}</label>--}}
+                                {{--<label>--}}
+                                    {{--<input type="checkbox" class="__xe_inherit" {{ !$config->getPure('removeType')? 'checked' : '' }}>--}}
+                                    {{--{{ xe_trans('xe::inheritMode') }}--}}
+                                {{--</label>--}}
                                 {{--<select name="removeType" class="form-control">--}}
                                     {{--<option value="batch" @if($config->get('removeType') == 'batch') selected @endif>일괄 삭제</option>--}}
                                     {{--<option value="sr-only" @if($config->get('removeType') == 'sr-only') selected @endif>해당 글 가리기</option>--}}
@@ -100,6 +128,10 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>{{ xe_trans('comment::manage.ordering') }}</label>
+                                <label>
+                                    <input type="checkbox" class="__xe_inherit" {{ $config->getPure('reverse') === null ? 'checked' : '' }}>
+                                    {{ xe_trans('xe::inheritMode') }}
+                                </label>
                                 <select name="reverse" class="form-control">
                                     <option value="false" @if(!$config->get('reverse')) selected @endif>{{ xe_trans('comment::forwardOrder') }}</option>
                                     <option value="true" @if($config->get('reverse')) selected @endif>{{ xe_trans('comment::inverseOrder') }}</option>
@@ -205,6 +237,13 @@
 
         $('#fCommentSetting').submit(function () {
             $('<input>').attr('type', 'hidden').attr('name', 'redirect').val(location.href).appendTo(this);
+        });
+
+        $('.__xe_inherit', '#fCommentSetting').click(function (e) {
+            var $group = $(this).closest('.form-group');
+            $('input,select,textarea', $group).not(this).prop('disabled', $(this).is(':checked'));
+        }).each(function () {
+            $(this).triggerHandler('click');
         });
 
     });

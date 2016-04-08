@@ -114,6 +114,16 @@ class Plugin extends AbstractPlugin
                 'as' => 'manage.comment.setting',
                 'uses' => 'ManagerController@postSetting'
             ]);
+
+            Route::get('setting/global', [
+                'as' => 'manage.comment.setting.global',
+                'uses' => 'ManagerController@getGlobalSetting'
+            ]);
+
+            Route::post('setting/global', [
+                'as' => 'manage.comment.setting.global',
+                'uses' => 'ManagerController@postGlobalSetting'
+            ]);
         }, ['namespace' => __NAMESPACE__]);
 
         Route::fixed('comment', function () {
@@ -168,6 +178,11 @@ class Plugin extends AbstractPlugin
         foreach ($menus as $id => $menu) {
             app('xe.register')->push('settings/menu', $id, $menu);
         }
+    }
+
+    public function getSettingsURI()
+    {
+        return route('manage.comment.setting.global');
     }
 
     public function getHandler()

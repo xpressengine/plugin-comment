@@ -78,6 +78,10 @@ class Handler
      */
     public function createInstance($targetInstanceId, $division = false)
     {
+        if ($this->getInstanceId($targetInstanceId)) {
+            throw new \RuntimeException(sprintf('Already exists comment instance for "%s"', $targetInstanceId));
+        }
+
         $instanceId = $this->keygen->generate();
         $this->documents->createInstance($instanceId, ['division' => $division]);
 
@@ -130,9 +134,9 @@ class Handler
         return null;
     }
 
-    protected function getKeyForConfig($instanceId)
+    protected function getKeyForConfig($instanceId = null)
     {
-        return static::PLUGIN_PREFIX . '.' . $instanceId;
+        return static::PLUGIN_PREFIX . ($instanceId ? '.' . $instanceId : '');
     }
 
     public function configure($instanceId, array $information)
@@ -140,18 +144,19 @@ class Handler
         $key = $this->getKeyForConfig($instanceId);
 
         if (!$config = $this->configs->get($key)) {
-            throw new \Exception();
+            throw new \RuntimeException('Instance was not created');
         }
 
-        $information = array_merge($this->defaultConfig, $information);
+        if ($instanceId === null) {
+            // global 설정에는 모든 설정이 등록될 수 있도록 함
+            $information = array_merge($this->defaultConfig, $information);
+        }
+
+        $information = array_only($information, array_keys($this->defaultConfig));
         // division 설정은 최초 인스턴스 생성시 결정되며 변경할 수 없다.
-        $information = array_except($information, 'division');
+        $information = array_merge($information, ['division' => $config->get('division')]);
 
-        foreach ($information as $name => $value) {
-            $config->set($name, $value);
-        }
-
-        $this->configs->modify($config);
+        $this->configs->put($key, $information);
     }
 
     /**
@@ -188,7 +193,7 @@ class Handler
         $this->configs->setVal(implode('.', [$key, $target]), null);
     }
 
-    public function getConfig($instanceId)
+    public function getConfig($instanceId = null)
     {
         $config = $this->configs->get($this->getKeyForConfig($instanceId));
 
@@ -423,7 +428,7 @@ class Handler
      * @param $instanceId
      * @return mixed
      */
-    public function getPermission($instanceId)
+    public function getPermission($instanceId = null)
     {
         return $this->permissions->findOrNew($this->getKeyForPerm($instanceId));
     }
