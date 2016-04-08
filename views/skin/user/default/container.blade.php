@@ -7,6 +7,9 @@
 {{ XeFrontend::css('/plugins/ckeditor/assets/ckeditor/xe3.css')->load() }}
 
 {{ XeFrontend::js([
+    '/assets/vendor/jQuery-File-Upload/js/vendor/jquery.ui.widget.js',
+    '/assets/vendor/jQuery-File-Upload/js/jquery.iframe-transport.js',
+    '/assets/vendor/jQuery-File-Upload/js/jquery.fileupload.js',
     '/plugins/ckeditor/assets/ckeditor/ckeditor.js',
     '/plugins/ckeditor/assets/ckeditor/styles.js',
     '/plugins/ckeditor/assets/ckeditor/xe3.js',

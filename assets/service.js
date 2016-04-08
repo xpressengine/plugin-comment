@@ -19,7 +19,7 @@
     var jqXHRError = function (jqXHR) {
         var responseText = $.parseJSON(jqXHR.responseText);
         var errorMessage = responseText.message;
-        alertBox('warning', errorMessage ? errorMessage : responseText.exception);
+        XE.toast('warning', errorMessage ? errorMessage : responseText.exception);
     };
 
     var url = function (relativePath) {
@@ -201,7 +201,7 @@
 
             }.bind(this));
 
-            XE.shortDate();
+            XE.Component.timeago();
         },
         rendered: function (item) {
             return this._getListBox().find('[data-id="' + item.getId() + '"]').length > 0;
@@ -715,4 +715,4 @@
     window.comment = comment;
 
     return comment;
-})(typeof window !== "undefined" ? window : this, XE.jQuery);
+})(typeof window !== "undefined" ? window : this, jQuery);

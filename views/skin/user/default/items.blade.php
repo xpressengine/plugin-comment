@@ -9,7 +9,7 @@
             <div class="comment_entity_body_meta">
                 <!-- [D] 클릭시 클래스 on 적용 -->
                 <a href="#" class="author __xe_member" data-id="{{ $item->userId }}">{{ $item->writer }}</a>
-                <span class="date __xe_short_date" data-timestamp="{{ $item->createdAt->getTimestamp()  }}" title="{{ $item->createdAt }}"></span>
+                <span class="date" data-xe-timeago="{{ $item->createdAt }}" title="{{ $item->createdAt }}">{{ $item->createdAt }}</span>
                 <div class="ly_popup">
                     <ul>
                         <li><a href="#">신고</a></li>

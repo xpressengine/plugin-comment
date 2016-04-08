@@ -24,6 +24,7 @@
   "extra": {
     "xpressengine": {
       "title": "댓글",
+      "icon": "icon.png",
       "component": {
         "uiobject/comment@comment": {
           "class": "Xpressengine\\Plugins\\Comment\\CommentUIObject",
