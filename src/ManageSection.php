@@ -5,6 +5,7 @@ use View;
 use App\Sections\DynamicFieldSection;
 use App\Sections\ToggleMenuSection;
 use App\Sections\SkinSection;
+use Xpressengine\Plugins\Comment\Skins\ManagerSkin;
 use Xpressengine\User\Models\UserGroup;
 
 class ManageSection
@@ -54,16 +55,13 @@ class ManageSection
             ->setting($model->getConnection());
         $toggleMenuSection = (new ToggleMenuSection())->setting($plugin->getId(), $instanceId);
 
-        return View::make(
-            sprintf('%s::views.setting', $plugin->getId()),
-            [
-                'instanceId' => $instanceId,
-                'config' => $config,
-                'permArgs' => $permArgs,
-                'skinSection' => $skinSection,
-                'dynamicFieldSection' => $dynamicFieldSection,
-                'toggleMenuSection' => $toggleMenuSection
-            ]
-        );
+        return (new ManagerSkin)->setView('section')->setData([
+            'instanceId' => $instanceId,
+            'config' => $config,
+            'permArgs' => $permArgs,
+            'skinSection' => $skinSection,
+            'dynamicFieldSection' => $dynamicFieldSection,
+            'toggleMenuSection' => $toggleMenuSection
+        ]);
     }
 }
