@@ -425,6 +425,7 @@
 
         var param = {
             type: "comment/" + this.getInstanceId(),
+            align: 'right',
             identifier: this.getId(),
             html: $('.__xe_comment_menu', this.dom).html()
         };
