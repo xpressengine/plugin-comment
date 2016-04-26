@@ -13,6 +13,7 @@ use Xpressengine\User\GuardInterface as Authenticator;
 use Xpressengine\Counter\Counter;
 use Xpressengine\User\Rating;
 use Xpressengine\Permission\Grant;
+use Xpressengine\Plugins\Comment\Plugin as CommentPlugin;
 
 class Handler
 {
@@ -209,6 +210,7 @@ class Handler
 
     public function create(array $inputs, UserInterface $user = null)
     {
+        $inputs['type'] = CommentPlugin::getId();
         $user = $user ?: $this->auth->user();
 
         if (!$user instanceof Guest) {
