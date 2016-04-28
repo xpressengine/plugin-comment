@@ -257,4 +257,13 @@ return [
         'ko' => '복원',
         'en' => 'Restore',
     ],
+
+    'forwardOrder' => [
+        'ko' => '정순',
+        'en' => 'Forward Order',
+    ],
+    'inverseOrder' => [
+        'ko' => '역순',
+        'en' => 'Inverse Order',
+    ],
 ];

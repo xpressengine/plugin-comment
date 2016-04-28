@@ -7,6 +7,8 @@ use Validator;
 use Xpressengine\Permission\Grant;
 use XePresenter;
 use XeConfig;
+use XeDB;
+use Xpressengine\User\Models\UserGroup;
 
 class ManagerController extends Controller
 {
@@ -197,9 +199,9 @@ class ManagerController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator->errors());
+            return redirect()->back()->with('alert', ['type' => 'danger', 'message' => $validator->errors()]);
         }
-
+//dd($configInputs);
         $this->handler->configure(Input::get('instanceId'), $configInputs);
 
         $grantInfo = [
@@ -234,5 +236,78 @@ class ManagerController extends Controller
             Grant::EXCEPT_TYPE => array_filter(explode(',', array_get($inputs, $action . 'Except'))),
             Grant::VGROUP_TYPE => array_get($inputs, $action . 'VGroup') ?: [],
         ];
+    }
+
+    public function getGlobalSetting()
+    {
+        $config = $this->handler->getConfig();
+        $permission = $this->handler->getPermission();
+
+        $allGroup = UserGroup::get();
+        $permArgs = [
+            'create' => [
+                'grant' => $permission['create'],
+                'title' => 'create',
+                'groups' => $allGroup,
+            ],
+            'download' => [
+                'grant' => $permission['download'],
+                'title' => 'download',
+                'groups' => $allGroup,
+            ]
+        ];
+        
+        return XePresenter::make('setting', ['config' => $config, 'permArgs' => $permArgs]);
+    }
+
+    public function postGlobalSetting()
+    {
+        $inputs = Input::except(['_token']);
+
+        $configInputs = $permInputs = [];
+        foreach ($inputs as $name => $value) {
+            if (substr($name, 0, strlen('create')) === 'create'
+                || substr($name, 0, strlen('download')) === 'download') {
+                $permInputs[$name] = $value;
+            } else {
+                $configInputs[$name] = $value;
+            }
+        }
+
+        /** @var \Illuminate\Validation\Validator $validator */
+        $validator = Validator::make(
+            ['perPage' => Input::get('perPage')],
+            ['perPage' => 'Numeric']
+        );
+
+        if ($validator->fails()) {
+            return redirect()->back()->with('alert', ['type' => 'danger', 'message' => $validator->errors()]);
+        }
+
+        XeDB::beginTransaction();
+
+        try {
+            $this->handler->configure(null, $configInputs);
+
+            $grantInfo = [
+                'create' => $this->makeGrant($permInputs, 'create'),
+                'download' => $this->makeGrant($permInputs, 'download'),
+            ];
+
+            $grant = new Grant();
+            foreach (array_filter($grantInfo) as $action => $info) {
+                $grant->set($action, $info);
+            }
+
+            $this->handler->setPermission(null, $grant);
+
+            XeDB::commit();
+        } catch (\Exception $e) {
+            XeDB::rollBack();
+
+            return redirect()->back()->with('alert', ['type' => 'danger', 'message' => $e->getMessage()]);
+        }
+
+        return redirect()->route('manage.comment.setting.global');
     }
 }
