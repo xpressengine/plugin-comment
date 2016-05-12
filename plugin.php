@@ -110,7 +110,12 @@ class Plugin extends AbstractPlugin
             Route::post('destroy', ['as' => 'manage.comment.destroy', 'uses' => 'ManagerController@destroy']);
             Route::post('restore', ['as' => 'manage.comment.restore', 'uses' => 'ManagerController@restore']);
 
-            Route::post('setting', [
+            Route::get('setting/{targetInstanceId}', [
+                'as' => 'manage.comment.setting',
+                'uses' => 'ManagerController@getSetting'
+            ]);
+
+            Route::post('setting/{targetInstanceId}', [
                 'as' => 'manage.comment.setting',
                 'uses' => 'ManagerController@postSetting'
             ]);

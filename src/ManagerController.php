@@ -2,8 +2,13 @@
 namespace Xpressengine\Plugins\Comment;
 
 use App\Http\Controllers\Controller;
+use App\Sections\DynamicFieldSection;
+use App\Sections\SkinSection;
+use App\Sections\ToggleMenuSection;
 use Input;
 use Validator;
+use Xpressengine\Menu\MenuHandler;
+use Xpressengine\Module\ModuleHandler;
 use Xpressengine\Permission\Grant;
 use XePresenter;
 use XeConfig;
@@ -12,6 +17,8 @@ use Xpressengine\User\Models\UserGroup;
 
 class ManagerController extends Controller
 {
+    protected $plugin;
+
     /**
      * @var Handler
      */
@@ -19,9 +26,9 @@ class ManagerController extends Controller
 
     public function __construct()
     {
-        $plugin = app('xe.plugin.comment');
-        $this->handler = $plugin->getHandler();
-        XePresenter::setSettingsSkinTargetId($plugin->getId());
+        $this->plugin = app('xe.plugin.comment');
+        $this->handler = $this->plugin->getHandler();
+        XePresenter::setSettingsSkinTargetId($this->plugin->getId());
     }
 
     protected function getInstances()
@@ -175,10 +182,59 @@ class ManagerController extends Controller
             return redirect()->route('manage.comment.index');
         }
     }
-
-    public function postSetting()
+    
+    public function getSetting(MenuHandler $menus, $targetInstanceId)
     {
-        $inputs = Input::except(['instanceId', 'redirect', '_token']);
+        $instanceId = $this->handler->getInstanceId($targetInstanceId);
+        $config = $this->handler->getConfig($instanceId);
+
+        $permission = $this->handler->getPermission($instanceId);
+
+        $mode = function ($action) use ($permission) {
+            return $permission->pure($action) ? 'manual' : 'inherit';
+        };
+
+        $allGroup = UserGroup::get();
+        $permArgs = [
+            'create' => [
+                'mode' => $mode('create'),
+                'grant' => $permission['create'],
+                'title' => 'create',
+                'groups' => $allGroup,
+            ],
+            'download' => [
+                'mode' => $mode('download'),
+                'grant' => $permission['download'],
+                'title' => 'download',
+                'groups' => $allGroup,
+            ]
+        ];
+
+        $skinSection = (new SkinSection())->setting($this->plugin->getId(), $instanceId);
+
+        $dynamicFieldSection = (new DynamicFieldSection(str_replace('.', '_', $config->name)))
+            ->setting($this->handler->createModel()->getConnection());
+        $toggleMenuSection = (new ToggleMenuSection())->setting($this->plugin->getId(), $instanceId);
+
+        $menuItem = $menus->createItemModel()->newQuery()
+            ->where('id', $targetInstanceId)->first();
+
+        return XePresenter::make('setting', [
+            'targetInstanceId' => $targetInstanceId,
+            'config' => $config,
+            'permArgs' => $permArgs,
+            'skinSection' => $skinSection,
+            'dynamicFieldSection' => $dynamicFieldSection,
+            'toggleMenuSection' => $toggleMenuSection,
+            'menuItem' => $menuItem,
+        ]);
+    }
+
+    public function postSetting($targetInstanceId)
+    {
+        $instanceId = $this->handler->getInstanceId($targetInstanceId);
+
+        $inputs = Input::except(['redirect', '_token']);
 
         $configInputs = $permInputs = [];
         foreach ($inputs as $name => $value) {
@@ -191,18 +247,16 @@ class ManagerController extends Controller
         }
 
         $validator = Validator::make([
-            'instanceId' => Input::get('instanceId'),
             'perPage' => Input::get('perPage')
         ], [
-            'instanceId' => 'Required',
             'perPage' => 'Numeric'
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->with('alert', ['type' => 'danger', 'message' => $validator->errors()]);
         }
-//dd($configInputs);
-        $this->handler->configure(Input::get('instanceId'), $configInputs);
+
+        $this->handler->configure($instanceId, $configInputs);
 
         $grantInfo = [
             'create' => $this->makeGrant($permInputs, 'create'),
@@ -214,12 +268,12 @@ class ManagerController extends Controller
             $grant->set($action, $info);
         }
 
-        $this->handler->setPermission(Input::get('instanceId'), $grant);
+        $this->handler->setPermission($instanceId, $grant);
 
         if (Input::get('redirect') != null) {
             return redirect(Input::get('redirect'));
         } else {
-            return redirect()->back();
+            return redirect()->route('manage.comment.setting', $targetInstanceId);
         }
     }
 
@@ -257,7 +311,7 @@ class ManagerController extends Controller
             ]
         ];
         
-        return XePresenter::make('setting', ['config' => $config, 'permArgs' => $permArgs]);
+        return XePresenter::make('global', ['config' => $config, 'permArgs' => $permArgs]);
     }
 
     public function postGlobalSetting()

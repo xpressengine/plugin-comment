@@ -2,6 +2,14 @@
 
 return [
     'manage' => [
+        'detailSetting' => [
+            'ko' => '댓글 상세 설정',
+            'en' => 'Comment Detail Configures',
+        ],
+        'detailSettingDesc' => [
+            'ko' => '댓글의 상세 설정 페이지 입니다.',
+            'en' => 'This page is comment detail configures',
+        ],
         'setting' => [
             'basic' => [
                 'ko' => '기본설정',

@@ -8,6 +8,12 @@ use App\Sections\SkinSection;
 use Xpressengine\Plugins\Comment\Skins\ManagerSkin;
 use Xpressengine\User\Models\UserGroup;
 
+/**
+ * Class ManageSection
+ * @package Xpressengine\Plugins\Comment
+ *
+ * @deprecated
+ */
 class ManageSection
 {
     /**
@@ -55,13 +61,17 @@ class ManageSection
             ->setting($model->getConnection());
         $toggleMenuSection = (new ToggleMenuSection())->setting($plugin->getId(), $instanceId);
 
-        return (new ManagerSkin)->setView('section')->setData([
-            'instanceId' => $instanceId,
+        $menuItem = app('xe.menu')->createItemModel()->newQuery()
+            ->where('id', $targetInstanceId)->first();
+
+        return (new ManagerSkin)->setView('setting')->setData([
+            'targetInstanceId' => $targetInstanceId,
             'config' => $config,
             'permArgs' => $permArgs,
             'skinSection' => $skinSection,
             'dynamicFieldSection' => $dynamicFieldSection,
-            'toggleMenuSection' => $toggleMenuSection
+            'toggleMenuSection' => $toggleMenuSection,
+            'menuItem' => $menuItem,
         ]);
     }
 }

@@ -11,6 +11,6 @@ class ManagerSkin extends AbstractSkin
         return View::make(
             sprintf('%s::views.skin.manager.%s', app('xe.plugin.comment')->getId(), $this->view),
             $this->data
-        )->render();
+        );
     }
 }
