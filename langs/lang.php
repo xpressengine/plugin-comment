@@ -4,11 +4,19 @@ return [
     'manage' => [
         'detailSetting' => [
             'ko' => '댓글 상세 설정',
-            'en' => 'Comment Detail Configures',
+            'en' => 'Comment detail configures',
         ],
         'detailSettingDesc' => [
             'ko' => '댓글의 상세 설정 페이지 입니다.',
             'en' => 'This page is comment detail configures',
+        ],
+        'globalSetting' => [
+            'ko' => '댓글 전역 설정',
+            'en' => 'Comment global configures',
+        ],
+        'globalSettingDesc' => [
+            'ko' => '댓글의 전역 설정 페이지 입니다.',
+            'en' => 'This page is comment global configures',
         ],
         'setting' => [
             'basic' => [
