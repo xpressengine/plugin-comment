@@ -2,13 +2,12 @@
 namespace Xpressengine\Plugins\Comment;
 
 use App\Http\Controllers\Controller;
-use App\Sections\DynamicFieldSection;
-use App\Sections\SkinSection;
-use App\Sections\ToggleMenuSection;
+use App\Http\Sections\DynamicFieldSection;
+use App\Http\Sections\SkinSection;
+use App\Http\Sections\ToggleMenuSection;
 use Input;
 use Validator;
 use Xpressengine\Menu\MenuHandler;
-use Xpressengine\Module\ModuleHandler;
 use Xpressengine\Permission\Grant;
 use XePresenter;
 use XeConfig;
@@ -210,11 +209,13 @@ class ManagerController extends Controller
             ]
         ];
 
-        $skinSection = (new SkinSection())->setting($this->plugin->getId(), $instanceId);
+        $skinSection = new SkinSection($this->plugin->getId(), $instanceId);
 
-        $dynamicFieldSection = (new DynamicFieldSection(str_replace('.', '_', $config->name)))
-            ->setting($this->handler->createModel()->getConnection());
-        $toggleMenuSection = (new ToggleMenuSection())->setting($this->plugin->getId(), $instanceId);
+        $dynamicFieldSection = new DynamicFieldSection(
+            str_replace('.', '_', $config->name),
+            $this->handler->createModel()->getConnection()
+        );
+        $toggleMenuSection = new ToggleMenuSection($this->plugin->getId(), $instanceId);
 
         $menuItem = $menus->createItemModel()->newQuery()
             ->where('id', $targetInstanceId)->first();
