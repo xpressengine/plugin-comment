@@ -113,19 +113,19 @@ class Plugin extends AbstractPlugin
             Route::get('setting/{targetInstanceId}', [
                 'as' => 'manage.comment.setting',
                 'uses' => 'ManagerController@getSetting'
-            ])->where('targetInstanceId', '[^(global)]+');
+            ]);
 
             Route::post('setting/{targetInstanceId}', [
                 'as' => 'manage.comment.setting',
                 'uses' => 'ManagerController@postSetting'
-            ])->where('targetInstanceId', '[^(global)]+');
+            ]);
 
-            Route::get('setting/global', [
+            Route::get('global', [
                 'as' => 'manage.comment.setting.global',
                 'uses' => 'ManagerController@getGlobalSetting'
             ]);
 
-            Route::post('setting/global', [
+            Route::post('global', [
                 'as' => 'manage.comment.setting.global',
                 'uses' => 'ManagerController@postGlobalSetting'
             ]);
