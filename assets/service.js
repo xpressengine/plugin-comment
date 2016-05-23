@@ -61,7 +61,7 @@
                         this.renderItems();
 
                         this.setTotalCnt(this.getTotalCnt() + 1);
-                    }.bind(this), self.props.config.useWysiwyg);
+                    }.bind(this), self.props.config.editor);
 
                 form.render(this._getFormBox());
 
@@ -309,7 +309,7 @@
                         self.spotIn(child);
                         item.removeForm();
                         self.renderItems();
-                    }, self.props.config.useWysiwyg));
+                    }, self.props.config.editor));
 
                     self.state.ing = false;
                 });
@@ -343,7 +343,7 @@
                             item.setChanged();
                             self.replace(item);
                             self.renderItems();
-                        }, self.props.config.useWysiwyg);
+                        }, self.props.config.editor);
 
                         item.setForm(form);
                     };
@@ -594,12 +594,12 @@
         },
     };
 
-    function Form(dom, mode, callback, useEditor)
+    function Form(dom, mode, callback, editorData)
     {
         this.dom = dom;
         this.mode = mode;
         this.callback = callback;
-        this.useEditor = useEditor;
+        this.editorData = editorData;
         this.editor = null;
         this.container = null;
     }
@@ -614,19 +614,20 @@
 
             this.container = container;
 
-            if (this.useEditor === true) {
+            if (this.editorData !== null) {
                 this.initEditor();
             }
 
             this._eventBind();
         },
         initEditor: function () {
-            if (typeof(xe3CkEditor) !== 'function') {
+            if (typeof(XEeditor) == 'undefined') {
                 return ;
             }
 
             var textarea = $('textarea', this.dom)[0],
-                editor = xe3CkEditor(textarea, {
+                editor = XEeditor.getEditor(this.editorData.name);
+                editor.create(textarea, {
                     "height": 200,
                     "fileUpload":{
                         "upload_url": url("/file/upload"),
@@ -637,8 +638,11 @@
                         "hashtag_api": url("/suggestion/hashTag"),
                         "mention_api": url("/suggestion/mention")
                     }
-                });
+                }, this.editorData.config, this.editorData.tools);
 
+            // todo
+            // todo: event interface 필요
+            // todo
             editor.on('focus', function () {
                 $(textarea).triggerHandler('focus');
             });
@@ -651,8 +655,8 @@
             this.editor = editor;
         },
         editorSync: function () {
-            if (this.useEditor && this.editor) {
-                this.editor.setData($('textarea', this.dom).val());
+            if (this.editor) {
+                this.editor.setContents($('textarea', this.dom).val());
             }
         },
         getDom: function () {
@@ -705,7 +709,7 @@
         this.dom = dom;
         this.mode = 'certify';
         this.callback = callback;
-        this.useEditor = false;
+        this.editorData = null;
         this.editor = null;
         this.container = null;
     }
