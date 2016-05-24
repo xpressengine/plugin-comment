@@ -32,7 +32,7 @@
             </div>
             <div class="xe_content __xe_comment_edit_toggle">
                 @can('read', $item)
-                {!! uio('contentCompiler', ['content' => $item->content]) !!}
+                {!! compile($item->instanceId, $item->content) !!}
                 @else
                     @if ($item->display == 'hidden' && $item->status != 'public')
                         {{ xe_trans('comment::RemoveContent') }}

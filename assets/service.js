@@ -626,8 +626,7 @@
             }
 
             var textarea = $('textarea', this.dom)[0],
-                editor = XEeditor.getEditor(this.editorData.name);
-                editor.create(textarea, {
+                editor = XEeditor.getEditor(this.editorData.name).create(textarea, {
                     "height": 200,
                     "fileUpload":{
                         "upload_url": url("/file/upload"),
@@ -647,7 +646,7 @@
                 $(textarea).triggerHandler('focus');
             });
             editor.on('change', function () {
-                editor.updateElement();
+                editor.updateElement(); // 이게 무슨 기능이었드라?
 
                 $(textarea).triggerHandler('input');
             });
