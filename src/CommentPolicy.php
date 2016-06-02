@@ -17,8 +17,8 @@ class CommentPolicy
 
         if ($comment->display === 'secret'
             && !$user->isManager()
-            && $user->getId() != $comment->author->getId()
-            && $user->getId() != $comment->target->author->getId()) {
+            && $user->getId() != $comment->getAuthor()->getId()
+            && $user->getId() != $comment->target->getAuthor()->getId()) {
             return false;
         }
 
@@ -37,12 +37,12 @@ class CommentPolicy
 
     private function checkUpdateOrDelete(UserInterface $user, Comment $comment)
     {
-        if ($user instanceof Guest && $comment->author->getId() === null && $this->isCertified($comment) === true) {
+        if ($user instanceof Guest && $comment->getAuthor()->getId() === null && $this->isCertified($comment) === true) {
             return true;
         }
 
-        if ($comment->author->getId() !== null
-            && $comment->author->getId() == $user->getId()) {
+        if ($comment->getAuthor()->getId() !== null
+            && $comment->getAuthor()->getId() == $user->getId()) {
             return true;
         }
 

@@ -1,15 +1,16 @@
 <?php
 namespace Xpressengine\Plugins\Comment\Models;
 
-
 use Xpressengine\Database\Eloquent\DynamicModel;
+use Xpressengine\User\Models\Guest;
 use Xpressengine\User\Models\User;
+use Xpressengine\User\UserInterface;
 
 /**
  * Class Target
  *
  * @property Comment $comment
- * @property User $author
+ * @property User|null $author
  *
  * @package Xpressengine\Plugins\Comment\Models
  */
@@ -39,5 +40,19 @@ class Target extends DynamicModel
     public function author()
     {
         return $this->belongsTo(User::class, 'targetAuthorId');
+    }
+
+    /**
+     * Returns the author
+     *
+     * @return UserInterface
+     */
+    public function getAuthor()
+    {
+        if (!$author = $this->getRelationValue('author')) {
+            $author = new Guest();
+        }
+
+        return $author;
     }
 }
