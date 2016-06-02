@@ -1,7 +1,7 @@
 @foreach($items as $item)
     <div class="comment_entity depth{{ $item->getDepth() }} __xe_comment_list_item" id="#comment-{{ $item->id }}" data-instanceid="{{ $item->instanceId }}" data-id="{{ $item->id }}" data-head="{{ $item->head }}" data-reply="{{ $item->reply }}" data-parentid="{{ $item->parentId }}" data-indent="{{ $item->getDepth() }}">
         <div class="comment_entity_avatar">
-            <img src="{{ $item->target->author->getProfileImage() }}" alt="{{ $item->target->author->getDisplayName() }}">
+            <img src="{{ $item->target->getAuthor()->getProfileImage() }}" alt="{{ $item->target->getAuthor()->getDisplayName() }}">
             <!-- [D] 소셜로그인시 클래스 kakao, google, facebook, github, naver, twitter -->
             {{--<span class="social_badge facebook"></span>--}}
         </div>
