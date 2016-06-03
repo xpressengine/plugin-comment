@@ -1,4 +1,12 @@
 <?php
+/**
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     LGPL-2.1
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @link        https://xpressengine.io
+ */
+
 namespace Xpressengine\Plugins\Comment;
 
 use Illuminate\Session\Store as SessionStore;
@@ -266,7 +274,7 @@ class Handler
     {
         // todo: 휴지통 상태의 것만 삭제 가능하고 상태에 따라 다른 처리 core의 comment handler 참조
         $comment->target->delete();
-        
+
         return $this->documents->remove($comment);
     }
 
@@ -451,7 +459,7 @@ class Handler
     {
         $this->permissions->destroy($this->getKeyForPerm($instanceId));
     }
-    
+
     public function getKeyForPerm($instanceId)
     {
         $name = static::PLUGIN_PREFIX;

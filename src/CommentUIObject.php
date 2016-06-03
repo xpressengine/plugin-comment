@@ -2,13 +2,13 @@
 /**
  * This file is comment ui object class
  *
- * PHP version 5
- *
- * @author      XE Team (jhyeon1010) <cjh1010@xpressengine.com>
- * @copyright   2014 Copyright (C) NAVER <http://www.navercorp.com>
- * @license     http://www.gnu.org/licenses/lgpl-3.0-standalone.html LGPL
- * @link        http://www.xpressengine.com
+ * @author      XE Developers (jhyeon1010) <cjh1010@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Crop. <http://www.navercorp.com>
+ * @license     LGPL-2.1
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @link        https://xpressengine.io
  */
+
 namespace Xpressengine\Plugins\Comment;
 
 use Xpressengine\UIObject\AbstractUIObject;
@@ -19,11 +19,6 @@ use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
 
 /**
  * 댓글 ui object 랜더링
- *
- * @author      XE Team (jhyeon1010) <cjh1010@xpressengine.com>
- * @copyright   2014 Copyright (C) NAVER <http://www.navercorp.com>
- * @license     http://www.gnu.org/licenses/lgpl-3.0-standalone.html LGPL
- * @link        http://www.xpressengine.com
  */
 class CommentUIObject extends AbstractUIObject
 {
