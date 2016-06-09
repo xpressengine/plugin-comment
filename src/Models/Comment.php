@@ -4,7 +4,7 @@ namespace Xpressengine\Plugins\Comment\Models;
 use Illuminate\Database\Eloquent\Collection;
 use Xpressengine\Document\Models\Document;
 use Xpressengine\Storage\File;
-use Xpressengine\User\Models\Guest;
+use Xpressengine\User\Models\UnknownUser;
 use Xpressengine\User\Models\User;
 use Xpressengine\User\UserInterface;
 
@@ -45,7 +45,7 @@ class Comment extends Document
     public function getAuthor()
     {
         if (!$author = $this->getRelationValue('author')) {
-            $author = new Guest();
+            $author = new UnknownUser();
         }
 
         return $author;

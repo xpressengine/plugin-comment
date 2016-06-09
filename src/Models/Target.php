@@ -2,7 +2,7 @@
 namespace Xpressengine\Plugins\Comment\Models;
 
 use Xpressengine\Database\Eloquent\DynamicModel;
-use Xpressengine\User\Models\Guest;
+use Xpressengine\User\Models\UnknownUser;
 use Xpressengine\User\Models\User;
 use Xpressengine\User\UserInterface;
 
@@ -50,7 +50,7 @@ class Target extends DynamicModel
     public function getAuthor()
     {
         if (!$author = $this->getRelationValue('author')) {
-            $author = new Guest();
+            $author = new UnknownUser();
         }
 
         return $author;

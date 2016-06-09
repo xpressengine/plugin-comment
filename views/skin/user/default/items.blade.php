@@ -1,14 +1,14 @@
 @foreach($items as $item)
     <div class="comment_entity depth{{ $item->getDepth() }} __xe_comment_list_item" id="#comment-{{ $item->id }}" data-instanceid="{{ $item->instanceId }}" data-id="{{ $item->id }}" data-head="{{ $item->head }}" data-reply="{{ $item->reply }}" data-parentid="{{ $item->parentId }}" data-indent="{{ $item->getDepth() }}">
         <div class="comment_entity_avatar">
-            <img src="{{ $item->target->getAuthor()->getProfileImage() }}" alt="{{ $item->target->getAuthor()->getDisplayName() }}">
+            <img src="{{ $item->getAuthor()->getProfileImage() }}" alt="{{ $item->writer }}">
             <!-- [D] 소셜로그인시 클래스 kakao, google, facebook, github, naver, twitter -->
             {{--<span class="social_badge facebook"></span>--}}
         </div>
         <div class="comment_entity_body">
             <div class="comment_entity_body_meta">
                 <!-- [D] 클릭시 클래스 on 적용 -->
-                <a href="#" class="author __xe_member" data-id="{{ $item->userId }}">{{ $item->writer }}</a>
+                <a href="#" class="author {{ $item->getAuthor()->getRating() !== Xpressengine\User\Rating::GUEST ? '__xe_member' : '' }}" data-id="{{ $item->userId }}">{{ $item->writer }}</a>
                 <span class="date" data-xe-timeago="{{ $item->createdAt }}" title="{{ $item->createdAt }}">{{ $item->createdAt }}</span>
                 <div class="ly_popup">
                     <ul>
