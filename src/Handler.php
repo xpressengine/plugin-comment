@@ -13,14 +13,11 @@ use Illuminate\Session\Store as SessionStore;
 use Xpressengine\Config\ConfigManager;
 use Xpressengine\Document\DocumentHandler;
 use Xpressengine\Keygen\Keygen;
-use Xpressengine\Permission\PermissionHandler;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\User\Models\Guest;
 use Xpressengine\User\UserInterface;
 use Xpressengine\User\GuardInterface as Authenticator;
 use Xpressengine\Counter\Counter;
-use Xpressengine\User\Rating;
-use Xpressengine\Permission\Grant;
 use Xpressengine\Plugins\Comment\Plugin as CommentPlugin;
 
 class Handler
@@ -36,8 +33,6 @@ class Handler
     protected $counter;
 
     protected $auth;
-
-    protected $permissions;
 
     protected $configs;
 
@@ -64,7 +59,6 @@ class Handler
         SessionStore $session,
         Counter $counter,
         Authenticator $auth,
-        PermissionHandler $permissions,
         ConfigManager $configs,
         Keygen $keygen
     )
@@ -73,7 +67,6 @@ class Handler
         $this->session = $session;
         $this->counter = $counter;
         $this->auth = $auth;
-        $this->permissions = $permissions;
         $this->configs = $configs;
         $this->keygen = $keygen;
     }
@@ -99,8 +92,6 @@ class Handler
         ]);
 
         $this->instanceMapping($targetInstanceId, $instanceId);
-
-        $this->setPermission($instanceId, new Grant());
     }
 
     protected function instanceMapping($targetInstanceId, $commentInstanceId)
@@ -413,54 +404,7 @@ class Handler
         return $this->defaultConfig;
     }
 
-    public function getDefaultPermission()
-    {
-        $grant = new Grant();
-        $grant->set('create', [
-            Grant::RATING_TYPE => Rating::MEMBER,
-            Grant::GROUP_TYPE => [],
-            Grant::USER_TYPE => [],
-            Grant::EXCEPT_TYPE => [],
-            Grant::VGROUP_TYPE => []
-        ]);
-        $grant->set('download', [
-            Grant::RATING_TYPE => Rating::MEMBER,
-            Grant::GROUP_TYPE => [],
-            Grant::USER_TYPE => [],
-            Grant::EXCEPT_TYPE => [],
-            Grant::VGROUP_TYPE => []
-        ]);
-
-        return $grant;
-    }
-
-    /**
-     * @param $instanceId
-     * @return mixed
-     */
-    public function getPermission($instanceId = null)
-    {
-        return $this->permissions->findOrNew($this->getKeyForPerm($instanceId));
-    }
-
-    /**
-     * @param $instanceId
-     * @param Grant $grant
-     */
-    public function setPermission($instanceId, Grant $grant)
-    {
-        $this->permissions->register($this->getKeyForPerm($instanceId), $grant);
-    }
-
-    /**
-     * @param $instanceId
-     */
-    public function removePermission($instanceId)
-    {
-        $this->permissions->destroy($this->getKeyForPerm($instanceId));
-    }
-
-    public function getKeyForPerm($instanceId)
+    public function getKeyForPerm($instanceId = null)
     {
         $name = static::PLUGIN_PREFIX;
 

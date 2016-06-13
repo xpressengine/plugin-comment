@@ -15,15 +15,17 @@ use App\Http\Sections\SkinSection;
 use App\Http\Sections\ToggleMenuSection;
 use Input;
 use Validator;
+use Xpressengine\Http\Request;
 use Xpressengine\Menu\MenuHandler;
-use Xpressengine\Permission\Grant;
 use XePresenter;
 use XeConfig;
 use XeDB;
-use Xpressengine\User\Models\UserGroup;
+use Xpressengine\Permission\PermissionSupport;
 
 class ManagerController extends Controller
 {
+    use PermissionSupport;
+
     protected $plugin;
 
     /**
@@ -195,27 +197,7 @@ class ManagerController extends Controller
         $instanceId = $this->handler->getInstanceId($targetInstanceId);
         $config = $this->handler->getConfig($instanceId);
 
-        $permission = $this->handler->getPermission($instanceId);
-
-        $mode = function ($action) use ($permission) {
-            return $permission->pure($action) ? 'manual' : 'inherit';
-        };
-
-        $allGroup = UserGroup::get();
-        $permArgs = [
-            'create' => [
-                'mode' => $mode('create'),
-                'grant' => $permission['create'],
-                'title' => 'create',
-                'groups' => $allGroup,
-            ],
-            'download' => [
-                'mode' => $mode('download'),
-                'grant' => $permission['download'],
-                'title' => 'download',
-                'groups' => $allGroup,
-            ]
-        ];
+        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm($instanceId), ['create', 'download']);
 
         $skinSection = new SkinSection($this->plugin->getId(), $instanceId);
 
@@ -239,24 +221,17 @@ class ManagerController extends Controller
         ]);
     }
 
-    public function postSetting($targetInstanceId)
+    public function postSetting(Request $request, $targetInstanceId)
     {
         $instanceId = $this->handler->getInstanceId($targetInstanceId);
 
-        $inputs = Input::except(['redirect', '_token']);
-
-        $configInputs = $permInputs = [];
-        foreach ($inputs as $name => $value) {
-            if (substr($name, 0, strlen('create')) === 'create'
-            || substr($name, 0, strlen('download')) === 'download') {
-                $permInputs[$name] = $value;
-            } else {
-                $configInputs[$name] = $value;
-            }
-        }
+        $configInputs = array_filter($request->except(['redirect', '_token']), function ($key) {
+            return substr($key, 0, strlen('create')) !== 'create'
+            && substr($key, 0, strlen('download')) !== 'download';
+        }, ARRAY_FILTER_USE_KEY);
 
         $validator = Validator::make([
-            'perPage' => Input::get('perPage')
+            'perPage' => $request->get('perPage')
         ], [
             'perPage' => 'Numeric'
         ]);
@@ -267,79 +242,33 @@ class ManagerController extends Controller
 
         $this->handler->configure($instanceId, $configInputs);
 
-        $grantInfo = [
-            'create' => $this->makeGrant($permInputs, 'create'),
-            'download' => $this->makeGrant($permInputs, 'download'),
-        ];
+        $this->permissionRegister($request, $this->handler->getKeyForPerm($instanceId), ['create', 'download']);
 
-        $grant = new Grant();
-        foreach (array_filter($grantInfo) as $action => $info) {
-            $grant->set($action, $info);
-        }
-
-        $this->handler->setPermission($instanceId, $grant);
-
-        if (Input::get('redirect') != null) {
-            return redirect(Input::get('redirect'));
+        if ($request->get('redirect') != null) {
+            return redirect($request->get('redirect'));
         } else {
             return redirect()->route('manage.comment.setting', $targetInstanceId);
         }
     }
 
-    private function makeGrant($inputs, $action)
-    {
-        if (array_get($inputs, $action . 'Mode') === 'inherit') {
-            return null;
-        }
-
-        return [
-            Grant::RATING_TYPE => array_get($inputs, $action . 'Rating'),
-            Grant::GROUP_TYPE => array_get($inputs, $action . 'Group') ?: [],
-            Grant::USER_TYPE => array_filter(explode(',', array_get($inputs, $action . 'User'))),
-            Grant::EXCEPT_TYPE => array_filter(explode(',', array_get($inputs, $action . 'Except'))),
-            Grant::VGROUP_TYPE => array_get($inputs, $action . 'VGroup') ?: [],
-        ];
-    }
-
     public function getGlobalSetting()
     {
         $config = $this->handler->getConfig();
-        $permission = $this->handler->getPermission();
-
-        $allGroup = UserGroup::get();
-        $permArgs = [
-            'create' => [
-                'grant' => $permission['create'],
-                'title' => 'create',
-                'groups' => $allGroup,
-            ],
-            'download' => [
-                'grant' => $permission['download'],
-                'title' => 'download',
-                'groups' => $allGroup,
-            ]
-        ];
+        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm(), ['create', 'download']);
 
         return XePresenter::make('global', ['config' => $config, 'permArgs' => $permArgs]);
     }
 
-    public function postGlobalSetting()
+    public function postGlobalSetting(Request $request)
     {
-        $inputs = Input::except(['_token']);
-
-        $configInputs = $permInputs = [];
-        foreach ($inputs as $name => $value) {
-            if (substr($name, 0, strlen('create')) === 'create'
-                || substr($name, 0, strlen('download')) === 'download') {
-                $permInputs[$name] = $value;
-            } else {
-                $configInputs[$name] = $value;
-            }
-        }
+        $configInputs = array_filter($request->except(['_token']), function ($key) {
+            return substr($key, 0, strlen('create')) !== 'create'
+            && substr($key, 0, strlen('download')) !== 'download';
+        }, ARRAY_FILTER_USE_KEY);
 
         /** @var \Illuminate\Validation\Validator $validator */
         $validator = Validator::make(
-            ['perPage' => Input::get('perPage')],
+            ['perPage' => $request->get('perPage')],
             ['perPage' => 'Numeric']
         );
 
@@ -352,17 +281,7 @@ class ManagerController extends Controller
         try {
             $this->handler->configure(null, $configInputs);
 
-            $grantInfo = [
-                'create' => $this->makeGrant($permInputs, 'create'),
-                'download' => $this->makeGrant($permInputs, 'download'),
-            ];
-
-            $grant = new Grant();
-            foreach (array_filter($grantInfo) as $action => $info) {
-                $grant->set($action, $info);
-            }
-
-            $this->handler->setPermission(null, $grant);
+            $this->permissionRegister($request, $this->handler->getKeyForPerm(), ['create', 'download']);
 
             XeDB::commit();
         } catch (\Exception $e) {

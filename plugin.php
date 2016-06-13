@@ -10,6 +10,7 @@
 namespace Xpressengine\Plugins\Comment;
 
 use Illuminate\Database\Schema\Blueprint;
+use Xpressengine\Permission\Grant;
 use Xpressengine\Plugin\AbstractPlugin;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\Translation\Translator;
@@ -18,30 +19,13 @@ use XeTrash;
 use XeSkin;
 use View;
 use Gate;
+use Xpressengine\User\Rating;
 
 class Plugin extends AbstractPlugin
 {
     private $targetTable = 'comment_target';
 
     private $handler;
-    /**
-     * activate
-     *
-     * @param null $installedVersion installed version
-     * @return void
-     */
-    public function activate($installedVersion = null)
-    {
-        /** @var Handler $handler */
-        $handler = $this->getHandler();
-        // 기본 권한
-        $handler->setPermission(null, $handler->getDefaultPermission());
-        // 기본 설정
-        \XeConfig::set('comment', $handler->getDefaultConfig());
-        if (\XeConfig::get('comment_map') === null) {
-            \XeConfig::set('comment_map', []);
-        }
-    }
 
     /**
      * @return void
@@ -55,6 +39,31 @@ class Plugin extends AbstractPlugin
 
         // pivot table
         $this->migrate();
+
+        /** @var Handler $handler */
+        $handler = $this->getHandler();
+        // 기본 권한
+        $grant = new Grant();
+        $grant->set('create', [
+            Grant::RATING_TYPE => Rating::MEMBER,
+            Grant::GROUP_TYPE => [],
+            Grant::USER_TYPE => [],
+            Grant::EXCEPT_TYPE => [],
+            Grant::VGROUP_TYPE => []
+        ]);
+        $grant->set('download', [
+            Grant::RATING_TYPE => Rating::MEMBER,
+            Grant::GROUP_TYPE => [],
+            Grant::USER_TYPE => [],
+            Grant::EXCEPT_TYPE => [],
+            Grant::VGROUP_TYPE => []
+        ]);
+        app('xe.permission')->register($handler->getKeyForPerm(), $grant);
+        // 기본 설정
+        \XeConfig::set('comment', $handler->getDefaultConfig());
+        if (\XeConfig::get('comment_map') === null) {
+            \XeConfig::set('comment_map', []);
+        }
     }
 
     private function migrate()
@@ -208,7 +217,6 @@ class Plugin extends AbstractPlugin
                 app('session.store'),
                 $counter,
                 app('xe.auth'),
-                app('xe.permission'),
                 app('xe.config'),
                 app('xe.keygen')
             );
