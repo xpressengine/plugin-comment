@@ -207,6 +207,11 @@ class Plugin extends AbstractPlugin
         return route('manage.comment.setting.global');
     }
 
+    public function getInstanceSettingURI($instanceId)
+    {
+        return route('manage.comment.setting', $instanceId);
+    }
+
     public function getHandler()
     {
         if (!$this->handler) {
