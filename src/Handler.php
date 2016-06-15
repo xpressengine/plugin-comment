@@ -13,6 +13,8 @@ use Illuminate\Session\Store as SessionStore;
 use Xpressengine\Config\ConfigManager;
 use Xpressengine\Document\DocumentHandler;
 use Xpressengine\Keygen\Keygen;
+use Xpressengine\Permission\Grant;
+use Xpressengine\Permission\PermissionHandler;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\User\Models\Guest;
 use Xpressengine\User\UserInterface;
@@ -33,6 +35,8 @@ class Handler
     protected $counter;
 
     protected $auth;
+
+    protected $permissions;
 
     protected $configs;
 
@@ -59,6 +63,7 @@ class Handler
         SessionStore $session,
         Counter $counter,
         Authenticator $auth,
+        PermissionHandler $permissions,
         ConfigManager $configs,
         Keygen $keygen
     )
@@ -67,6 +72,7 @@ class Handler
         $this->session = $session;
         $this->counter = $counter;
         $this->auth = $auth;
+        $this->permissions = $permissions;
         $this->configs = $configs;
         $this->keygen = $keygen;
     }
@@ -92,6 +98,8 @@ class Handler
         ]);
 
         $this->instanceMapping($targetInstanceId, $instanceId);
+
+        $this->permissions->register($this->getKeyForPerm($instanceId), new Grant());
     }
 
     protected function instanceMapping($targetInstanceId, $commentInstanceId)

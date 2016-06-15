@@ -222,6 +222,7 @@ class Plugin extends AbstractPlugin
                 app('session.store'),
                 $counter,
                 app('xe.auth'),
+                app('xe.permission'),
                 app('xe.config'),
                 app('xe.keygen')
             );
