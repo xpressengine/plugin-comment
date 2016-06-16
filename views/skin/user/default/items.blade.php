@@ -98,8 +98,8 @@
                         <!-- [D] 클릭시 클래스 on 적용 및 comment_action_area 활성화 -->
                 <a href="#" class="btn_share reply __xe_comment_btn_reply"><i class="xi-reply"></i> {{ xe_trans('comment::reply') }}</a>
                 @endcan
-                <div class="vote_list">
-                    <ul class="__xe_comment_voters __xe_assent __xe_dissent" style="display: none;"></ul>
+                <div class="vote_list __xe_comment_voters __xe_assent __xe_dissent">
+                    {{--<ul class="__xe_comment_voters __xe_assent __xe_dissent" style="display: none;"></ul>--}}
                 </div>
             </div>
             <div class="__xe_comment_edit_form __xe_comment_reply_form __xe_comment_certify"></div>

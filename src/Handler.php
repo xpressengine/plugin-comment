@@ -367,11 +367,28 @@ class Handler
         return $this->counter->getUsers($comment->id, $option);
     }
 
+    public function voteUserCount(Comment $comment, $option)
+    {
+        return $this->counter->getPoint($comment->id, $option);
+    }
+
     public function bindUserVote(Comment $comment)
     {
         if (!$this->auth->guest() && $log = $this->counter->getByName($comment->id, $this->auth->user())) {
             $comment->setVoteType($log->counterOption);
         }
+    }
+
+    public function votedList(Comment $comment, $option, $startId = null, $limit = 10)
+    {
+        $query = $this->counter->newModel()->where('counterName', static::COUNTER_VOTE)
+            ->where('targetId', $comment->id)->where('counterOption', $option);
+
+        if ($startId) {
+            $query->where('id', '<', $startId);
+        }
+
+        return $query->orderBy('id', 'desc')->take($limit)->get();
     }
 
     /**

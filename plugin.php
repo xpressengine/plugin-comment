@@ -159,7 +159,9 @@ class Plugin extends AbstractPlugin
             Route::get('voteInfo', 'UserController@voteInfo');
             Route::post('voteOn', 'UserController@voteOn');
             Route::post('voteOff', 'UserController@voteOff');
-            Route::get('voteUser', 'UserController@voteUser');
+            Route::get('votedUser', 'UserController@votedUser');
+            Route::get('votedModal', ['as' => 'plugin.comment.voted.modal', 'uses' => 'UserController@votedModal']);
+            Route::get('votedList', ['as' => 'plugin.comment.voted.list', 'uses' => 'UserController@votedList']);
 
 
             Route::post('file/upload', 'UserController@fileUpload');
