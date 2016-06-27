@@ -343,7 +343,7 @@
                             item.setChanged();
                             self.replace(item);
                             self.renderItems();
-                        }, self.props.config.editor);
+                        }, $.extend({}, self.props.config.editor, json.etc));
 
                         item.setForm(form);
                     };
@@ -591,7 +591,7 @@
         },
         unsetChanged: function () {
             this.state.changed = false;
-        },
+        }
     };
 
     function Form(dom, mode, callback, editorData)
@@ -625,30 +625,21 @@
                 return ;
             }
 
-            var textarea = $('textarea', this.dom)[0],
-                editor = XEeditor.getEditor(this.editorData.name).create(textarea, {
-                    "height": 200,
-                    "fileUpload":{
-                        "upload_url": url("/file/upload"),
-                        "source_url": url("/file/source"),
-                        "download_url": url("/file/download")
-                    },
-                    "suggestion":{
-                        "hashtag_api": url("/suggestion/hashTag"),
-                        "mention_api": url("/suggestion/mention")
-                    }
-                }, this.editorData.config, this.editorData.tools);
+            // var textarea = $('textarea', this.dom)[0],
+            //     editor = XEeditor.getEditor(this.editorData.name).create(textarea, this.editorData.options, this.editorData.customOptions, this.editorData.tools);
+            var id = 'comment_textarea_' + (new Date().getTime());
+            $('textarea', this.dom).attr('id', id);
+            var editor = XEeditor.getEditor(this.editorData.name).create(id, this.editorData.options, this.editorData.customOptions, this.editorData.tools);
 
-            // todo
-            // todo: event interface 필요
-            // todo
             editor.on('focus', function () {
-                $(textarea).triggerHandler('focus');
+                // $(textarea).triggerHandler('focus');
+                $(id).triggerHandler('focus');
             });
             editor.on('change', function () {
-                editor.updateElement(); // 이게 무슨 기능이었드라?
+                // editor.updateElement(); // 이게 무슨 기능이었드라?
 
-                $(textarea).triggerHandler('input');
+                // $(textarea).triggerHandler('input');
+                $(id).triggerHandler('input');
             });
 
             this.editor = editor;
@@ -690,7 +681,7 @@
                         self.callback(json);
                         $(self._getForm()).trigger('reset');
                         if (self.editor && self.getMode() == 'create') {
-                            self.editor.clear();
+                            self.editor.setContents('');
                         }
                     }
                 }).always(function () {

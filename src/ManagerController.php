@@ -3,6 +3,7 @@ namespace Xpressengine\Plugins\Comment;
 
 use App\Http\Controllers\Controller;
 use App\Http\Sections\DynamicFieldSection;
+use App\Http\Sections\EditorSection;
 use App\Http\Sections\SkinSection;
 use App\Http\Sections\ToggleMenuSection;
 use Input;
@@ -210,6 +211,7 @@ class ManagerController extends Controller
         ];
 
         $skinSection = new SkinSection($this->plugin->getId(), $instanceId);
+        $editorSection = new EditorSection($instanceId);
 
         $dynamicFieldSection = new DynamicFieldSection(
             str_replace('.', '_', $config->name),
@@ -217,14 +219,14 @@ class ManagerController extends Controller
         );
         $toggleMenuSection = new ToggleMenuSection($this->plugin->getId(), $instanceId);
 
-        $menuItem = $menus->createItemModel()->newQuery()
-            ->where('id', $targetInstanceId)->first();
+        $menuItem = $menus->getItem($targetInstanceId);
 
         return XePresenter::make('setting', [
             'targetInstanceId' => $targetInstanceId,
             'config' => $config,
             'permArgs' => $permArgs,
             'skinSection' => $skinSection,
+            'editorSection' => $editorSection,
             'dynamicFieldSection' => $dynamicFieldSection,
             'toggleMenuSection' => $toggleMenuSection,
             'menuItem' => $menuItem,

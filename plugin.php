@@ -145,14 +145,14 @@ class Plugin extends AbstractPlugin
             Route::get('voteUser', 'UserController@voteUser');
 
 
-            Route::post('file/upload', 'UserController@fileUpload');
-            Route::get('file/source/{id}', 'UserController@fileSource');
-            Route::get('file/download/{instanceId}/{fileId}', [
-                'as' => 'plugin.comment.download',
-                'uses' => 'UserController@fileDownload'
-            ]);
-            Route::get('suggestion/hashTag', 'UserController@suggestionHashTag');
-            Route::get('suggestion/mention', 'UserController@suggestionMention');
+//            Route::post('file/upload', 'UserController@fileUpload');
+//            Route::get('file/source/{id}', 'UserController@fileSource');
+//            Route::get('file/download/{instanceId}/{fileId}', [
+//                'as' => 'plugin.comment.download',
+//                'uses' => 'UserController@fileDownload'
+//            ]);
+//            Route::get('suggestion/hashTag', 'UserController@suggestionHashTag');
+//            Route::get('suggestion/mention', 'UserController@suggestionMention');
         }, ['namespace' => __NAMESPACE__]);
     }
 

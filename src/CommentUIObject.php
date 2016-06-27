@@ -11,6 +11,7 @@
  */
 namespace Xpressengine\Plugins\Comment;
 
+use Xpressengine\Permission\Grant;
 use Xpressengine\UIObject\AbstractUIObject;
 use View;
 use XeFrontend;
@@ -80,11 +81,18 @@ class CommentUIObject extends AbstractUIObject
         $editor = $config->get('useWysiwyg') ? XeEditor::get($instanceId) : null;
 
         if ($editor) {
+            $key = XeEditor::getPermKey($instanceId);
+            if (!app('xe.permission')->get($key)) {
+                app('xe.permission')->register($key, new Grant);
+            }
+            XeFrontend::js('assets/core/common/js/xe.editor.core.js')->load();
+
             $editor->setArguments(false);
 
             $props['config']['editor'] = [
                 'name' => $editor->getName(),
-                'config' => $editor->getConfigData(),
+                'options' => $editor->getOptions(),
+                'customOptions' => $editor->getCustomOptions(),
                 'tools' => $editor->getTools(),
             ];
         }

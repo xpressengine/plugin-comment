@@ -119,8 +119,8 @@ class UserController extends Controller
         $originInput = Input::originAll();
         $inputs['content'] = $originInput['content'];
 
-        $fileIds = array_only($inputs, '_files');
-        $inputs = array_except($inputs, ['_files']);
+//        $fileIds = array_only($inputs, '_files');
+//        $inputs = array_except($inputs, ['_files']);
 
         if (Gate::denies('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             throw new AccessDeniedHttpException;
@@ -155,10 +155,13 @@ class UserController extends Controller
 
         /** @var Comment $comment */
         $comment = $this->handler->create($inputs);
-        $files = File::whereIn('id', $fileIds)->get();
-        foreach ($files as $file) {
-            XeStorage::bind($comment->getKey(), $file);
-        }
+
+        \XeEditor::terminate($instanceId, $comment->getKey(), $inputs);
+
+//        $files = File::whereIn('id', $fileIds)->get();
+//        foreach ($files as $file) {
+//            XeStorage::bind($comment->getKey(), $file);
+//        }
 
         $config = $this->handler->getConfig($instanceId);
 
@@ -458,7 +461,7 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return XePresenter::makeApi(['mode' => 'edit', 'html' => $content]);
+        return XePresenter::makeApi(['mode' => 'edit', 'html' => $content, 'etc' => ['files' => \XeEditor::getFiles($comment->getKey())]]);
     }
 
     protected function getReplyForm()
@@ -542,116 +545,116 @@ class UserController extends Controller
         throw new BadRequestException;
     }
 
-    public function fileUpload()
-    {
-        /** @var \Xpressengine\Storage\Storage $storage */
-        $storage = app('xe.storage');
-
-        $uploadedFile = null;
-        if (Input::file('file') !== null) {
-            $uploadedFile = Input::file('file');
-        } elseif (Input::file('image') !== null) {
-            $uploadedFile = Input::file('image');
-        }
-
-        if ($uploadedFile === null) {
-            $e = new InvalidArgumentException;
-            $e->setMessage(xe_trans('comment_service::Require', ['attribute' => 'file']));
-
-            throw $e;
-        }
-
-        $file = $storage->upload($uploadedFile, 'attached/comment');
-
-        /** @var \Xpressengine\Media\MediaManager $mediaManager */
-        $mediaManager = app('xe.media');
-        $thumbnails = null;
-        $media = null;
-        if ($mediaManager->is($file) === true) {
-            $media = $mediaManager->make($file);
-            $thumbnails = $mediaManager->createThumbnails($media, 'spill');
-        }
-
-        return XePresenter::makeApi([
-            'file' => $file,
-            'media' => $media,
-            'thumbnails' => $thumbnails,
-        ]);
-    }
-
-    public function fileSource($id)
-    {
-        // todo: authorization 필요 여부 검토
-
-        $file = File::find($id);
-
-        /** @var \Xpressengine\Media\MediaManager $mediaManager */
-        $mediaManager = app('xe.media');
-        if ($mediaManager->is($file) === true) {
-            $dimension = 'L';
-            if (app('request')->isMobile() === true) {
-                $dimension = 'M';
-            }
-
-            $image = Image::getThumbnail($mediaManager->make($file), 'spill', $dimension);
-
-            header('Content-type: ' . $image->mime);
-
-            echo $image->getContent();
-        }
-    }
-
-    public function fileDownload($instanceId, $id)
-    {
-        if (Gate::denies('download', new Instance($this->handler->getKeyForPerm($instanceId)))) {
-            throw new AccessDeniedHttpException;
-        }
-
-        /** @var \Xpressengine\Storage\Storage $storage */
-        $storage = app('xe.storage');
-        $file = File::find($id);
-
-        $storage->download($file);
-    }
-
-    public function suggestionHashTag()
-    {
-        $string = Input::get('string');
-
-        if (empty($string) === true) {
-            return XePresenter::makeApi([]);
-        }
-
-        /** @var \Xpressengine\Tag\TagHandler $tagHandler */
-        $tagHandler = app('xe.tag');
-        $tags = $tagHandler->similar($string);
-
-        $suggestions = [];
-        foreach ($tags as $tag) {
-            $suggestions[] = [
-                'id' => $tag->id,
-                'word' => $tag->word,
-            ];
-        }
-
-        return XePresenter::makeApi($suggestions);
-    }
-
-    public function suggestionMention()
-    {
-        $string = Input::get('string');
-
-        /** @var User[] $users */
-        $users = User::where('displayName', 'like', $string . '%')->get();
-
-        $suggestions = [];
-        foreach ($users as $user) {
-            $suggestions[] = [
-                'id' => $user->getId(),
-                'displayName' => $user->getDisplayName(),
-                'profileImage' => $user->getProfileImage(),
-            ];
-        }
-        return XePresenter::makeApi($suggestions);
-    }
+//    public function fileUpload()
+//    {
+//        /** @var \Xpressengine\Storage\Storage $storage */
+//        $storage = app('xe.storage');
+//
+//        $uploadedFile = null;
+//        if (Input::file('file') !== null) {
+//            $uploadedFile = Input::file('file');
+//        } elseif (Input::file('image') !== null) {
+//            $uploadedFile = Input::file('image');
+//        }
+//
+//        if ($uploadedFile === null) {
+//            $e = new InvalidArgumentException;
+//            $e->setMessage(xe_trans('comment_service::Require', ['attribute' => 'file']));
+//
+//            throw $e;
+//        }
+//
+//        $file = $storage->upload($uploadedFile, 'attached/comment');
+//
+//        /** @var \Xpressengine\Media\MediaManager $mediaManager */
+//        $mediaManager = app('xe.media');
+//        $thumbnails = null;
+//        $media = null;
+//        if ($mediaManager->is($file) === true) {
+//            $media = $mediaManager->make($file);
+//            $thumbnails = $mediaManager->createThumbnails($media, 'spill');
+//        }
+//
+//        return XePresenter::makeApi([
+//            'file' => $file,
+//            'media' => $media,
+//            'thumbnails' => $thumbnails,
+//        ]);
+//    }
+//
+//    public function fileSource($id)
+//    {
+//        // todo: authorization 필요 여부 검토
+//
+//        $file = File::find($id);
+//
+//        /** @var \Xpressengine\Media\MediaManager $mediaManager */
+//        $mediaManager = app('xe.media');
+//        if ($mediaManager->is($file) === true) {
+//            $dimension = 'L';
+//            if (app('request')->isMobile() === true) {
+//                $dimension = 'M';
+//            }
+//
+//            $image = Image::getThumbnail($mediaManager->make($file), 'spill', $dimension);
+//
+//            header('Content-type: ' . $image->mime);
+//
+//            echo $image->getContent();
+//        }
+//    }
+//
+//    public function fileDownload($instanceId, $id)
+//    {
+//        if (Gate::denies('download', new Instance($this->handler->getKeyForPerm($instanceId)))) {
+//            throw new AccessDeniedHttpException;
+//        }
+//
+//        /** @var \Xpressengine\Storage\Storage $storage */
+//        $storage = app('xe.storage');
+//        $file = File::find($id);
+//
+//        $storage->download($file);
+//    }
+//
+//    public function suggestionHashTag()
+//    {
+//        $string = Input::get('string');
+//
+//        if (empty($string) === true) {
+//            return XePresenter::makeApi([]);
+//        }
+//
+//        /** @var \Xpressengine\Tag\TagHandler $tagHandler */
+//        $tagHandler = app('xe.tag');
+//        $tags = $tagHandler->similar($string);
+//
+//        $suggestions = [];
+//        foreach ($tags as $tag) {
+//            $suggestions[] = [
+//                'id' => $tag->id,
+//                'word' => $tag->word,
+//            ];
+//        }
+//
+//        return XePresenter::makeApi($suggestions);
+//    }
+//
+//    public function suggestionMention()
+//    {
+//        $string = Input::get('string');
+//
+//        /** @var User[] $users */
+//        $users = User::where('displayName', 'like', $string . '%')->get();
+//
+//        $suggestions = [];
+//        foreach ($users as $user) {
+//            $suggestions[] = [
+//                'id' => $user->getId(),
+//                'displayName' => $user->getDisplayName(),
+//                'profileImage' => $user->getProfileImage(),
+//            ];
+//        }
+//        return XePresenter::makeApi($suggestions);
+//    }
 }
