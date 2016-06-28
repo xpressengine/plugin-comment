@@ -201,12 +201,6 @@ class ManagerController extends Controller
                 'grant' => $permission['create'],
                 'title' => 'create',
                 'groups' => $allGroup,
-            ],
-            'download' => [
-                'mode' => $mode('download'),
-                'grant' => $permission['download'],
-                'title' => 'download',
-                'groups' => $allGroup,
             ]
         ];
 
@@ -241,8 +235,7 @@ class ManagerController extends Controller
 
         $configInputs = $permInputs = [];
         foreach ($inputs as $name => $value) {
-            if (substr($name, 0, strlen('create')) === 'create'
-            || substr($name, 0, strlen('download')) === 'download') {
+            if (substr($name, 0, strlen('create')) === 'create') {
                 $permInputs[$name] = $value;
             } else {
                 $configInputs[$name] = $value;
@@ -263,7 +256,6 @@ class ManagerController extends Controller
 
         $grantInfo = [
             'create' => $this->makeGrant($permInputs, 'create'),
-            'download' => $this->makeGrant($permInputs, 'download'),
         ];
 
         $grant = new Grant();
@@ -306,11 +298,6 @@ class ManagerController extends Controller
                 'grant' => $permission['create'],
                 'title' => 'create',
                 'groups' => $allGroup,
-            ],
-            'download' => [
-                'grant' => $permission['download'],
-                'title' => 'download',
-                'groups' => $allGroup,
             ]
         ];
         
@@ -323,8 +310,7 @@ class ManagerController extends Controller
 
         $configInputs = $permInputs = [];
         foreach ($inputs as $name => $value) {
-            if (substr($name, 0, strlen('create')) === 'create'
-                || substr($name, 0, strlen('download')) === 'download') {
+            if (substr($name, 0, strlen('create')) === 'create') {
                 $permInputs[$name] = $value;
             } else {
                 $configInputs[$name] = $value;
@@ -348,7 +334,6 @@ class ManagerController extends Controller
 
             $grantInfo = [
                 'create' => $this->makeGrant($permInputs, 'create'),
-                'download' => $this->makeGrant($permInputs, 'download'),
             ];
 
             $grant = new Grant();

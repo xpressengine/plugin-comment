@@ -337,13 +337,15 @@
 
                 var mode = 'edit',
                     callback = function (json) {
+                        var editor = $.extend(true, {}, self.props.config.editor);
+                        $.extend(editor.options, json.etc);
                         var form = new Form($.parseHTML(json.html), mode, function (json) {
                             var items = self.makeItems($.parseHTML(json.items)),
                                 item = items[0];
                             item.setChanged();
                             self.replace(item);
                             self.renderItems();
-                        }, $.extend({}, self.props.config.editor, json.etc));
+                        }, editor);
 
                         item.setForm(form);
                     };
@@ -625,20 +627,14 @@
                 return ;
             }
 
-            // var textarea = $('textarea', this.dom)[0],
-            //     editor = XEeditor.getEditor(this.editorData.name).create(textarea, this.editorData.options, this.editorData.customOptions, this.editorData.tools);
             var id = 'comment_textarea_' + (new Date().getTime());
-            $('textarea', this.dom).attr('id', id);
+            $('textarea', this.dom).attr('id', id).css('width', '100%');
             var editor = XEeditor.getEditor(this.editorData.name).create(id, this.editorData.options, this.editorData.customOptions, this.editorData.tools);
 
             editor.on('focus', function () {
-                // $(textarea).triggerHandler('focus');
                 $(id).triggerHandler('focus');
             });
             editor.on('change', function () {
-                // editor.updateElement(); // 이게 무슨 기능이었드라?
-
-                // $(textarea).triggerHandler('input');
                 $(id).triggerHandler('input');
             });
 

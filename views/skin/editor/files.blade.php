@@ -4,11 +4,7 @@
     <ul>
         @foreach($files as $file)
             <li>
-                {{--@can('download', $instance)--}}
-                <a href="{{ route('editor.file.download', ['id' => $file->id])}}">
-                {{--@else--}}
-                {{--<a href="#">--}}
-                {{--@endcan--}}
+                <a href="{{ route('editor.file.download', ['instanceId' => $instanceId, 'id' => $file->id])}}">
                     <i class="xi-download-disk"></i> {{ $file->clientname }} <span class="file_size">({{ bytes($file->size) }})</span>
                 </a>
             </li>

@@ -415,13 +415,6 @@ class Handler
             Grant::EXCEPT_TYPE => [],
             Grant::VGROUP_TYPE => []
         ]);
-        $grant->set('download', [
-            Grant::RATING_TYPE => Rating::MEMBER,
-            Grant::GROUP_TYPE => [],
-            Grant::USER_TYPE => [],
-            Grant::EXCEPT_TYPE => [],
-            Grant::VGROUP_TYPE => []
-        ]);
 
         return $grant;
     }

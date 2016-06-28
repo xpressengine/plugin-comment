@@ -11,7 +11,6 @@
  */
 namespace Xpressengine\Plugins\Comment;
 
-use Xpressengine\Permission\Grant;
 use Xpressengine\UIObject\AbstractUIObject;
 use View;
 use XeFrontend;
@@ -81,10 +80,6 @@ class CommentUIObject extends AbstractUIObject
         $editor = $config->get('useWysiwyg') ? XeEditor::get($instanceId) : null;
 
         if ($editor) {
-            $key = XeEditor::getPermKey($instanceId);
-            if (!app('xe.permission')->get($key)) {
-                app('xe.permission')->register($key, new Grant);
-            }
             XeFrontend::js('assets/core/common/js/xe.editor.core.js')->load();
 
             $editor->setArguments(false);
@@ -105,15 +100,15 @@ class CommentUIObject extends AbstractUIObject
             'editor' => $editor,
             'inner' => $view,
             'props' => json_enc($props)
-        ])->render();
+        ]);
 
         return $view;
     }
 
     protected function loadDependencies()
     {
-        XeFrontend::css('/assets/core/common/css/temporary.css')->load();
-        XeFrontend::js('/assets/core/common/js/temporary.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
+//        XeFrontend::css('/assets/core/common/css/temporary.css')->load();
+//        XeFrontend::js('/assets/core/common/js/temporary.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
         XeFrontend::js('/assets/core/common/js/toggleMenu.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
     }
 
