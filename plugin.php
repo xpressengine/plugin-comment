@@ -24,12 +24,6 @@ class Plugin extends AbstractPlugin
      */
     public function activate($installedVersion = null)
     {
-        /** @var Handler $handler */
-        $handler = $this->getHandler();
-        // 기본 권한
-        $handler->setPermission(null, $handler->getDefaultPermission());
-        // 기본 설정
-        \XeConfig::set('comment', $handler->getDefaultConfig());
         if (\XeConfig::get('comment_map') === null) {
             \XeConfig::set('comment_map', []);
         }
@@ -47,6 +41,13 @@ class Plugin extends AbstractPlugin
 
         // pivot table
         $this->migrate();
+
+        /** @var Handler $handler */
+        $handler = $this->getHandler();
+        // 기본 권한
+        $handler->setPermission(null, $handler->getDefaultPermission());
+        // 기본 설정
+        \XeConfig::set('comment', $handler->getDefaultConfig());
     }
 
     private function migrate()
