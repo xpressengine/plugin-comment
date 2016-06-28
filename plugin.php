@@ -19,6 +19,8 @@ use XeTrash;
 use XeSkin;
 use View;
 use Gate;
+use XeDB;
+use Schema;
 use Xpressengine\User\Rating;
 
 class Plugin extends AbstractPlugin
@@ -68,7 +70,8 @@ class Plugin extends AbstractPlugin
 
     private function migrate()
     {
-        \Schema::create($this->targetTable, function (Blueprint $table) {
+        $schema = Schema::setConnection(XeDB::connection('document')->master());
+        $schema->create($this->targetTable, function (Blueprint $table) {
             $table->engine = "InnoDB";
 
             $table->increments('id');
@@ -87,7 +90,8 @@ class Plugin extends AbstractPlugin
      */
     public function checkInstalled($installedVersion = null)
     {
-        return \Schema::hasTable($this->targetTable);
+        $schema = Schema::setConnection(XeDB::connection('document')->master());
+        return $schema->hasTable($this->targetTable);
     }
 
     public function boot()
