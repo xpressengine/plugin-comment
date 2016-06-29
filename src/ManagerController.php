@@ -1,4 +1,12 @@
 <?php
+/**
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     LGPL-2.1
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @link        https://xpressengine.io
+ */
+
 namespace Xpressengine\Plugins\Comment;
 
 use App\Http\Controllers\Controller;
@@ -8,15 +16,18 @@ use App\Http\Sections\SkinSection;
 use App\Http\Sections\ToggleMenuSection;
 use Input;
 use Validator;
+use Xpressengine\Http\Request;
 use Xpressengine\Menu\MenuHandler;
-use Xpressengine\Permission\Grant;
 use XePresenter;
 use XeConfig;
 use XeDB;
-use Xpressengine\User\Models\UserGroup;
+use Xpressengine\Module\ModuleHandler;
+use Xpressengine\Permission\PermissionSupport;
 
 class ManagerController extends Controller
 {
+    use PermissionSupport;
+
     protected $plugin;
 
     /**
@@ -42,7 +53,7 @@ class ManagerController extends Controller
         return $instanceIds;
     }
 
-    public function index()
+    public function index(MenuHandler $menus, ModuleHandler $modules)
     {
         Input::flash();
 
@@ -60,17 +71,15 @@ class ManagerController extends Controller
         $comments = $query->with('target')->paginate();
 
         $map = $this->handler->getInstanceMap();
-        $menuItems = app('xe.menu')->createItemModel()->newQuery()->with('route')
-            ->whereIn('id', array_keys($map))->get()->getDictionary();
+        $menuItems = $menus->getItemIn(array_keys($map), 'route')->getDictionary();
 
         return XePresenter::make('index', [
             'comments' => $comments,
             'menuItem' => function ($comment) use ($menuItems, $map) {
                 return $menuItems[array_search($comment->instanceId, $map)];
             },
-            'urlMake' => function ($comment, $menuItem) {
-                $module = app('xe.module');
-                return url($module->getModuleObject($menuItem->type)
+            'urlMake' => function ($comment, $menuItem) use ($modules) {
+                return url($modules->getModuleObject($menuItem->type)
                         ->getTypeItem($comment->target->targetId)
                         ->getLink($menuItem->route) . '#comment-'.$comment->id);
             },
@@ -122,7 +131,7 @@ class ManagerController extends Controller
         }
     }
 
-    public function trash()
+    public function trash(MenuHandler $menus)
     {
         Input::flash();
 
@@ -132,8 +141,7 @@ class ManagerController extends Controller
             ->where('status', 'trash')->paginate();
 
         $map = $this->handler->getInstanceMap();
-        $menuItems = app('xe.menu')->createItemModel()->newQuery()->with('route')
-            ->whereIn('id', array_keys($map))->get()->getDictionary();
+        $menuItems = $menus->getItemIn(array_keys($map), 'route')->getDictionary();
 
         return XePresenter::make('trash', [
             'comments' => $comments,
@@ -182,27 +190,13 @@ class ManagerController extends Controller
             return redirect()->route('manage.comment.index');
         }
     }
-    
+
     public function getSetting(MenuHandler $menus, $targetInstanceId)
     {
         $instanceId = $this->handler->getInstanceId($targetInstanceId);
         $config = $this->handler->getConfig($instanceId);
 
-        $permission = $this->handler->getPermission($instanceId);
-
-        $mode = function ($action) use ($permission) {
-            return $permission->pure($action) ? 'manual' : 'inherit';
-        };
-
-        $allGroup = UserGroup::get();
-        $permArgs = [
-            'create' => [
-                'mode' => $mode('create'),
-                'grant' => $permission['create'],
-                'title' => 'create',
-                'groups' => $allGroup,
-            ]
-        ];
+        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm($instanceId), ['create']);
 
         $skinSection = new SkinSection($this->plugin->getId(), $instanceId);
         $editorSection = new EditorSection($instanceId);
@@ -227,23 +221,16 @@ class ManagerController extends Controller
         ]);
     }
 
-    public function postSetting($targetInstanceId)
+    public function postSetting(Request $request, $targetInstanceId)
     {
         $instanceId = $this->handler->getInstanceId($targetInstanceId);
 
-        $inputs = Input::except(['redirect', '_token']);
-
-        $configInputs = $permInputs = [];
-        foreach ($inputs as $name => $value) {
-            if (substr($name, 0, strlen('create')) === 'create') {
-                $permInputs[$name] = $value;
-            } else {
-                $configInputs[$name] = $value;
-            }
-        }
+        $configInputs = array_filter($request->except(['redirect', '_token']), function ($key) {
+            return substr($key, 0, strlen('create')) !== 'create';
+        }, ARRAY_FILTER_USE_KEY);
 
         $validator = Validator::make([
-            'perPage' => Input::get('perPage')
+            'perPage' => $request->get('perPage')
         ], [
             'perPage' => 'Numeric'
         ]);
@@ -254,72 +241,33 @@ class ManagerController extends Controller
 
         $this->handler->configure($instanceId, $configInputs);
 
-        $grantInfo = [
-            'create' => $this->makeGrant($permInputs, 'create'),
-        ];
+        $this->permissionRegister($request, $this->handler->getKeyForPerm($instanceId), ['create']);
 
-        $grant = new Grant();
-        foreach (array_filter($grantInfo) as $action => $info) {
-            $grant->set($action, $info);
-        }
-
-        $this->handler->setPermission($instanceId, $grant);
-
-        if (Input::get('redirect') != null) {
-            return redirect(Input::get('redirect'));
+        if ($request->get('redirect') != null) {
+            return redirect($request->get('redirect'));
         } else {
             return redirect()->route('manage.comment.setting', $targetInstanceId);
         }
     }
 
-    private function makeGrant($inputs, $action)
-    {
-        if (array_get($inputs, $action . 'Mode') === 'inherit') {
-            return null;
-        }
-
-        return [
-            Grant::RATING_TYPE => array_get($inputs, $action . 'Rating'),
-            Grant::GROUP_TYPE => array_get($inputs, $action . 'Group') ?: [],
-            Grant::USER_TYPE => array_filter(explode(',', array_get($inputs, $action . 'User'))),
-            Grant::EXCEPT_TYPE => array_filter(explode(',', array_get($inputs, $action . 'Except'))),
-            Grant::VGROUP_TYPE => array_get($inputs, $action . 'VGroup') ?: [],
-        ];
-    }
-
     public function getGlobalSetting()
     {
         $config = $this->handler->getConfig();
-        $permission = $this->handler->getPermission();
 
-        $allGroup = UserGroup::get();
-        $permArgs = [
-            'create' => [
-                'grant' => $permission['create'],
-                'title' => 'create',
-                'groups' => $allGroup,
-            ]
-        ];
-        
+        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm(), ['create']);
+
         return XePresenter::make('global', ['config' => $config, 'permArgs' => $permArgs]);
     }
 
-    public function postGlobalSetting()
+    public function postGlobalSetting(Request $request)
     {
-        $inputs = Input::except(['_token']);
-
-        $configInputs = $permInputs = [];
-        foreach ($inputs as $name => $value) {
-            if (substr($name, 0, strlen('create')) === 'create') {
-                $permInputs[$name] = $value;
-            } else {
-                $configInputs[$name] = $value;
-            }
-        }
+        $configInputs = array_filter($request->except(['_token']), function ($key) {
+            return substr($key, 0, strlen('create')) !== 'create';
+        }, ARRAY_FILTER_USE_KEY);
 
         /** @var \Illuminate\Validation\Validator $validator */
         $validator = Validator::make(
-            ['perPage' => Input::get('perPage')],
+            ['perPage' => $request->get('perPage')],
             ['perPage' => 'Numeric']
         );
 
@@ -332,16 +280,7 @@ class ManagerController extends Controller
         try {
             $this->handler->configure(null, $configInputs);
 
-            $grantInfo = [
-                'create' => $this->makeGrant($permInputs, 'create'),
-            ];
-
-            $grant = new Grant();
-            foreach (array_filter($grantInfo) as $action => $info) {
-                $grant->set($action, $info);
-            }
-
-            $this->handler->setPermission(null, $grant);
+            $this->permissionRegister($request, $this->handler->getKeyForPerm(), ['create']);
 
             XeDB::commit();
         } catch (\Exception $e) {

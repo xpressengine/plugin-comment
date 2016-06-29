@@ -1,7 +1,16 @@
 <?php
+/**
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     LGPL-2.1
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @link        https://xpressengine.io
+ */
+
 namespace Xpressengine\Plugins\Comment;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Input;
 use XePresenter;
@@ -22,6 +31,7 @@ use Xpressengine\Plugins\Comment\Exceptions\UnknownIdentifierException;
 use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
 use XeDynamicField;
 use Gate;
+use Xpressengine\User\Models\UnknownUser;
 
 class UserController extends Controller
 {
@@ -39,6 +49,8 @@ class UserController extends Controller
         $plugin = app('xe.plugin.comment');
         $this->handler = $plugin->getHandler();
         $this->skin = XeSkin::getAssigned($plugin->getId());
+
+        XePresenter::setSkinTargetId($plugin->getId());
     }
 
     public function index()
@@ -338,7 +350,7 @@ class UserController extends Controller
         return XePresenter::makeApi($data);
     }
 
-    public function voteUser()
+    public function votedUser()
     {
         $instanceId = Input::get('instanceId');
         $id = Input::get('id');
@@ -348,9 +360,78 @@ class UserController extends Controller
         $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
         $users = $this->handler->voteUsers($comment, $option);
 
-        $content = $this->skin->setView('vote')->setData(['users' => $users])->render();
+        $users = new LengthAwarePaginator($users, count($users), 10);
 
-        return XePresenter::makeApi(['items' => $content]);
+//        $content = $this->skin->setView('voted')->setData(['users' => $users])->render();
+
+//        return XePresenter::makeApi(['items' => $content]);
+        return apiRender('voted', [
+            'users' => $users,
+            'data' => [
+                'instanceId' => $instanceId,
+                'id' => $id,
+                'option' => $option,
+            ]
+        ]);
+    }
+    
+    public function votedModal()
+    {
+        $instanceId = Input::get('instanceId');
+        $id = Input::get('id');
+        $option = Input::get('option');
+
+        $model = $this->handler->createModel();
+        $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
+        $count = $this->handler->voteUserCount($comment, $option);
+
+        return apiRender('votedModal', [
+            'count' => $count,
+            'data' => [
+                'instanceId' => $instanceId,
+                'id' => $id,
+                'option' => $option,
+            ]
+        ]);
+    }
+    
+    public function votedList()
+    {
+        $instanceId = Input::get('instanceId');
+        $id = Input::get('id');
+        $option = Input::get('option');
+        $startId = Input::get('startId');
+        $limit = Input::get('limit', 10);
+
+        $model = $this->handler->createModel();
+        $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
+        $logs = $this->handler->votedList($comment, $option, $startId, $limit);
+
+        $list = [];
+        foreach ($logs as $log) {
+            if (!$user = $log->user) {
+                $user = new UnknownUser();
+            }
+
+            $profilePage = route('member.profile', ['member' => $user->getId()]);
+            $list[] = [
+                'id' => $user->getId(),
+                'displayName' => $user->getDisplayName(),
+                'profileImage' => $user->getProfileImage(),
+                'createdAt' => (string)$log->createdAt,
+                'profilePage' => $profilePage,
+            ];
+        }
+
+        $nextStartId = 0;
+        if (count($logs) == $limit) {
+            $nextStartId = $logs->last()->id;
+        }
+
+        return XePresenter::makeApi([
+            'list' => $list,
+            'nextStartId' => $nextStartId,
+        ]);
     }
 
     public function form()

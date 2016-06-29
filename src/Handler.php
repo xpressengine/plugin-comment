@@ -1,18 +1,25 @@
 <?php
+/**
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     LGPL-2.1
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @link        https://xpressengine.io
+ */
+
 namespace Xpressengine\Plugins\Comment;
 
 use Illuminate\Session\Store as SessionStore;
 use Xpressengine\Config\ConfigManager;
 use Xpressengine\Document\DocumentHandler;
 use Xpressengine\Keygen\Keygen;
+use Xpressengine\Permission\Grant;
 use Xpressengine\Permission\PermissionHandler;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\User\Models\Guest;
 use Xpressengine\User\UserInterface;
 use Xpressengine\User\GuardInterface as Authenticator;
 use Xpressengine\Counter\Counter;
-use Xpressengine\User\Rating;
-use Xpressengine\Permission\Grant;
 use Xpressengine\Plugins\Comment\Plugin as CommentPlugin;
 
 class Handler
@@ -92,7 +99,7 @@ class Handler
 
         $this->instanceMapping($targetInstanceId, $instanceId);
 
-        $this->setPermission($instanceId, new Grant());
+        $this->permissions->register($this->getKeyForPerm($instanceId), new Grant());
     }
 
     protected function instanceMapping($targetInstanceId, $commentInstanceId)
@@ -266,7 +273,7 @@ class Handler
     {
         // todo: 휴지통 상태의 것만 삭제 가능하고 상태에 따라 다른 처리 core의 comment handler 참조
         $comment->target->delete();
-        
+
         return $this->documents->remove($comment);
     }
 
@@ -368,11 +375,28 @@ class Handler
         return $this->counter->getUsers($comment->id, $option);
     }
 
+    public function voteUserCount(Comment $comment, $option)
+    {
+        return $this->counter->getPoint($comment->id, $option);
+    }
+
     public function bindUserVote(Comment $comment)
     {
         if (!$this->auth->guest() && $log = $this->counter->getByName($comment->id, $this->auth->user())) {
             $comment->setVoteType($log->counterOption);
         }
+    }
+
+    public function votedList(Comment $comment, $option, $startId = null, $limit = 10)
+    {
+        $query = $this->counter->newModel()->where('counterName', static::COUNTER_VOTE)
+            ->where('targetId', $comment->id)->where('counterOption', $option);
+
+        if ($startId) {
+            $query->where('id', '<', $startId);
+        }
+
+        return $query->orderBy('id', 'desc')->take($limit)->get();
     }
 
     /**
@@ -405,47 +429,7 @@ class Handler
         return $this->defaultConfig;
     }
 
-    public function getDefaultPermission()
-    {
-        $grant = new Grant();
-        $grant->set('create', [
-            Grant::RATING_TYPE => Rating::MEMBER,
-            Grant::GROUP_TYPE => [],
-            Grant::USER_TYPE => [],
-            Grant::EXCEPT_TYPE => [],
-            Grant::VGROUP_TYPE => []
-        ]);
-
-        return $grant;
-    }
-
-    /**
-     * @param $instanceId
-     * @return mixed
-     */
-    public function getPermission($instanceId = null)
-    {
-        return $this->permissions->findOrNew($this->getKeyForPerm($instanceId));
-    }
-
-    /**
-     * @param $instanceId
-     * @param Grant $grant
-     */
-    public function setPermission($instanceId, Grant $grant)
-    {
-        $this->permissions->register($this->getKeyForPerm($instanceId), $grant);
-    }
-
-    /**
-     * @param $instanceId
-     */
-    public function removePermission($instanceId)
-    {
-        $this->permissions->destroy($this->getKeyForPerm($instanceId));
-    }
-    
-    public function getKeyForPerm($instanceId)
+    public function getKeyForPerm($instanceId = null)
     {
         $name = static::PLUGIN_PREFIX;
 

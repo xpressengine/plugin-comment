@@ -1,7 +1,16 @@
 <?php
+/**
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     LGPL-2.1
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @link        https://xpressengine.io
+ */
+
 namespace Xpressengine\Plugins\Comment;
 
 use Illuminate\Database\Schema\Blueprint;
+use Xpressengine\Permission\Grant;
 use Xpressengine\Plugin\AbstractPlugin;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\Translation\Translator;
@@ -10,6 +19,9 @@ use XeTrash;
 use XeSkin;
 use View;
 use Gate;
+use XeDB;
+use Schema;
+use Xpressengine\User\Rating;
 
 class Plugin extends AbstractPlugin
 {
@@ -44,15 +56,31 @@ class Plugin extends AbstractPlugin
 
         /** @var Handler $handler */
         $handler = $this->getHandler();
-        // 기본 권한
-        $handler->setPermission(null, $handler->getDefaultPermission());
+
+        $grant = new Grant();
+        $grant->set('create', [
+            Grant::RATING_TYPE => Rating::MEMBER,
+            Grant::GROUP_TYPE => [],
+            Grant::USER_TYPE => [],
+            Grant::EXCEPT_TYPE => [],
+            Grant::VGROUP_TYPE => []
+        ]);
+        $grant->set('download', [
+            Grant::RATING_TYPE => Rating::MEMBER,
+            Grant::GROUP_TYPE => [],
+            Grant::USER_TYPE => [],
+            Grant::EXCEPT_TYPE => [],
+            Grant::VGROUP_TYPE => []
+        ]);
+        app('xe.permission')->register($handler->getKeyForPerm(), $grant);
         // 기본 설정
         \XeConfig::set('comment', $handler->getDefaultConfig());
     }
 
     private function migrate()
     {
-        \Schema::create($this->targetTable, function (Blueprint $table) {
+        $schema = Schema::setConnection(XeDB::connection('document')->master());
+        $schema->create($this->targetTable, function (Blueprint $table) {
             $table->engine = "InnoDB";
 
             $table->increments('id');
@@ -71,7 +99,8 @@ class Plugin extends AbstractPlugin
      */
     public function checkInstalled($installedVersion = null)
     {
-        return \Schema::hasTable($this->targetTable);
+        $schema = Schema::setConnection(XeDB::connection('document')->master());
+        return $schema->hasTable($this->targetTable);
     }
 
     public function boot()
@@ -143,7 +172,10 @@ class Plugin extends AbstractPlugin
             Route::get('voteInfo', 'UserController@voteInfo');
             Route::post('voteOn', 'UserController@voteOn');
             Route::post('voteOff', 'UserController@voteOff');
-            Route::get('voteUser', 'UserController@voteUser');
+
+            Route::get('votedUser', 'UserController@votedUser');
+            Route::get('votedModal', ['as' => 'plugin.comment.voted.modal', 'uses' => 'UserController@votedModal']);
+            Route::get('votedList', ['as' => 'plugin.comment.voted.list', 'uses' => 'UserController@votedList']);
         }, ['namespace' => __NAMESPACE__]);
     }
 
@@ -179,6 +211,11 @@ class Plugin extends AbstractPlugin
     public function getSettingsURI()
     {
         return route('manage.comment.setting.global');
+    }
+
+    public function getInstanceSettingURI($instanceId)
+    {
+        return route('manage.comment.setting', $instanceId);
     }
 
     public function getHandler()

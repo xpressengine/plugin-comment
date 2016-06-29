@@ -1,8 +1,16 @@
 <?php
+/**
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     LGPL-2.1
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @link        https://xpressengine.io
+ */
+
 namespace Xpressengine\Plugins\Comment\Models;
 
 use Xpressengine\Database\Eloquent\DynamicModel;
-use Xpressengine\User\Models\Guest;
+use Xpressengine\User\Models\UnknownUser;
 use Xpressengine\User\Models\User;
 use Xpressengine\User\UserInterface;
 
@@ -17,6 +25,8 @@ use Xpressengine\User\UserInterface;
 class Target extends DynamicModel
 {
     protected $table = 'comment_target';
+
+    protected $connection = 'document';
 
     /**
      * The attributes that are mass assignable.
@@ -50,7 +60,7 @@ class Target extends DynamicModel
     public function getAuthor()
     {
         if (!$author = $this->getRelationValue('author')) {
-            $author = new Guest();
+            $author = new UnknownUser();
         }
 
         return $author;

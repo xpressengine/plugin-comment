@@ -1,10 +1,18 @@
 <?php
+/**
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     LGPL-2.1
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @link        https://xpressengine.io
+ */
+
 namespace Xpressengine\Plugins\Comment\Models;
 
 use Illuminate\Database\Eloquent\Collection;
 use Xpressengine\Document\Models\Document;
 use Xpressengine\Storage\File;
-use Xpressengine\User\Models\Guest;
+use Xpressengine\User\Models\UnknownUser;
 use Xpressengine\User\Models\User;
 use Xpressengine\User\UserInterface;
 
@@ -39,7 +47,7 @@ class Comment extends Document
     public function getAuthor()
     {
         if (!$author = $this->getRelationValue('author')) {
-            $author = new Guest();
+            $author = new UnknownUser();
         }
 
         return $author;
