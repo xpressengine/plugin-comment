@@ -69,7 +69,7 @@ class UserController extends Controller
         $model = $this->handler->createModel();
         $query = $model->newQuery()->whereHas('target', function ($query) use ($targetId) {
             $query->where('targetId', $targetId);
-        })->where('approved', 'approved')->where('display', '!=', 'hidden');
+        })->where('approved', Comment::APPROVED_APPROVED)->where('display', '!=', Comment::DISPLAY_HIDDEN);
 
         // 댓글 총 수
         $totalCount = $query->count();
