@@ -19,7 +19,7 @@
     var jqXHRError = function (jqXHR) {
         var responseText = $.parseJSON(jqXHR.responseText);
         var errorMessage = responseText.message;
-        XE.toast('warning', errorMessage ? errorMessage : responseText.exception);
+        XE.toast('xe-warning', errorMessage ? errorMessage : responseText.exception);
     };
 
     var url = function (relativePath) {
