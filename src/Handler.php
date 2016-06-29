@@ -90,7 +90,7 @@ class Handler
             throw new \RuntimeException(sprintf('Already exists comment instance for "%s"', $targetInstanceId));
         }
 
-        $instanceId = $this->keygen->generate();
+        $instanceId = $this->createInstanceId();
         $this->documents->createInstance($instanceId, ['division' => $division]);
 
         $this->configs->set($this->getKeyForConfig($instanceId), [
@@ -434,6 +434,23 @@ class Handler
         $name = static::PLUGIN_PREFIX;
 
         return $instanceId === null ? $name : $name . '.' . $instanceId;
+    }
+
+    protected function createInstanceId()
+    {
+        $map = $this->getInstanceMap();
+        $try = 0;
+
+        do {
+            if ($try > 20) {
+                throw new \Exception;
+            }
+            $instanceId = substr(str_replace('-', '', $this->keygen->generate()), 0, 12);
+
+            $try++;
+        } while(array_search($instanceId, $map) !== false);
+
+        return $instanceId;
     }
 
     public function createModel()
