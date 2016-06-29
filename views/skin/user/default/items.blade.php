@@ -32,7 +32,7 @@
             </div>
             <div class="xe_content __xe_comment_edit_toggle">
                 @can('read', $item)
-                {!! compile($item->instanceId, $item->content, $item->id) !!}
+                {!! compile($item->instanceId, $item->content, $item->format === Xpressengine\Plugins\Comment\Models\Comment::FORMAT_HTML, $item->id) !!}
                 @else
                     @if ($item->display == 'hidden' && $item->status != 'public')
                         {{ xe_trans('comment::RemoveContent') }}

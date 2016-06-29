@@ -159,6 +159,10 @@ class UserController extends Controller
             $inputs['certifyKey'] = Hash::make($inputs['certifyKey']);
         }
 
+        /** @var \Xpressengine\Editor\AbstractEditor $editor */
+        $editor = XeEditor::get($instanceId);
+        $inputs['format'] = $editor->htmlable() ? Comment::FORMAT_HTML : Comment::FORMAT_NONE;
+
         /** @var Comment $comment */
         $comment = $this->handler->create($inputs);
 
@@ -225,6 +229,11 @@ class UserController extends Controller
         if (isset($inputs['certifyKey'])) {
             $inputs['certifyKey'] = Hash::make($inputs['certifyKey']);
         }
+
+        /** @var \Xpressengine\Editor\AbstractEditor $editor */
+        $editor = XeEditor::get($instanceId);
+        $inputs['format'] = $editor->htmlable() ? Comment::FORMAT_HTML : Comment::FORMAT_NONE;
+        
         $comment->fill(array_filter($inputs));
 
         $comment = $this->handler->put($comment);
