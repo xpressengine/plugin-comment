@@ -687,7 +687,7 @@
                         self.callback(json);
                         $(self._getForm()).trigger('reset');
                         if (self.editor && self.getMode() == 'create') {
-                            self.editor.setContents('');
+                            self.editor.reset();
                         }
                     }
                 }).always(function () {
