@@ -642,7 +642,7 @@ class UserController extends Controller
             throw $e;
         }
 
-        $file = $storage->upload($uploadedFile, 'attached/comment');
+        $file = $storage->upload($uploadedFile, 'public/plugin/comment');
 
         /** @var \Xpressengine\Media\MediaManager $mediaManager */
         $mediaManager = app('xe.media');
