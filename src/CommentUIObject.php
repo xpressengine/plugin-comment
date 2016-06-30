@@ -75,8 +75,6 @@ class CommentUIObject extends AbstractUIObject
         $editor = $config->get('useWysiwyg') ? XeEditor::get($instanceId) : null;
 
         if ($editor) {
-            XeFrontend::js('assets/core/common/js/xe.editor.core.js')->load();
-
             $editor->setArguments(false);
 
             $props['config']['editor'] = [
