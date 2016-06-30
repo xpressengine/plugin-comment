@@ -133,6 +133,22 @@ class Plugin extends AbstractPlugin
                 return $this;
             }
         );
+
+        $this->createInstanceIntercept();
+    }
+
+    private function createInstanceIntercept()
+    {
+        intercept(
+            Handler::class . '@createInstance',
+            static::getId() . '::comment.createInstance',
+            function ($func, $targetInstanceId, $division = false) {
+                $func($targetInstanceId, $division);
+
+                $instanceId = $this->getHandler()->getInstanceId($targetInstanceId);
+                app('xe.editor')->setInstance($instanceId, 'editor/ckeditor@ckEditor');
+            }
+        );
     }
 
     private function setRoutes()
