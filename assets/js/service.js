@@ -560,16 +560,6 @@
                     $('.__xe_comment_voters.__xe_' + type.current, self.dom).show();
                 });
             });
-
-            $('.__xe_comment_btn_toggle_file', this.dom).click(function (e) {
-                e.preventDefault();
-
-                $(this).toggleClass('on');
-
-                $(this).hasClass('on') ?
-                    $('.__xe_comment_files', self.dom).show() :
-                    $('.__xe_comment_files', self.dom).hide();
-            });
         },
         _currentVoteType: function (elem) {
             if ($(elem).hasClass('__xe_assent')) {

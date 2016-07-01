@@ -1,6 +1,6 @@
 <div class="comment_file_list">
     <!-- [D] 클릭시 클래스 on 적용 -->
-    <a href="#" class="btn_file __xe_comment_btn_toggle_file">첨부파일 <strong class="file_num">{{ count($files) }}</strong></a>
+    <a href="#" class="btn_file on">첨부파일 <strong class="file_num">{{ count($files) }}</strong></a>
     <ul>
         @foreach($files as $file)
             <li>

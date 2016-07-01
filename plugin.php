@@ -10,6 +10,7 @@
 namespace Xpressengine\Plugins\Comment;
 
 use Illuminate\Database\Schema\Blueprint;
+use Xpressengine\Editor\EditorHandler;
 use Xpressengine\Permission\Grant;
 use Xpressengine\Plugin\AbstractPlugin;
 use Xpressengine\Plugins\Comment\Models\Comment;
@@ -22,6 +23,7 @@ use Gate;
 use XeDB;
 use XeConfig;
 use XeToggleMenu;
+use XeEditor;
 use Schema;
 use Xpressengine\User\Rating;
 
@@ -146,7 +148,9 @@ class Plugin extends AbstractPlugin
                 $func($targetInstanceId, $division);
 
                 $instanceId = $this->getHandler()->getInstanceId($targetInstanceId);
-                app('xe.editor')->setInstance($instanceId, 'editor/ckeditor@ckEditor');
+                XeEditor::setInstance($instanceId, 'editor/ckeditor@ckEditor');
+
+                XeSkin::assign([EditorHandler::NAME, $instanceId], XeSkin::get('editor/skin/comment@comment'));
             }
         );
     }
