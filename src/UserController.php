@@ -233,7 +233,7 @@ class UserController extends Controller
         /** @var \Xpressengine\Editor\AbstractEditor $editor */
         $editor = XeEditor::get($instanceId);
         $inputs['format'] = $editor->htmlable() ? Comment::FORMAT_HTML : Comment::FORMAT_NONE;
-        
+
         $comment->fill(array_filter($inputs));
 
         $comment = $this->handler->put($comment);
@@ -371,9 +371,6 @@ class UserController extends Controller
 
         $users = new LengthAwarePaginator($users, count($users), 10);
 
-//        $content = $this->skin->setView('voted')->setData(['users' => $users])->render();
-
-//        return XePresenter::makeApi(['items' => $content]);
         return apiRender('voted', [
             'users' => $users,
             'data' => [
