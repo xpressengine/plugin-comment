@@ -550,18 +550,7 @@
                     return;
                 }
 
-                // $.ajax({
-                //     url: url('/votedUser'),
-                //     dataType: 'json',
-                //     data: {instanceId: self.getInstanceId(), id: self.getId(), option: type.current},
-                //     success: function (json) {
-                //         $('.__xe_comment_voters.__xe_' + type.current, self.dom)
-                //             .html(json.items)
-                //             .show();
-                //     }
-                // });
-
-                XE.page(url('/votedUser'), '.__xe_comment_voters.__xe_' + type.current, {
+                XE.page(url('/votedUser'), $('.__xe_comment_voters.__xe_' + type.current, self.dom), {
                     data: {
                         instanceId: self.getInstanceId(),
                         id: self.getId(),
