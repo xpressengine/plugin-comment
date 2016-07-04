@@ -374,7 +374,7 @@
 }
 .comment_entity_body img {
     max-width: 100%;
-    /*max-height: 180px;*/
+    max-height: 180px;
     height: auto;
 }
 .comment_entity_body pre code {
@@ -635,6 +635,7 @@
     color: #696e7a;
 }
 .comment_action_area {
+    display: none;
     clear: both;
 }
 .comment_action_area .comment_form {
@@ -656,30 +657,19 @@
 .comment_action_area.modify {
     clear: initial;
 }
-.comment_file_list {
-    margin: -7px 0 13px;
+
+.comment_action .bd_file_list{
+    margin-bottom: 13px;
 }
-.comment_file_list .btn_file {
-    color: #696e7a;
-    font-size: 12px;
+
+.comment_action .bd_file_list .bd_btn_file{
+    font-size: 14px;
 }
-.comment_file_list .btn_file.on ~ ul {
-    display: block;
+
+.comment_action .bd_file_list .bd_btn_file i{
+    font-size: 18px;
 }
-.comment_file_list ul {
-    display: none;
-    list-style: none;
-}
-.comment_file_list li {
-    margin-top: 5px;
-    font-size: 12px;
-}
-.comment_file_list li a {
-    color: #bebebe;
-}
-.comment_file_list li a:hover {
-    color: #696e7a;
-}
+
 .comment_action .vote_list {
     display: none;
     clear: both;
