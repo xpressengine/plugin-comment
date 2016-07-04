@@ -138,13 +138,13 @@
 
         var actions = {
             approve: function ($f) {
-                $('<input>').attr('type', 'hidden').attr('name', 'approved').val('approved').appendTo($f);
+                $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Xpressengine\Plugins\Comment\Models\Comment::APPROVED_APPROVED }}).appendTo($f);
 
                 $f.attr('action', '{{ route('manage.comment.approve') }}');
                 $f.submit();
             },
             reject: function ($f) {
-                $('<input>').attr('type', 'hidden').attr('name', 'approved').val('rejected').appendTo($f);
+                $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Xpressengine\Plugins\Comment\Models\Comment::APPROVED_REJECTED }}).appendTo($f);
 
                 $f.attr('action', '{{ route('manage.comment.approve') }}');
                 $f.submit();

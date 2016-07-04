@@ -23,6 +23,7 @@ use XeConfig;
 use XeDB;
 use Xpressengine\Module\ModuleHandler;
 use Xpressengine\Permission\PermissionSupport;
+use Xpressengine\Plugins\Comment\Models\Comment;
 
 class ManagerController extends Controller
 {
@@ -60,7 +61,7 @@ class ManagerController extends Controller
         $model = $this->handler->createModel();
         $query = $model->newQuery()
             ->whereIn('instanceId', $this->getInstances())
-            ->where('status', 'public');
+            ->where('status', Comment::STATUS_PUBLIC);
 
         if ($options = Input::get('options')) {
             list($searchField, $searchValue) = explode('|', $options);
@@ -138,7 +139,7 @@ class ManagerController extends Controller
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
             ->whereIn('instanceId', $this->getInstances())
-            ->where('status', 'trash')->paginate();
+            ->where('status', Comment::STATUS_TRASH)->paginate();
 
         $map = $this->handler->getInstanceMap();
         $menuItems = $menus->getItemIn(array_keys($map), 'route')->getDictionary();
