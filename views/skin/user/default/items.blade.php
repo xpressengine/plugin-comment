@@ -32,7 +32,7 @@
             </div>
             <div class="xe_content __xe_comment_edit_toggle">
                 @can('read', $item)
-                {!! uio('contentCompiler', ['content' => $item->content]) !!}
+                {!! compile($item->instanceId, $item->content, $item->format === Xpressengine\Plugins\Comment\Models\Comment::FORMAT_HTML, $item->id) !!}
                 @else
                     @if ($item->display == 'hidden' && $item->status != 'public')
                         {{ xe_trans('comment::RemoveContent') }}
@@ -52,25 +52,6 @@
                 </p>
             </div>
             <div class="comment_action __xe_comment_edit_toggle">
-                @if(count($item->files) > 0)
-                <div class="comment_file_list">
-                    <!-- [D] 클릭시 클래스 on 적용 -->
-                    <a href="#" class="btn_file __xe_comment_btn_toggle_file">첨부파일 <strong class="file_num">{{ count($item->files) }}</strong></a>
-                    <ul>
-                        @foreach($item->files as $file)
-                        <li>
-                            @can('download', $instance)
-                            <a href="{{ route('plugin.comment.download', ['instanceId' => $item->instanceId, 'fileId' => $file->id]) }}">
-                            @else
-                            <a href="#">
-                            @endcan
-                                <i class="xi-download-disk"></i> {{ $file->clientname }} <span class="file_size">({{ bytes($file->size) }})</span>
-                            </a>
-                        </li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
                 @if($config->get('useAssent') === true)
                 <div class="vote">
                     <!-- [D] 클릭시 클래스 on 적용 -->
@@ -98,8 +79,8 @@
                         <!-- [D] 클릭시 클래스 on 적용 및 comment_action_area 활성화 -->
                 <a href="#" class="btn_share reply __xe_comment_btn_reply"><i class="xi-reply"></i> {{ xe_trans('comment::reply') }}</a>
                 @endcan
-                <div class="vote_list">
-                    <ul class="__xe_comment_voters __xe_assent __xe_dissent" style="display: none;"></ul>
+                <div class="vote_list __xe_comment_voters __xe_assent __xe_dissent">
+                    {{--<ul class="__xe_comment_voters __xe_assent __xe_dissent" style="display: none;"></ul>--}}
                 </div>
             </div>
             <div class="__xe_comment_edit_form __xe_comment_reply_form __xe_comment_certify"></div>

@@ -1,25 +1,3 @@
-{{ XeFrontend::css(app('xe.plugin.comment')->assetPath() . '/css/default.css')->load() }}
-{{ XeFrontend::css('/assets/core/common/css/temporary.css')->load() }}
-
-{{ XeFrontend::js('/assets/core/common/js/toggleMenu.js')->appendTo('head')->load() }}
-
-@if($config->get('useWysiwyg'))
-{{ XeFrontend::css('/plugins/ckeditor/assets/ckeditor/xe3.css')->load() }}
-
-{{ XeFrontend::js([
-    '/assets/vendor/jQuery-File-Upload/js/vendor/jquery.ui.widget.js',
-    '/assets/vendor/jQuery-File-Upload/js/jquery.iframe-transport.js',
-    '/assets/vendor/jQuery-File-Upload/js/jquery.fileupload.js',
-    '/plugins/ckeditor/assets/ckeditor/ckeditor.js',
-    '/plugins/ckeditor/assets/ckeditor/styles.js',
-    '/plugins/ckeditor/assets/ckeditor/xe3.js',
-    '/plugins/ckeditor/assets/plugins/append.js'
-    ])->appendTo('body')->load() }}
-@endif
-
-{{ XeFrontend::translation(['xe::autoSave', 'xe::tempSave']) }}
-
-
 <div class="comment_header">
     <p class="total_count"><span class="total_count_num __xe_comment_cnt">0</span>{{ xe_trans('xe::ea') }} {{ xe_trans('xe::comment') }}</p>
 </div>

@@ -23,21 +23,6 @@ return [
                 'ko' => '기본설정',
                 'en' => 'Basic',
             ],
-
-            'skin' => [
-                'ko' => '스킨설정',
-                'en' => 'Skin',
-            ],
-
-            'dynamicField' => [
-                'ko' => 'Dynamic Field',
-                'en' => 'Dynamic Field',
-            ],
-
-            'toggleMenu' => [
-                'ko' => '펼침 메뉴',
-                'en' => 'Toggle menu',
-            ]
         ],
 
         'division' => [

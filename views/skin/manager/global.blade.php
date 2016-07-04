@@ -152,17 +152,6 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <h4>{{ xe_trans('comment::manage.permission.download') }}</h4>
-                                <div class="well">
-                                    {!! uio('permission', $permArgs['download']) !!}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
                 <div class="panel-footer">
@@ -176,12 +165,3 @@
     </div>
 
 </div>
-
-<script type="text/javascript">
-    $(function () {
-//        $('input[name=useWysiwyg]').change(function () {
-//            $('#commentEditor').toggleClass('hidden');
-//        });
-
-    });
-</script>

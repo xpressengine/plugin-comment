@@ -7,7 +7,7 @@
 
     <div class="comment_form_editor">
         <div class="comment_form_ckeditor __xe_content __xe_temp_container">
-            <textarea rows="3" name="content" placeholder="Write your opinion to here"></textarea>
+            <textarea name="content" placeholder="Write your opinion to here"></textarea>
         </div>
 
         <p>

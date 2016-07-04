@@ -10,6 +10,7 @@
 namespace Xpressengine\Plugins\Comment;
 
 use Illuminate\Database\Schema\Blueprint;
+use Xpressengine\Editor\EditorHandler;
 use Xpressengine\Permission\Grant;
 use Xpressengine\Plugin\AbstractPlugin;
 use Xpressengine\Plugins\Comment\Models\Comment;
@@ -20,6 +21,8 @@ use XeSkin;
 use View;
 use Gate;
 use XeDB;
+use XeConfig;
+use XeEditor;
 use Schema;
 use Xpressengine\User\Rating;
 
@@ -28,6 +31,18 @@ class Plugin extends AbstractPlugin
     private $targetTable = 'comment_target';
 
     private $handler;
+    /**
+     * activate
+     *
+     * @param null $installedVersion installed version
+     * @return void
+     */
+    public function activate($installedVersion = null)
+    {
+        if (XeConfig::get('comment_map') === null) {
+            XeConfig::set('comment_map', []);
+        }
+    }
 
     /**
      * @return void
@@ -44,7 +59,7 @@ class Plugin extends AbstractPlugin
 
         /** @var Handler $handler */
         $handler = $this->getHandler();
-        // 기본 권한
+
         $grant = new Grant();
         $grant->set('create', [
             Grant::RATING_TYPE => Rating::MEMBER,
@@ -62,10 +77,7 @@ class Plugin extends AbstractPlugin
         ]);
         app('xe.permission')->register($handler->getKeyForPerm(), $grant);
         // 기본 설정
-        \XeConfig::set('comment', $handler->getDefaultConfig());
-        if (\XeConfig::get('comment_map') === null) {
-            \XeConfig::set('comment_map', []);
-        }
+        XeConfig::set('comment', $handler->getDefaultConfig());
     }
 
     private function migrate()
@@ -118,6 +130,24 @@ class Plugin extends AbstractPlugin
                 return $this;
             }
         );
+
+        $this->createInstanceIntercept();
+    }
+
+    private function createInstanceIntercept()
+    {
+        intercept(
+            Handler::class . '@createInstance',
+            static::getId() . '::comment.createInstance',
+            function ($func, $targetInstanceId, $division = false) {
+                $func($targetInstanceId, $division);
+
+                $instanceId = $this->getHandler()->getInstanceId($targetInstanceId);
+                XeEditor::setInstance($instanceId, 'editor/ckeditor@ckEditor');
+
+                XeSkin::assign([EditorHandler::NAME, $instanceId], XeSkin::get('editor/skin/comment@comment'));
+            }
+        );
     }
 
     private function setRoutes()
@@ -163,17 +193,10 @@ class Plugin extends AbstractPlugin
             Route::get('voteInfo', 'UserController@voteInfo');
             Route::post('voteOn', 'UserController@voteOn');
             Route::post('voteOff', 'UserController@voteOff');
-            Route::get('voteUser', 'UserController@voteUser');
 
-
-            Route::post('file/upload', 'UserController@fileUpload');
-            Route::get('file/source/{id}', 'UserController@fileSource');
-            Route::get('file/download/{instanceId}/{fileId}', [
-                'as' => 'plugin.comment.download',
-                'uses' => 'UserController@fileDownload'
-            ]);
-            Route::get('suggestion/hashTag', 'UserController@suggestionHashTag');
-            Route::get('suggestion/mention', 'UserController@suggestionMention');
+            Route::get('votedUser', 'UserController@votedUser');
+            Route::get('votedModal', ['as' => 'plugin.comment.voted.modal', 'uses' => 'UserController@votedModal']);
+            Route::get('votedList', ['as' => 'plugin.comment.voted.list', 'uses' => 'UserController@votedList']);
         }, ['namespace' => __NAMESPACE__]);
     }
 

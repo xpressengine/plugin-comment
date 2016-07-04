@@ -10,7 +10,7 @@
 namespace Xpressengine\Plugins\Comment;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Database\QueryException;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Input;
 use XePresenter;
@@ -21,18 +21,17 @@ use XeDB;
 use Counter;
 use XeSkin;
 use XeStorage;
-use Xpressengine\Media\Models\Image;
+use XeEditor;
 use Xpressengine\Permission\Instance;
 use Xpressengine\Plugins\Comment\Exceptions\BadRequestException;
 use Xpressengine\Plugins\Comment\Models\Comment;
-use Xpressengine\Storage\File;
 use Xpressengine\Support\Exceptions\AccessDeniedHttpException;
 use Xpressengine\Plugins\Comment\Exceptions\NotMatchCertifyKeyException;
 use Xpressengine\Plugins\Comment\Exceptions\UnknownIdentifierException;
 use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
 use XeDynamicField;
 use Gate;
-use Xpressengine\User\Models\User;
+use Xpressengine\User\Models\UnknownUser;
 
 class UserController extends Controller
 {
@@ -50,6 +49,8 @@ class UserController extends Controller
         $plugin = app('xe.plugin.comment');
         $this->handler = $plugin->getHandler();
         $this->skin = XeSkin::getAssigned($plugin->getId());
+
+        XePresenter::setSkinTargetId($plugin->getId());
     }
 
     public function index()
@@ -68,7 +69,7 @@ class UserController extends Controller
         $model = $this->handler->createModel();
         $query = $model->newQuery()->whereHas('target', function ($query) use ($targetId) {
             $query->where('targetId', $targetId);
-        })->where('approved', 'approved')->where('display', '!=', 'hidden');
+        })->where('approved', Comment::APPROVED_APPROVED)->where('display', '!=', Comment::DISPLAY_HIDDEN);
 
         // 댓글 총 수
         $totalCount = $query->count();
@@ -87,7 +88,7 @@ class UserController extends Controller
             });
         }
         $query->orderBy('head', 'desc')->orderBy('reply', $direction)->take($take + 1);
-        $comments = $query->with('target.author', 'files')->get();
+        $comments = $query->with('target.author')->get();
         foreach ($comments as $comment) {
             $this->handler->bindUserVote($comment);
         }
@@ -127,9 +128,6 @@ class UserController extends Controller
         $originInput = Input::originAll();
         $inputs['content'] = $originInput['content'];
 
-        $fileIds = array_only($inputs, '_files');
-        $inputs = array_except($inputs, ['_files']);
-
         if (Gate::denies('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             throw new AccessDeniedHttpException;
         }
@@ -161,23 +159,22 @@ class UserController extends Controller
             $inputs['certifyKey'] = Hash::make($inputs['certifyKey']);
         }
 
+        /** @var \Xpressengine\Editor\AbstractEditor $editor */
+        $editor = XeEditor::get($instanceId);
+        $inputs['format'] = $editor->htmlable() ? Comment::FORMAT_HTML : Comment::FORMAT_NONE;
+
         /** @var Comment $comment */
         $comment = $this->handler->create($inputs);
-        $files = File::whereIn('id', $fileIds)->get();
-        foreach ($files as $file) {
-            XeStorage::bind($comment->getKey(), $file);
-        }
+
+        XeEditor::terminate($instanceId, $comment->getKey(), $inputs);
 
         $config = $this->handler->getConfig($instanceId);
-
         $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
-
-        $instance = new Instance($this->handler->getKeyForPerm($instanceId));
 
         $content = $this->skin->setView('items')->setData([
             'items' => [$comment],
             'config' => $config,
-            'instance' => $instance,
+            'instance' => new Instance($this->handler->getKeyForPerm($instanceId)),
             'fieldTypes' => $fieldTypes,
         ])->render();
 
@@ -202,10 +199,8 @@ class UserController extends Controller
             'content' => 'Required|Min:4',
         ];
 
-        $fileIds = array_only($inputs, '_files');
-        $inputs = array_except($inputs, ['_files']);
-
         $model = $this->handler->createModel();
+        /** @var Comment $comment */
         if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
             throw new UnknownIdentifierException;
         }
@@ -221,7 +216,6 @@ class UserController extends Controller
         $validator = Validator::make($inputs, $rules);
 
         if ($validator->fails()) {
-            // todo: validation lang 과 translation lang 호환 처리
             $e = new InvalidArgumentException;
             $e->setMessage($validator->errors()->first());
 
@@ -232,47 +226,28 @@ class UserController extends Controller
             throw new AccessDeniedHttpException;
         }
 
-        foreach ($inputs as $name => $value) {
-            if (empty($value)) {
-                continue;
-            }
-
-            if ($name == 'certifyKey') {
-                $value = Hash::make($value);
-            }
-
-            $comment->{$name} = $value;
+        if (isset($inputs['certifyKey'])) {
+            $inputs['certifyKey'] = Hash::make($inputs['certifyKey']);
         }
+
+        /** @var \Xpressengine\Editor\AbstractEditor $editor */
+        $editor = XeEditor::get($instanceId);
+        $inputs['format'] = $editor->htmlable() ? Comment::FORMAT_HTML : Comment::FORMAT_NONE;
+
+        $comment->fill(array_filter($inputs));
 
         $comment = $this->handler->put($comment);
         $this->handler->bindUserVote($comment);
 
-        $newFiles = File::whereIn('id', $fileIds)->get();
-        $removes = $comment->files->diff($newFiles);
-        foreach ($removes as $file) {
-            XeStorage::unBind($comment->getKey(), $file, true);
-        }
-        foreach ($newFiles as $file) {
-            try {
-                XeStorage::bind($comment->getKey(), $file);
-            } catch (QueryException $e) {
-                if ($e->getCode() != "23000") {
-                    throw $e;
-                }
-            }
-        }
-        unset($comment->files);
+        XeEditor::terminate($instanceId, $comment->getKey(), $inputs);
 
         $config = $this->handler->getConfig($instanceId);
-
         $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
-
-        $instance = new Instance($this->handler->getKeyForPerm($instanceId));
 
         $content = $this->skin->setView('items')->setData([
             'items' => [$comment],
             'config' => $config,
-            'instance' => $instance,
+            'instance' => new Instance($this->handler->getKeyForPerm($instanceId)),
             'fieldTypes' => $fieldTypes,
         ])->render();
 
@@ -384,7 +359,7 @@ class UserController extends Controller
         return XePresenter::makeApi($data);
     }
 
-    public function voteUser()
+    public function votedUser()
     {
         $instanceId = Input::get('instanceId');
         $id = Input::get('id');
@@ -394,9 +369,75 @@ class UserController extends Controller
         $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
         $users = $this->handler->voteUsers($comment, $option);
 
-        $content = $this->skin->setView('vote')->setData(['users' => $users])->render();
+        $users = new LengthAwarePaginator($users, count($users), 10);
 
-        return XePresenter::makeApi(['items' => $content]);
+        return apiRender('voted', [
+            'users' => $users,
+            'data' => [
+                'instanceId' => $instanceId,
+                'id' => $id,
+                'option' => $option,
+            ]
+        ]);
+    }
+    
+    public function votedModal()
+    {
+        $instanceId = Input::get('instanceId');
+        $id = Input::get('id');
+        $option = Input::get('option');
+
+        $model = $this->handler->createModel();
+        $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
+        $count = $this->handler->voteUserCount($comment, $option);
+
+        return apiRender('votedModal', [
+            'count' => $count,
+            'data' => [
+                'instanceId' => $instanceId,
+                'id' => $id,
+                'option' => $option,
+            ]
+        ]);
+    }
+    
+    public function votedList()
+    {
+        $instanceId = Input::get('instanceId');
+        $id = Input::get('id');
+        $option = Input::get('option');
+        $startId = Input::get('startId');
+        $limit = Input::get('limit', 10);
+
+        $model = $this->handler->createModel();
+        $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
+        $logs = $this->handler->votedList($comment, $option, $startId, $limit);
+
+        $list = [];
+        foreach ($logs as $log) {
+            if (!$user = $log->user) {
+                $user = new UnknownUser();
+            }
+
+            $profilePage = route('member.profile', ['member' => $user->getId()]);
+            $list[] = [
+                'id' => $user->getId(),
+                'displayName' => $user->getDisplayName(),
+                'profileImage' => $user->getProfileImage(),
+                'createdAt' => (string)$log->createdAt,
+                'profilePage' => $profilePage,
+            ];
+        }
+
+        $nextStartId = 0;
+        if (count($logs) == $limit) {
+            $nextStartId = $logs->last()->id;
+        }
+
+        return XePresenter::makeApi([
+            'list' => $list,
+            'nextStartId' => $nextStartId,
+        ]);
     }
 
     public function form()
@@ -466,7 +507,7 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return XePresenter::makeApi(['mode' => 'edit', 'html' => $content]);
+        return XePresenter::makeApi(['mode' => 'edit', 'html' => $content, 'etc' => ['files' => \XeEditor::getFiles($comment->getKey())]]);
     }
 
     protected function getReplyForm()
@@ -548,118 +589,5 @@ class UserController extends Controller
         }
 
         throw new BadRequestException;
-    }
-
-    public function fileUpload()
-    {
-        /** @var \Xpressengine\Storage\Storage $storage */
-        $storage = app('xe.storage');
-
-        $uploadedFile = null;
-        if (Input::file('file') !== null) {
-            $uploadedFile = Input::file('file');
-        } elseif (Input::file('image') !== null) {
-            $uploadedFile = Input::file('image');
-        }
-
-        if ($uploadedFile === null) {
-            $e = new InvalidArgumentException;
-            $e->setMessage(xe_trans('comment_service::Require', ['attribute' => 'file']));
-
-            throw $e;
-        }
-
-        $file = $storage->upload($uploadedFile, 'public/plugin/comment');
-
-        /** @var \Xpressengine\Media\MediaManager $mediaManager */
-        $mediaManager = app('xe.media');
-        $thumbnails = null;
-        $media = null;
-        if ($mediaManager->is($file) === true) {
-            $media = $mediaManager->make($file);
-            $thumbnails = $mediaManager->createThumbnails($media, 'spill');
-        }
-
-        return XePresenter::makeApi([
-            'file' => $file,
-            'media' => $media,
-            'thumbnails' => $thumbnails,
-        ]);
-    }
-
-    public function fileSource($id)
-    {
-        // todo: authorization 필요 여부 검토
-
-        $file = File::find($id);
-
-        /** @var \Xpressengine\Media\MediaManager $mediaManager */
-        $mediaManager = app('xe.media');
-        if ($mediaManager->is($file) === true) {
-            $dimension = 'L';
-            if (app('request')->isMobile() === true) {
-                $dimension = 'M';
-            }
-
-            $image = Image::getThumbnail($mediaManager->make($file), 'spill', $dimension);
-
-            header('Content-type: ' . $image->mime);
-
-            echo $image->getContent();
-        }
-    }
-
-    public function fileDownload($instanceId, $id)
-    {
-        if (Gate::denies('download', new Instance($this->handler->getKeyForPerm($instanceId)))) {
-            throw new AccessDeniedHttpException;
-        }
-
-        /** @var \Xpressengine\Storage\Storage $storage */
-        $storage = app('xe.storage');
-        $file = File::find($id);
-
-        $storage->download($file);
-    }
-
-    public function suggestionHashTag()
-    {
-        $string = Input::get('string');
-
-        if (empty($string) === true) {
-            return XePresenter::makeApi([]);
-        }
-
-        /** @var \Xpressengine\Tag\TagHandler $tagHandler */
-        $tagHandler = app('xe.tag');
-        $tags = $tagHandler->similar($string);
-
-        $suggestions = [];
-        foreach ($tags as $tag) {
-            $suggestions[] = [
-                'id' => $tag->id,
-                'word' => $tag->word,
-            ];
-        }
-
-        return XePresenter::makeApi($suggestions);
-    }
-
-    public function suggestionMention()
-    {
-        $string = Input::get('string');
-
-        /** @var User[] $users */
-        $users = User::where('displayName', 'like', $string . '%')->get();
-
-        $suggestions = [];
-        foreach ($users as $user) {
-            $suggestions[] = [
-                'id' => $user->getId(),
-                'displayName' => $user->getDisplayName(),
-                'profileImage' => $user->getProfileImage(),
-            ];
-        }
-        return XePresenter::makeApi($suggestions);
     }
 }

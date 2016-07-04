@@ -15,6 +15,7 @@ use Xpressengine\UIObject\AbstractUIObject;
 use View;
 use XeFrontend;
 use XeSkin;
+use XeEditor;
 use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
 
 /**
@@ -57,18 +58,59 @@ class CommentUIObject extends AbstractUIObject
 
         $config = $handler->getConfig($instanceId);
 
-        XeFrontend::js('/assets/core/common/js/toggleMenu.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
-        XeFrontend::js('/assets/core/common/js/temporary.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
-        XeFrontend::js($plugin->assetPath().'/service.js')->appendTo('head')->load();
+        $this->loadDependencies();
+        $this->initAssets();
 
-//        $skin = Skin::getInstance($plugin->getId());
+        $props = [
+            'targetId' => $target->getUid(),
+            'instanceId' => $instanceId,
+            'targetAuthorId' => $target->getAuthor()->getId(),
+            'config' => [
+                'reverse' => $config->get('reverse'),
+                'editor' => null,
+            ]
+        ];
+
+        /** @var \Xpressengine\Editor\AbstractEditor $editor */
+        $editor = $config->get('useWysiwyg') ? XeEditor::get($instanceId) : null;
+
+        if ($editor) {
+            $editor->setArguments(false);
+
+            $props['config']['editor'] = [
+                'name' => $editor->getName(),
+                'options' => $editor->getOptions(),
+                'customOptions' => $editor->getCustomOptions(),
+                'tools' => $editor->getTools(),
+            ];
+        }
+
         $skin = XeSkin::getAssigned($plugin->getId());
         $view = $skin->setView('container')->setData(compact('config'))->render();
 
-        $view = View::make(sprintf('%s::views.uio', $plugin->getId()),
-            array_merge(compact('instanceId', 'target', 'config'), ['inner' => $view])
-        )->render();
+        $view = View::make(sprintf('%s::views.uio', $plugin->getId()), [
+            'target' => $target,
+            'editor' => $editor,
+            'inner' => $view,
+            'props' => json_enc($props)
+        ]);
 
         return $view;
+    }
+
+    protected function loadDependencies()
+    {
+//        XeFrontend::css('/assets/core/common/css/temporary.css')->load();
+//        XeFrontend::js('/assets/core/common/js/temporary.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
+        XeFrontend::js('/assets/core/common/js/toggleMenu.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
+        XeFrontend::js('/assets/core/xe-ui-component/js/xe-page.js')->load();
+    }
+
+    protected function initAssets()
+    {
+        XeFrontend::css(app('xe.plugin.comment')->assetPath() . '/css/default.css')->load();
+        XeFrontend::js(app('xe.plugin.comment')->assetPath() . '/js/service.js')->appendTo('head')->load();
+
+        XeFrontend::translation(['xe::autoSave', 'xe::tempSave']);
     }
 }

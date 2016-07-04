@@ -11,6 +11,7 @@ namespace Xpressengine\Plugins\Comment;
 
 use App\Http\Controllers\Controller;
 use App\Http\Sections\DynamicFieldSection;
+use App\Http\Sections\EditorSection;
 use App\Http\Sections\SkinSection;
 use App\Http\Sections\ToggleMenuSection;
 use Input;
@@ -195,9 +196,10 @@ class ManagerController extends Controller
         $instanceId = $this->handler->getInstanceId($targetInstanceId);
         $config = $this->handler->getConfig($instanceId);
 
-        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm($instanceId), ['create', 'download']);
+        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm($instanceId), ['create']);
 
         $skinSection = new SkinSection($this->plugin->getId(), $instanceId);
+        $editorSection = new EditorSection($instanceId);
 
         $dynamicFieldSection = new DynamicFieldSection(
             str_replace('.', '_', $config->name),
@@ -212,6 +214,7 @@ class ManagerController extends Controller
             'config' => $config,
             'permArgs' => $permArgs,
             'skinSection' => $skinSection,
+            'editorSection' => $editorSection,
             'dynamicFieldSection' => $dynamicFieldSection,
             'toggleMenuSection' => $toggleMenuSection,
             'menuItem' => $menuItem,
@@ -223,8 +226,7 @@ class ManagerController extends Controller
         $instanceId = $this->handler->getInstanceId($targetInstanceId);
 
         $configInputs = array_filter($request->except(['redirect', '_token']), function ($key) {
-            return substr($key, 0, strlen('create')) !== 'create'
-            && substr($key, 0, strlen('download')) !== 'download';
+            return substr($key, 0, strlen('create')) !== 'create';
         }, ARRAY_FILTER_USE_KEY);
 
         $validator = Validator::make([
@@ -239,7 +241,7 @@ class ManagerController extends Controller
 
         $this->handler->configure($instanceId, $configInputs);
 
-        $this->permissionRegister($request, $this->handler->getKeyForPerm($instanceId), ['create', 'download']);
+        $this->permissionRegister($request, $this->handler->getKeyForPerm($instanceId), ['create']);
 
         if ($request->get('redirect') != null) {
             return redirect($request->get('redirect'));
@@ -251,7 +253,8 @@ class ManagerController extends Controller
     public function getGlobalSetting()
     {
         $config = $this->handler->getConfig();
-        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm(), ['create', 'download']);
+
+        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm(), ['create']);
 
         return XePresenter::make('global', ['config' => $config, 'permArgs' => $permArgs]);
     }
@@ -259,8 +262,7 @@ class ManagerController extends Controller
     public function postGlobalSetting(Request $request)
     {
         $configInputs = array_filter($request->except(['_token']), function ($key) {
-            return substr($key, 0, strlen('create')) !== 'create'
-            && substr($key, 0, strlen('download')) !== 'download';
+            return substr($key, 0, strlen('create')) !== 'create';
         }, ARRAY_FILTER_USE_KEY);
 
         /** @var \Illuminate\Validation\Validator $validator */
@@ -278,7 +280,7 @@ class ManagerController extends Controller
         try {
             $this->handler->configure(null, $configInputs);
 
-            $this->permissionRegister($request, $this->handler->getKeyForPerm(), ['create', 'download']);
+            $this->permissionRegister($request, $this->handler->getKeyForPerm(), ['create']);
 
             XeDB::commit();
         } catch (\Exception $e) {

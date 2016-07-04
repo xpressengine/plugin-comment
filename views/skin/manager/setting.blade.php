@@ -211,16 +211,6 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>{{ xe_trans('comment::manage.permission.download') }}</label>
-                                <div class="well">
-                                    {!! uio('permission', $permArgs['download']) !!}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="panel-footer">
@@ -238,7 +228,7 @@
     <div class="panel">
         <div class="panel-heading">
             <div class="pull-left">
-                <h3 class="panel-title">{{ xe_trans('comment::manage.setting.skin') }}</h3>
+                <h3 class="panel-title">{{ xe_trans('xe::skin') }}</h3>
             </div>
             <div class="pull-right">
                 <a data-toggle="collapse" data-parent="#accordion" href="#commentSkinSection" class="btn-link panel-toggle pull-right"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="sr-only">메뉴닫기</span></a>
@@ -251,11 +241,27 @@
         </div>
     </div>
 
+    <div class="panel">
+        <div class="panel-heading">
+            <div class="pull-left">
+                <h3 class="panel-title">{{xe_trans('xe::editor')}}</h3>
+            </div>
+            <div class="pull-right">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" class="btn-link panel-toggle pull-right"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="sr-only">메뉴닫기</span></a>
+            </div>
+        </div>
+        <div id="collapseTwo" class="panel-collapse collapse in">
+            <div class="panel-body">
+                {!! $editorSection !!}
+            </div>
+        </div>
+    </div>
+
     <!-- Comment dynamic field box -->
     <div class="panel">
         <div class="panel-heading">
             <div class="pull-left">
-                <h3 class="panel-title">{{ xe_trans('comment::manage.setting.dynamicField') }}</h3>
+                <h3 class="panel-title">{{ xe_trans('xe::dynamicField') }}</h3>
             </div>
             <div class="pull-right">
                 <a data-toggle="collapse" data-parent="#accordion" href="#commentDynamicField" class="btn-link panel-toggle pull-right"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="sr-only">메뉴닫기</span></a>
@@ -272,7 +278,7 @@
     <div class="panel">
         <div class="panel-heading">
             <div class="pull-left">
-                <h3 class="panel-title">{{ xe_trans('comment::manage.setting.toggleMenu') }}</h3>
+                <h3 class="panel-title">{{ xe_trans('xe::toggleMenu') }}</h3>
             </div>
             <div class="pull-right">
                 <a data-toggle="collapse" data-parent="#accordion" href="#commentToggleMenu" class="btn-link panel-toggle pull-right"><i class="xi-angle-down"></i><i class="xi-angle-up"></i><span class="sr-only">메뉴닫기</span></a>
@@ -290,10 +296,6 @@
 
 <script type="text/javascript">
     $(function () {
-//        $('input[name=useWysiwyg]', '#fCommentSetting').change(function () {
-//            $('#commentEditor').toggleClass('hidden');
-//        });
-
         $('#fCommentSetting').submit(function () {
             $('<input>').attr('type', 'hidden').attr('name', 'redirect').val(location.href).appendTo(this);
         });

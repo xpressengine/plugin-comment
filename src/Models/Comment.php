@@ -39,12 +39,6 @@ class Comment extends Document
         return $this->hasOne(Target::class, 'docId');
     }
 
-    public function files()
-    {
-        $file = new File;
-        return $this->belongsToMany(File::class, $file->getFileableTable(), 'fileableId', 'fileId');
-    }
-
     /**
      * Returns the author
      *

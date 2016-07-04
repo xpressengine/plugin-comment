@@ -61,7 +61,7 @@
                         this.renderItems();
 
                         this.setTotalCnt(this.getTotalCnt() + 1);
-                    }.bind(this), self.props.config.useWysiwyg);
+                    }.bind(this), self.props.config.editor);
 
                 form.render(this._getFormBox());
 
@@ -309,7 +309,7 @@
                         self.spotIn(child);
                         item.removeForm();
                         self.renderItems();
-                    }, self.props.config.useWysiwyg));
+                    }, self.props.config.editor));
 
                     self.state.ing = false;
                 });
@@ -337,13 +337,15 @@
 
                 var mode = 'edit',
                     callback = function (json) {
+                        var editor = $.extend(true, {}, self.props.config.editor);
+                        $.extend(editor.options, json.etc);
                         var form = new Form($.parseHTML(json.html), mode, function (json) {
                             var items = self.makeItems($.parseHTML(json.items)),
                                 item = items[0];
                             item.setChanged();
                             self.replace(item);
                             self.renderItems();
-                        }, self.props.config.useWysiwyg);
+                        }, editor);
 
                         item.setForm(form);
                     };
@@ -548,26 +550,15 @@
                     return;
                 }
 
-                $.ajax({
-                    url: url('/voteUser'),
-                    dataType: 'json',
-                    data: {instanceId: self.getInstanceId(), id: self.getId(), option: type.current},
-                    success: function (json) {
-                        $('.__xe_comment_voters.__xe_' + type.current, self.dom)
-                            .html(json.items)
-                            .show();
+                XE.page(url('/votedUser'), $('.__xe_comment_voters.__xe_' + type.current, self.dom), {
+                    data: {
+                        instanceId: self.getInstanceId(),
+                        id: self.getId(),
+                        option: type.current
                     }
+                }, function () {
+                    $('.__xe_comment_voters.__xe_' + type.current, self.dom).show();
                 });
-            });
-
-            $('.__xe_comment_btn_toggle_file', this.dom).click(function (e) {
-                e.preventDefault();
-
-                $(this).toggleClass('on');
-
-                $(this).hasClass('on') ?
-                    $('.__xe_comment_files', self.dom).show() :
-                    $('.__xe_comment_files', self.dom).hide();
             });
         },
         _currentVoteType: function (elem) {
@@ -591,15 +582,15 @@
         },
         unsetChanged: function () {
             this.state.changed = false;
-        },
+        }
     };
 
-    function Form(dom, mode, callback, useEditor)
+    function Form(dom, mode, callback, editorData)
     {
         this.dom = dom;
         this.mode = mode;
         this.callback = callback;
-        this.useEditor = useEditor;
+        this.editorData = editorData;
         this.editor = null;
         this.container = null;
     }
@@ -614,45 +605,33 @@
 
             this.container = container;
 
-            if (this.useEditor === true) {
+            if (this.editorData !== null) {
                 this.initEditor();
             }
 
             this._eventBind();
         },
         initEditor: function () {
-            if (typeof(xe3CkEditor) !== 'function') {
+            if (typeof(XEeditor) == 'undefined') {
                 return ;
             }
 
-            var textarea = $('textarea', this.dom)[0],
-                editor = xe3CkEditor(textarea, {
-                    "height": 200,
-                    "fileUpload":{
-                        "upload_url": url("/file/upload"),
-                        "source_url": url("/file/source"),
-                        "download_url": url("/file/download")
-                    },
-                    "suggestion":{
-                        "hashtag_api": url("/suggestion/hashTag"),
-                        "mention_api": url("/suggestion/mention")
-                    }
-                });
+            var id = 'comment_textarea_' + (new Date().getTime());
+            $('textarea', this.dom).attr('id', id).css('width', '100%');
+            var editor = XEeditor.getEditor(this.editorData.name).create(id, this.editorData.options, this.editorData.customOptions, this.editorData.tools);
 
             editor.on('focus', function () {
-                $(textarea).triggerHandler('focus');
+                $(id).triggerHandler('focus');
             });
             editor.on('change', function () {
-                editor.updateElement();
-
-                $(textarea).triggerHandler('input');
+                $(id).triggerHandler('input');
             });
 
             this.editor = editor;
         },
         editorSync: function () {
-            if (this.useEditor && this.editor) {
-                this.editor.setData($('textarea', this.dom).val());
+            if (this.editor) {
+                this.editor.setContents($('textarea', this.dom).val());
             }
         },
         getDom: function () {
@@ -687,7 +666,7 @@
                         self.callback(json);
                         $(self._getForm()).trigger('reset');
                         if (self.editor && self.getMode() == 'create') {
-                            self.editor.clear();
+                            self.editor.reset();
                         }
                     }
                 }).always(function () {
@@ -705,7 +684,7 @@
         this.dom = dom;
         this.mode = 'certify';
         this.callback = callback;
-        this.useEditor = false;
+        this.editorData = null;
         this.editor = null;
         this.container = null;
     }
@@ -717,3 +696,127 @@
 
     return comment;
 })(typeof window !== "undefined" ? window : this, jQuery);
+
+
+var CommentVotedVirtualGrid = (function() {
+
+    var self, grid, dataView;
+
+    var ajaxRunning = false;    //ajax중인지
+
+    var startId,
+        limit,
+        isLastRow = false;      //마지막 row인지
+
+    return {
+        init: function() {
+
+            var self = CommentVotedVirtualGrid;
+            var columns = [{
+                //selectable: false,
+                formatter: function(row, cell, value, columnDef, dataContext) {
+                    var tmpl = [
+                        '<!--[D] 링크가 아닌 경우 div 로 교체 -->',
+                        '<a href="__profilePage__" class="list-inner-item">',
+                        '<!--[D] 실제 이미지 사이즈는 모바일 대응 위해 일대일 비율로 96*96 이상-->',
+                        '<div class="img-thumbnail"><img src="__src__" width="48" height="48" alt="__alt__" /></div>',
+                        '<div class="list-text">',
+                        '<p>__alt__</p>',
+                        '</div>',
+                        '</a>',
+                    ].join("\n");
+
+                    return tmpl.replace(/__src__/g, dataContext.profileImage).replace(/__alt__/g, dataContext.displayName).replace(/__profilePage__/g, dataContext.profilePage);
+                }
+            }];
+
+            var options = {
+                editable: false,
+                enableAddRow: true,
+                enableColumnReorder: false,
+                enableCellNavigation: false,
+                // asyncEditorLoading: false,
+                // autoEdit: false,
+                rowHeight: 80,
+                headerHeight: 0,
+                showHeaderRow: false
+            };
+
+            // var data = [];
+            $(".xe-list-group").css("height", "365px");
+            dataView = new Slick.Data.DataView();
+            grid = new Slick.Grid(".xe-list-group", dataView, columns, options);
+            grid.setHeaderRowVisibility(false);
+
+            $(".slick-header").hide();
+
+
+            id= 0;
+            ajaxRunning = false;
+            isLastRow = false;
+            startId = 0;
+            limit = 10;
+
+            self.getRows();
+            self.bindEvent();
+
+            return self;
+        },
+        bindEvent: function() {
+            grid.onScroll.subscribe(function(e, args) {
+
+                var $viewport = $(".xe-modal").find(".slick-viewport"),
+                    loadBlockCnt = 3;   //3 page 정도 남으면 reload함, 1page - modal body height 기준.
+
+                if(!ajaxRunning && !isLastRow && ($viewport[0].scrollHeight - $viewport.scrollTop()) < ($viewport.outerHeight() * loadBlockCnt)) {
+                    CommentVotedVirtualGrid.getRows();
+                }
+
+            });
+
+            dataView.onRowCountChanged.subscribe(function (e, args) {
+                grid.updateRowCount();
+                grid.render();
+            });
+
+            dataView.onRowsChanged.subscribe(function (e, args) {
+                grid.invalidateRows(args.rows);
+                grid.render();
+            });
+        },
+        getRows: function() {
+
+            ajaxRunning = true;
+            
+            var data = $(".xe-list-group").data('data');
+            data = data ? (typeof(data) !== 'object' ? JSON.parse(data) : data) : {};
+            data['limit'] = limit;
+
+            if(startId !== 0) {
+                data['startId'] = startId;
+            }
+
+            XE.ajax({
+                url: $(".xe-list-group").data('url'),
+                type: 'get',
+                dataType: 'json',
+                data: data,
+                success: function(data) {
+
+                    if(data.nextStartId === 0) {
+                        isLastRow = true;
+                    }
+
+                    startId = data.nextStartId;
+
+                    for(var k = 0, max = data.list.length; k < max; k += 1) {
+                        dataView.addItem(data.list[k]);
+                    }
+
+                }
+            }).done(function() {
+                ajaxRunning = false;
+            });
+        }
+    }
+})();

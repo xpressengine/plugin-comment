@@ -90,7 +90,7 @@ class Handler
             throw new \RuntimeException(sprintf('Already exists comment instance for "%s"', $targetInstanceId));
         }
 
-        $instanceId = $this->keygen->generate();
+        $instanceId = $this->createInstanceId();
         $this->documents->createInstance($instanceId, ['division' => $division]);
 
         $this->configs->set($this->getKeyForConfig($instanceId), [
@@ -375,11 +375,28 @@ class Handler
         return $this->counter->getUsers($comment->id, $option);
     }
 
+    public function voteUserCount(Comment $comment, $option)
+    {
+        return $this->counter->getPoint($comment->id, $option);
+    }
+
     public function bindUserVote(Comment $comment)
     {
         if (!$this->auth->guest() && $log = $this->counter->getByName($comment->id, $this->auth->user())) {
             $comment->setVoteType($log->counterOption);
         }
+    }
+
+    public function votedList(Comment $comment, $option, $startId = null, $limit = 10)
+    {
+        $query = $this->counter->newModel()->where('counterName', static::COUNTER_VOTE)
+            ->where('targetId', $comment->id)->where('counterOption', $option);
+
+        if ($startId) {
+            $query->where('id', '<', $startId);
+        }
+
+        return $query->orderBy('id', 'desc')->take($limit)->get();
     }
 
     /**
@@ -417,6 +434,23 @@ class Handler
         $name = static::PLUGIN_PREFIX;
 
         return $instanceId === null ? $name : $name . '.' . $instanceId;
+    }
+
+    protected function createInstanceId()
+    {
+        $map = $this->getInstanceMap();
+        $try = 0;
+
+        do {
+            if ($try > 20) {
+                throw new \Exception;
+            }
+            $instanceId = substr(str_replace('-', '', $this->keygen->generate()), 0, 12);
+
+            $try++;
+        } while(array_search($instanceId, $map) !== false);
+
+        return $instanceId;
     }
 
     public function createModel()
