@@ -55,6 +55,8 @@
                 var self = this,
                     dom = $.parseHTML(json.html),
                     form = new Form(dom, 'create', function (json) {
+                        this._assetLoad(json.XE_ASSET_LOAD);
+
                         var items = this.makeItems($.parseHTML(json.items)),
                             item = items[0];
                         this.lastIn(item);
@@ -101,6 +103,8 @@
                 dataType: 'json',
                 data: data,
                 success: function (json) {
+                    this._assetLoad(json.XE_ASSET_LOAD);
+
                     var items = this.makeItems($.parseHTML(json.items));
                     for (var i in items) {
                         if (this.props.config.reverse === true) {
@@ -123,6 +127,17 @@
             }).always(function () {
                 this.loading = false;
             }.bind(this));
+        },
+        _assetLoad: function (assets) {
+            var cssList = assets.css || {},
+                jsList = assets.js || {};
+
+            $.each(cssList, function (i, css) {
+                DynamicLoadManager.cssLoad(css);
+            });
+            $.each(jsList, function (i, js) {
+                DynamicLoadManager.jsLoad(js);
+            });
         },
         makeItems: function (doms) {
             var items = [];
@@ -304,6 +319,8 @@
 
                 self.getForm('reply', item.getId(), function (json) {
                     item.setForm(new Form($.parseHTML(json.html), 'reply', function (json) {
+                        self._assetLoad(json.XE_ASSET_LOAD);
+
                         var items = self.makeItems($.parseHTML(json.items)),
                             child = items[0];
                         self.spotIn(child);
@@ -340,6 +357,8 @@
                         var editor = $.extend(true, {}, self.props.config.editor);
                         $.extend(editor.options, json.etc);
                         var form = new Form($.parseHTML(json.html), mode, function (json) {
+                            self._assetLoad(json.XE_ASSET_LOAD);
+
                             var items = self.makeItems($.parseHTML(json.items)),
                                 item = items[0];
                             item.setChanged();

@@ -110,10 +110,20 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return XePresenter::makeApi([
+        return XePresenter::makeApi($this->appendAssetsToParam([
             'totalCount' => $totalCount,
             'hasMore' => $comments->hasMorePages(),
             'items' => $content,
+        ]));
+    }
+
+    protected function appendAssetsToParam(array $param)
+    {
+        return array_merge($param, [
+            'XE_ASSET_LOAD' => [
+                'css' => \Xpressengine\Presenter\Html\Tags\CSSFile::getFileList(),
+                'js' => \Xpressengine\Presenter\Html\Tags\JSFile::getFileList(),
+            ],
         ]);
     }
 
@@ -178,9 +188,9 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return XePresenter::makeApi([
+        return XePresenter::makeApi($this->appendAssetsToParam([
             'items' => $content,
-        ]);
+        ]));
     }
 
     public function update()
@@ -251,9 +261,9 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return XePresenter::makeApi([
+        return XePresenter::makeApi($this->appendAssetsToParam([
             'items' => $content,
-        ]);
+        ]));
     }
 
     public function destroy()
