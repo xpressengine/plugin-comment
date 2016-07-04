@@ -18,10 +18,10 @@
                                 <ul class="dropdown-menu" role="menu">
                                     <li><strong>필터</strong></li>
                                     <li class="active"><a href="#" value="">{{ xe_trans('comment::manage.all') }}</a></li>
-                                    <li><a href="#" value="display|visible">{{ xe_trans('comment::manage.public') }}</a></li>
-                                    <li><a href="#" value="display|secret">{{ xe_trans('comment::manage.secret') }}</a></li>
-                                    <li><a href="#" value="approved|approved">{{ xe_trans('comment::manage.approved.approved') }}</a></li>
-                                    <li><a href="#" value="approved|waiting">{{ xe_trans('comment::manage.approved.waiting') }}</a></li>
+                                    <li><a href="#" value="display|{{ Xpressengine\Plugins\Comment\Models\Comment::DISPLAY_VISIBLE }}">{{ xe_trans('comment::manage.public') }}</a></li>
+                                    <li><a href="#" value="display|{{ Xpressengine\Plugins\Comment\Models\Comment::DISPLAY_SECRET }}">{{ xe_trans('comment::manage.secret') }}</a></li>
+                                    <li><a href="#" value="approved|{{ Xpressengine\Plugins\Comment\Models\Comment::APPROVED_APPROVED }}">{{ xe_trans('comment::manage.approved.approved') }}</a></li>
+                                    <li><a href="#" value="approved|{{ Xpressengine\Plugins\Comment\Models\Comment::APPROVED_WAITING }}">{{ xe_trans('comment::manage.approved.waiting') }}</a></li>
                                 </ul>
                             </div>
                         </form>
