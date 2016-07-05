@@ -22,6 +22,7 @@ use Counter;
 use XeSkin;
 use XeStorage;
 use XeEditor;
+use XeTag;
 use Xpressengine\Permission\Instance;
 use Xpressengine\Plugins\Comment\Exceptions\BadRequestException;
 use Xpressengine\Plugins\Comment\Models\Comment;
@@ -176,7 +177,10 @@ class UserController extends Controller
         /** @var Comment $comment */
         $comment = $this->handler->create($inputs);
 
-        XeEditor::terminate($instanceId, $comment->getKey(), $inputs);
+        // file 처리
+        XeStorage::sync($comment->getKey(), array_get($inputs, $editor->getFileInputName(), []));
+        // tag 처리
+        XeTag::set($comment->getKey(), array_get($inputs, $editor->getTagInputName(), []), $instanceId);
 
         $config = $this->handler->getConfig($instanceId);
         $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
@@ -249,7 +253,10 @@ class UserController extends Controller
         $comment = $this->handler->put($comment);
         $this->handler->bindUserVote($comment);
 
-        XeEditor::terminate($instanceId, $comment->getKey(), $inputs);
+        // file 처리
+        XeStorage::sync($comment->getKey(), array_get($inputs, $editor->getFileInputName(), []));
+        // tag 처리
+        XeTag::set($comment->getKey(), array_get($inputs, $editor->getTagInputName(), []), $instanceId);
 
         $config = $this->handler->getConfig($instanceId);
         $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));

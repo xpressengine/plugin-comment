@@ -41,12 +41,6 @@
           "name": "관리자 기본 스킨",
           "description": "댓글 관리자 기본스킨 입니다.",
           "screenshot" : []
-        },
-        "editor/skin/comment@comment": {
-          "class": "Xpressengine\\Plugins\\Comment\\Skins\\EditorSkin",
-          "name": "Comment editor skin",
-          "description": "Editor skin for comment.",
-          "screenshot" : []
         }
       }
     },

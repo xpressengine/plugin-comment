@@ -427,6 +427,12 @@
                     self.state.ing = false;
                 });
             });
+
+            $(this.container).on('click', '.__xe_comment_btn_toggle_file', function (e) {
+                e.preventDefault();
+
+                $(this).toggleClass('on');
+            });
         },
         _getListBox: function () {
             return $('.__xe_comment_list', this.container);

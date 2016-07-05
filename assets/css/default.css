@@ -635,7 +635,6 @@
     color: #696e7a;
 }
 .comment_action_area {
-    display: none;
     clear: both;
 }
 .comment_action_area .comment_form {
@@ -717,6 +716,33 @@
 .pagination_seemore > a:hover {
     border-color: #f4f4f4;
     background-color: #f4f4f4;
+}
+
+.comment_file_list {
+    margin: -7px 0 13px;
+}
+.comment_file_list .btn_file {
+    color: #696e7a;
+    font-size: 12px;
+}
+.comment_file_list .btn_file.on ~ ul {
+    display: block;
+}
+.comment_file_list ul {
+    margin:0;
+    padding:0;
+    display: none;
+    list-style: none;
+}
+.comment_file_list li {
+    margin-top: 5px;
+    font-size: 12px;
+}
+.comment_file_list li a {
+    color: #bebebe !important;
+}
+.comment_file_list li a:hover {
+    color: #696e7a;
 }
 
 @media (max-width: 767px) {

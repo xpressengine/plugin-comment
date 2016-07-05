@@ -10,7 +10,6 @@
 namespace Xpressengine\Plugins\Comment;
 
 use Illuminate\Database\Schema\Blueprint;
-use Xpressengine\Editor\EditorHandler;
 use Xpressengine\Permission\Grant;
 use Xpressengine\Plugin\AbstractPlugin;
 use Xpressengine\Plugins\Comment\Models\Comment;
@@ -144,8 +143,6 @@ class Plugin extends AbstractPlugin
 
                 $instanceId = $this->getHandler()->getInstanceId($targetInstanceId);
                 XeEditor::setInstance($instanceId, 'editor/ckeditor@ckEditor');
-
-                XeSkin::assign([EditorHandler::NAME, $instanceId], XeSkin::get('editor/skin/comment@comment'));
             }
         );
     }

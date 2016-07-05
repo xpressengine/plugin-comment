@@ -32,7 +32,7 @@
             </div>
             <div class="xe_content __xe_comment_edit_toggle">
                 @can('read', $item)
-                {!! compile($item->instanceId, $item->content, $item->format === Xpressengine\Plugins\Comment\Models\Comment::FORMAT_HTML, $item->id) !!}
+                {!! compile($item->instanceId, $item->content, $item->format === Xpressengine\Plugins\Comment\Models\Comment::FORMAT_HTML) !!}
                 @else
                     @if ($item->display == 'hidden' && $item->status != 'public')
                         {{ xe_trans('comment::RemoveContent') }}
@@ -52,6 +52,21 @@
                 </p>
             </div>
             <div class="comment_action __xe_comment_edit_toggle">
+                @if(count($item->files) > 0)
+                    <div class="comment_file_list">
+                        <!-- [D] 클릭시 클래스 on 적용 -->
+                        <a href="#" class="btn_file __xe_comment_btn_toggle_file">첨부파일 <strong class="file_num">{{ count($item->files) }}</strong></a>
+                        <ul>
+                            @foreach($item->files as $file)
+                                <li>
+                                    <a href="{{ route('editor.file.download', ['instanceId' => $item->instanceId, 'fileId' => $file->id]) }}">
+                                        <i class="xi-download"></i> {{ $file->clientname }} <span class="file_size">({{ bytes($file->size) }})</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 @if($config->get('useAssent') === true)
                 <div class="vote">
                     <!-- [D] 클릭시 클래스 on 적용 -->
