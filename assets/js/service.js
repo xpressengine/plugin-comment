@@ -456,9 +456,6 @@
             identifier: this.getId(),
             html: $('.__xe_comment_menu', this.dom).html()
         };
-        //React.unmountComponentAtNode($('.__xe_comment_menu', this.dom)[0]);
-
-        React.render(React.createElement(ToggleMenu, param), $('.__xe_comment_menu', this.dom)[0]);
     }
 
     Item.prototype = {

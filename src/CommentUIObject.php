@@ -102,7 +102,6 @@ class CommentUIObject extends AbstractUIObject
     {
 //        XeFrontend::css('/assets/core/common/css/temporary.css')->load();
 //        XeFrontend::js('/assets/core/common/js/temporary.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
-        XeFrontend::js('/assets/core/common/js/toggleMenu.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
         XeFrontend::js('/assets/core/xe-ui-component/js/xe-page.js')->load();
     }
 
