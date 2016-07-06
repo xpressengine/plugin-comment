@@ -292,9 +292,6 @@ class UserController extends Controller
             throw new AccessDeniedHttpException;
         }
 
-        return XePresenter::makeApi(['success' => true]);
-
-
         if (!$comment = $this->handler->trash($comment)) {
             return XePresenter::makeApi(['success' => false]);
         }
