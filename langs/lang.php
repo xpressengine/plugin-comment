@@ -89,11 +89,11 @@ return [
 
         'approved' => [
             'approved' => [
-                'ko' => '발행완료',
+                'ko' => '승인완료',
                 'en' => 'Approved',
             ],
             'waiting' => [
-                'ko' => '발행대기',
+                'ko' => '승인대기',
                 'en' => 'Waiting',
             ],
             'approve' => [
@@ -128,10 +128,10 @@ return [
         'en' => 'Removed content',
     ],
 
-    'blindContent' => [
-        'ko' => '숨김처리된 내용입니다.',
-        'en' => 'Blind content',
-    ],
+//    'blindContent' => [
+//        'ko' => '숨김처리된 내용입니다.',
+//        'en' => 'Blind content',
+//    ],
 
     'secretContent' => [
         'ko' => '비밀 댓글 입니다.',
@@ -156,6 +156,16 @@ return [
     'badRequest' => [
         'ko' => '잘못된 요청입니다.',
         'en' => 'Bad request',
+    ],
+
+    'wrongConfig' => [
+        'ko' => '설정 값이 잘못 되었습니다.',
+        'en' => 'Configuration values was something wrong.',
+    ],
+
+    'instanceIdGenerateFail'=> [
+        'ko' => '인스턴스 아이디를 생성하는데 실패했습니다.',
+        'en' => 'Failed to create an instance ID.',
     ],
 
     'submit' => [
@@ -266,5 +276,25 @@ return [
     'inverseOrder' => [
         'ko' => '역순',
         'en' => 'Inverse Order',
+    ],
+
+    'removeBatch' => [
+        'ko' => '일괄 삭제',
+        'en' => 'Batch',
+    ],
+
+    'removeBlind' => [
+        'ko' => '해당 글 가리기',
+        'en' => 'Blind',
+    ],
+
+    'removeUnable' => [
+        'ko' => '삭제 불가',
+        'en' => 'Unable',
+    ],
+
+    'msgRemoveUnable' => [
+        'ko' => '삭제할 수 없습니다.',
+        'en' => 'Unable to remove',
     ],
 ];

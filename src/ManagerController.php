@@ -24,6 +24,7 @@ use XeDB;
 use Xpressengine\Module\ModuleHandler;
 use Xpressengine\Permission\PermissionSupport;
 use Xpressengine\Plugins\Comment\Models\Comment;
+use Xpressengine\Support\Exceptions\InvalidArgumentException;
 
 class ManagerController extends Controller
 {
@@ -61,7 +62,7 @@ class ManagerController extends Controller
         $model = $this->handler->createModel();
         $query = $model->newQuery()
             ->whereIn('instanceId', $this->getInstances())
-            ->where('status', Comment::STATUS_PUBLIC);
+            ->where('status', '!=', Comment::STATUS_TRASH);
 
         if ($options = Input::get('options')) {
             list($searchField, $searchValue) = explode('|', $options);
@@ -69,7 +70,7 @@ class ManagerController extends Controller
             $query->where($searchField, $searchValue);
         }
 
-        $comments = $query->with('target')->paginate();
+        $comments = $query->orderBy(Comment::CREATED_AT)->with('target')->paginate();
 
         $map = $this->handler->getInstanceMap();
         $menuItems = $menus->getItemIn(array_keys($map), 'route')->getDictionary();
@@ -98,17 +99,23 @@ class ManagerController extends Controller
             ->whereIn('instanceId', $this->getInstances())
             ->whereIn('id', $commentIds)->get();
 
+        switch ($approved) {
+            case Comment::APPROVED_APPROVED:
+                $method = 'approve';
+                break;
+            case Comment::APPROVED_REJECTED:
+                $method = 'reject';
+                break;
+            default :
+                throw new InvalidArgumentException;
+                break;
+        }
+
         foreach ($comments as $comment) {
-            $comment->approved = $approved;
-
-            $this->handler->put($comment);
+            $this->handler->$method($comment);
         }
 
-        if (Input::get('redirect') != null) {
-            return redirect(Input::get('redirect'));
-        } else {
-            return redirect()->route('manage.comment.index');
-        }
+        return redirect()->back();
     }
 
     public function toTrash()
@@ -125,11 +132,7 @@ class ManagerController extends Controller
             $this->handler->trash($comment);
         }
 
-        if (Input::get('redirect') != null) {
-            return redirect(Input::get('redirect'));
-        } else {
-            return redirect()->route('manage.comment.index');
-        }
+        return redirect()->back();
     }
 
     public function trash(MenuHandler $menus)
@@ -139,7 +142,8 @@ class ManagerController extends Controller
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
             ->whereIn('instanceId', $this->getInstances())
-            ->where('status', Comment::STATUS_TRASH)->paginate();
+            ->where('status', Comment::STATUS_TRASH)
+            ->orderBy(Comment::CREATED_AT)->paginate();
 
         $map = $this->handler->getInstanceMap();
         $menuItems = $menus->getItemIn(array_keys($map), 'route')->getDictionary();
@@ -164,11 +168,7 @@ class ManagerController extends Controller
             $this->handler->remove($comment);
         }
 
-        if (Input::get('redirect') != null) {
-            return redirect(Input::get('redirect'));
-        } else {
-            return redirect()->route('manage.comment.index');
-        }
+        return redirect()->back();
     }
 
     public function restore()
@@ -185,11 +185,7 @@ class ManagerController extends Controller
             $this->handler->restore($comment);
         }
 
-        if (Input::get('redirect') != null) {
-            return redirect(Input::get('redirect'));
-        } else {
-            return redirect()->route('manage.comment.index');
-        }
+        return redirect()->back();
     }
 
     public function getSetting(MenuHandler $menus, $targetInstanceId)
@@ -226,7 +222,7 @@ class ManagerController extends Controller
     {
         $instanceId = $this->handler->getInstanceId($targetInstanceId);
 
-        $configInputs = array_filter($request->except(['redirect', '_token']), function ($key) {
+        $configInputs = array_filter($request->except(['_token']), function ($key) {
             return substr($key, 0, strlen('create')) !== 'create';
         }, ARRAY_FILTER_USE_KEY);
 
@@ -244,11 +240,7 @@ class ManagerController extends Controller
 
         $this->permissionRegister($request, $this->handler->getKeyForPerm($instanceId), ['create']);
 
-        if ($request->get('redirect') != null) {
-            return redirect($request->get('redirect'));
-        } else {
-            return redirect()->route('manage.comment.setting', $targetInstanceId);
-        }
+        return redirect()->back();
     }
 
     public function getGlobalSetting()

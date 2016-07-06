@@ -44,24 +44,6 @@
                                         {{--<input type="text" class="form-control" value="{{ $config->get('division') ? 'Used' : 'Unused' }}" readonly="readonly" disabled="disabled">--}}
                                     {{--</div>--}}
                                 {{--</div>--}}
-
-                                {{--<div class="col-sm-6">--}}
-                                    {{--<div class="form-group">--}}
-                                        {{--<div class="clearfix">--}}
-                                            {{--<label>{{ xe_trans('comment::manage.removeType') }}</label>--}}
-                                            {{--<div class="checkbox pull-right">--}}
-                                                {{--<label>--}}
-                                                    {{--<input type="checkbox" class="__xe_inherit" {{ !$config->getPure('removeType')? 'checked' : '' }}>--}}
-                                                    {{--{{ xe_trans('xe::inheritMode') }}--}}
-                                                {{--</label>--}}
-                                            {{--</div>--}}
-                                        {{--</div>--}}
-                                        {{--<select name="removeType" class="form-control">--}}
-                                            {{--<option value="batch" @if($config->get('removeType') == 'batch') selected @endif>일괄 삭제</option>--}}
-                                            {{--<option value="sr-only" @if($config->get('removeType') == 'sr-only') selected @endif>해당 글 가리기</option>--}}
-                                        {{--</select>--}}
-                                    {{--</div>--}}
-                                {{--</div>--}}
                             {{--</div>--}}
 
                             <div class="row">
@@ -193,12 +175,29 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-
+                                    <div class="form-group">
+                                        <div class="clearfix">
+                                            <label>
+                                                {{ xe_trans('comment::manage.removeType') }}
+                                                <small>reply 가 존재하는 글을 삭제하는 방식을 선택합니다.</small>
+                                            </label>
+                                            <div class="checkbox pull-right">
+                                                <label>
+                                                    <input type="checkbox" class="__xe_inherit" {{ !$config->getPure('removeType')? 'checked' : '' }}>
+                                                    {{ xe_trans('xe::inheritMode') }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <select name="removeType" class="form-control">
+                                            <option value="{{ Xpressengine\Plugins\Comment\Handler::REMOVE_BATCH }}" @if($config->get('removeType') == Xpressengine\Plugins\Comment\Handler::REMOVE_BATCH) selected @endif>{{ xe_trans('comment::removeBatch') }}</option>
+                                            <option value="{{ Xpressengine\Plugins\Comment\Handler::REMOVE_BlIND }}" @if($config->get('removeType') == Xpressengine\Plugins\Comment\Handler::REMOVE_BlIND) selected @endif>{{ xe_trans('comment::removeBlind') }}</option>
+                                            <option value="{{ Xpressengine\Plugins\Comment\Handler::REMOVE_UNABLE }}" @if($config->get('removeType') == Xpressengine\Plugins\Comment\Handler::REMOVE_UNABLE) selected @endif>{{ xe_trans('comment::removeUnable') }}</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
 
                     <div class="row">
                         <div class="col-sm-12">
@@ -296,10 +295,6 @@
 
 <script type="text/javascript">
     $(function () {
-        $('#fCommentSetting').submit(function () {
-            $('<input>').attr('type', 'hidden').attr('name', 'redirect').val(location.href).appendTo(this);
-        });
-
         $('.__xe_inherit', '#fCommentSetting').click(function (e) {
             var $group = $(this).closest('.form-group');
             $('input,select,textarea', $group).not(this).prop('disabled', $(this).is(':checked'));

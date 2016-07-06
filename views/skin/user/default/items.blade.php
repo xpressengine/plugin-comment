@@ -31,13 +31,9 @@
             </div>
             <div class="xe_content __xe_comment_edit_toggle">
                 @can('read', $item)
-                {!! compile($item->instanceId, $item->content, $item->format === Xpressengine\Plugins\Comment\Models\Comment::FORMAT_HTML) !!}
+                {!! compile($item->instanceId, $item->getContent(), $item->format === Xpressengine\Plugins\Comment\Models\Comment::FORMAT_HTML) !!}
                 @else
-                    @if ($item->display == 'hidden' && $item->status != 'public')
-                        {{ xe_trans('comment::RemoveContent') }}
-                    @elseif($item->display == 'hidden')
-                        {{ xe_trans('comment::BlindContent') }}
-                    @elseif($item->display == 'secret')
+                    @if($item->display == Xpressengine\Plugins\Comment\Models\Comment::DISPLAY_SECRET)
                         {{ xe_trans('comment::SecretContent') }}
                     @else
                         {{ xe_trans('comment::NotAllowContent') }}

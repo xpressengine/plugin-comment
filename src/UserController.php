@@ -70,7 +70,9 @@ class UserController extends Controller
         $model = $this->handler->createModel();
         $query = $model->newQuery()->whereHas('target', function ($query) use ($targetId) {
             $query->where('targetId', $targetId);
-        })->where('approved', Comment::APPROVED_APPROVED)->where('display', '!=', Comment::DISPLAY_HIDDEN);
+        })
+//            ->where('approved', Comment::APPROVED_APPROVED)
+            ->where('display', '!=', Comment::DISPLAY_HIDDEN);
 
         // 댓글 총 수
         $totalCount = $query->count();
@@ -159,7 +161,6 @@ class UserController extends Controller
         $validator = Validator::make($inputs, $rules);
 
         if ($validator->fails()) {
-            // todo: validation lang 과 translation lang 호환 처리
             $e = new InvalidArgumentException;
             $e->setMessage($validator->errors()->first());
 
@@ -291,27 +292,31 @@ class UserController extends Controller
             throw new AccessDeniedHttpException;
         }
 
-        $this->handler->trash($comment);
+        return XePresenter::makeApi(['success' => true]);
 
-        $config = $this->handler->getConfig($instanceId);
-        if ($config->get('removeType') == 'blind') {
-            $items[] = $this->handler->get($instanceId, $id);
 
-            $instance = new Instance($this->handler->getKeyForPerm($instanceId));
+        if (!$comment = $this->handler->trash($comment)) {
+            return XePresenter::makeApi(['success' => false]);
+        }
 
+        if ($comment->display == Comment::DISPLAY_VISIBLE) {
             $content = $this->skin->setView('items')->setData([
-                'instanceId' => $instanceId,
-                'items' => $items,
-                'config' => $config,
-                'instance' => $instance,
+                'items' => [$comment],
+                'config' => $this->handler->getConfig($instanceId),
+                'instance' => new Instance($this->handler->getKeyForPerm($instanceId)),
+                'fieldTypes' => [],
             ])->render();
 
             $data = ['items' => $content];
         } else {
+            if ($comment->getAuthor()->getId() === Auth::id()) {
+                $this->handler->remove($comment);
+            }
+
             $data = [];
         }
 
-        return XePresenter::makeApi($data);
+        return XePresenter::makeApi(array_merge($data, ['success' => true]));
     }
 
     public function voteOn()

@@ -12,6 +12,7 @@ namespace Xpressengine\Plugins\Comment\Models;
 use Illuminate\Database\Eloquent\Collection;
 use Xpressengine\Document\Models\Document;
 use Xpressengine\Storage\File;
+use Xpressengine\User\Models\Guest;
 use Xpressengine\User\Models\UnknownUser;
 use Xpressengine\User\Models\User;
 use Xpressengine\User\UserInterface;
@@ -53,10 +54,23 @@ class Comment extends Document
     public function getAuthor()
     {
         if (!$author = $this->getRelationValue('author')) {
-            $author = new UnknownUser();
+            if (!empty($this->userId)) {
+                $author = new UnknownUser();
+            } else {
+                $author = new Guest();
+            }
         }
 
         return $author;
+    }
+
+    public function getContent()
+    {
+        if ($this->status === static::STATUS_TRASH || $this->approved === static::APPROVED_REJECTED) {
+            return xe_trans('comment::RemoveContent');
+        }
+        
+        return $this->content;
     }
 
     public function isAssented()

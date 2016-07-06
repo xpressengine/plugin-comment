@@ -10,8 +10,9 @@
 
                 <div class="panel-heading">
                     <div class="pull-right">
-                        <div class="btn-group" role="group" aria-label="...">
-                            <button type="button" class="btn btn-default __xe_btn_restore">{{ xe_trans('comment::restore') }}</button>
+                        <div class="btn-group __xe_tools" role="group" aria-label="...">
+                            <button type="button" class="btn btn-default" data-mode="restore">{{ xe_trans('comment::restore') }}</button>
+                            <button type="button" class="btn btn-default" data-mode="destroy">{{ xe_trans('xe::destroy') }}</button>
                         </div>
                     </div>
 
@@ -37,7 +38,7 @@
                                     <td><input type="checkbox" name="id[]" class="__xe_checkbox" value="{{ $comment->id }}"></td>
                                     <td>
                                         <strong>[{{ xe_trans($menuItem($comment)->title) }}]</strong>
-                                        {{ str_limit(strip_tags($comment->content), 100) }}
+                                        {{ str_limit($comment->pureContent, 100) }}
                                     </td>
                                     <td><a href="#">{{ $comment->writer }}</a></td>
                                     <td>{{ $comment->assentCount }} / {{ $comment->dissentCount }}</td>
@@ -73,8 +74,8 @@
             }
         });
 
-        $('.__xe_btn_restore').click(function () {
-            var flag = false;
+        $('.__xe_tools button').click(function () {
+            var mode = $(this).attr('data-mode'), flag = false;
 
             $('input.__xe_checkbox').each(function () {
                 if ($(this).is(':checked')) {
@@ -87,10 +88,18 @@
             }
 
             var $f = $('#__xe_form_list');
-            $('<input>').attr('type', 'hidden').attr('name', 'redirect').val(location.href).appendTo($f);
-
-            $f.attr('action', '{{ route('manage.comment.restore') }}');
-            $f.submit();
+            eval('actions.' + mode + '($f)');
         });
+
+        var actions = {
+            restore: function ($f) {
+                $f.attr('action', '{{ route('manage.comment.restore') }}');
+                $f.submit();
+            },
+            destroy: function ($f) {
+                $f.attr('action', '{{ route('manage.comment.destroy') }}');
+                $f.submit();
+            }
+        };
     };
 </script>

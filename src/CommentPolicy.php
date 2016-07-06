@@ -19,11 +19,11 @@ class CommentPolicy
 
     public function read(UserInterface $user, Comment $comment)
     {
-        if ($comment->display === 'hidden') {
+        if ($comment->display === Comment::DISPLAY_HIDDEN) {
             return false;
         }
 
-        if ($comment->display === 'secret'
+        if ($comment->display === Comment::DISPLAY_SECRET
             && !$user->isManager()
             && $user->getId() != $comment->getAuthor()->getId()
             && $user->getId() != $comment->target->getAuthor()->getId()) {
@@ -49,7 +49,7 @@ class CommentPolicy
             return true;
         }
 
-        if ($comment->getAuthor()->getId() !== null
+        if (!$comment->getAuthor() instanceof Guest
             && $comment->getAuthor()->getId() == $user->getId()) {
             return true;
         }
@@ -63,19 +63,17 @@ class CommentPolicy
 
     public function updateVisible(UserInterface $user, Comment $comment)
     {
-        return $this->update($user, $comment) || ($comment->userId == null && $user instanceof Guest);
+        return $this->update($user, $comment) || ($comment->getAuthor() instanceof Guest && $user instanceof Guest);
     }
 
     public function deleteVisible(UserInterface $user, Comment $comment)
     {
-        return $this->delete($user, $comment) || ($comment->userId == null && $user instanceof Guest);
+        return $this->delete($user, $comment) || ($comment->getAuthor() instanceof Guest && $user instanceof Guest);
     }
 
     private function isCertified(Comment $comment)
     {
-        $resolver = static::$certifiedResolver;
-
-        return $resolver($comment);
+        return call_user_func(static::$certifiedResolver, $comment);
     }
 
     public static function setCertifiedResolver(callable $resolver)

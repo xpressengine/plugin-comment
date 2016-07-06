@@ -15,6 +15,8 @@ use Xpressengine\Document\DocumentHandler;
 use Xpressengine\Keygen\Keygen;
 use Xpressengine\Permission\Grant;
 use Xpressengine\Permission\PermissionHandler;
+use Xpressengine\Plugins\Comment\Exceptions\InstanceIdGenerateFailException;
+use Xpressengine\Plugins\Comment\Exceptions\WrongConfigurationException;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\User\Models\Guest;
 use Xpressengine\User\UserInterface;
@@ -46,6 +48,12 @@ class Handler
 
     protected $model = Comment::class;
 
+    const REMOVE_BATCH = 'batch';
+
+    const REMOVE_BlIND = 'blind';
+
+    const REMOVE_UNABLE = 'unable';
+
     private $defaultConfig = [
         'division' => false,
         'useAssent' => false,
@@ -54,7 +62,7 @@ class Handler
         'secret' => false,
         'perPage' => 20,
         'useWysiwyg' => false,
-        'removeType' => 'batch',
+        'removeType' => self::REMOVE_BATCH,
         'reverse' => false
     ];
 
@@ -81,7 +89,7 @@ class Handler
      * 새로운 인스턴스 설정
      *
      * @param string $targetInstanceId target instance identifier
-     * @param bool $division if true, set table division
+     * @param bool   $division if true, set table division
      * @return void
      */
     public function createInstance($targetInstanceId, $division = false)
@@ -102,6 +110,13 @@ class Handler
         $this->permissions->register($this->getKeyForPerm($instanceId), new Grant());
     }
 
+    /**
+     * 대상 인스턴스와 댓글 인스턴스 맵핑
+     *
+     * @param string $targetInstanceId  target instance identifier
+     * @param string $commentInstanceId comment instance identifier
+     * @return void
+     */
     protected function instanceMapping($targetInstanceId, $commentInstanceId)
     {
         $config = $this->configs->get('comment_map');
@@ -112,6 +127,11 @@ class Handler
         $this->instanceMap = array_merge($this->instanceMap ?: [], [$targetInstanceId => $commentInstanceId]);
     }
 
+    /**
+     * Get instance map
+     *
+     * @return array
+     */
     public function getInstanceMap()
     {
         if (!$this->instanceMap) {
@@ -125,6 +145,12 @@ class Handler
         return $this->instanceMap;
     }
 
+    /**
+     * Get instance id by target instance id
+     *
+     * @param string $targetInstanceId target instance identifier
+     * @return string|null
+     */
     public function getInstanceId($targetInstanceId)
     {
         $map = $this->getInstanceMap();
@@ -132,6 +158,12 @@ class Handler
         return isset($map[$targetInstanceId]) ? $map[$targetInstanceId] : null;
     }
 
+    /**
+     * Get target instance id by comment instance id
+     *
+     * @param string $instanceId comment instance identifier
+     * @return string|null
+     */
     public function getTargetInstanceId($instanceId)
     {
         $map = $this->getInstanceMap();
@@ -142,11 +174,24 @@ class Handler
         return null;
     }
 
+    /**
+     * Get key for config
+     *
+     * @param string|null $instanceId comment instance identifier
+     * @return string
+     */
     protected function getKeyForConfig($instanceId = null)
     {
         return static::PLUGIN_PREFIX . ($instanceId ? '.' . $instanceId : '');
     }
 
+    /**
+     * 설정 등록
+     *
+     * @param string $instanceId  comment instance identifier
+     * @param array  $information config data
+     * @return void
+     */
     public function configure($instanceId, array $information)
     {
         $key = $this->getKeyForConfig($instanceId);
@@ -201,6 +246,12 @@ class Handler
         $this->configs->setVal(implode('.', [$key, $target]), null);
     }
 
+    /**
+     * Get config
+     *
+     * @param string|null $instanceId comment instance identifier
+     * @return \Xpressengine\Config\ConfigEntity
+     */
     public function getConfig($instanceId = null)
     {
         $config = $this->configs->get($this->getKeyForConfig($instanceId));
@@ -215,6 +266,13 @@ class Handler
         return $config;
     }
 
+    /**
+     * 등록
+     *
+     * @param array              $inputs inputs
+     * @param UserInterface|null $user   user object
+     * @return Comment
+     */
     public function create(array $inputs, UserInterface $user = null)
     {
         $inputs['type'] = CommentPlugin::getId();
@@ -226,8 +284,8 @@ class Handler
         }
 
         $doc = $this->documents->add($inputs);
+        /** @var Comment $comment */
         $comment = $this->createModel()->newQuery()->find($doc->getKey());
-
         $comment->target()->create([
             'targetId' => $inputs['targetId'],
             'targetAuthorId' => $inputs['targetAuthorId']
@@ -237,9 +295,20 @@ class Handler
             $this->certified($comment);
         }
 
+        $config = $this->getConfig($comment->instanceId);
+        if ($config->get('useApprove') === true) {
+            $comment = $this->put($comment->setApproveWait());
+        }
+
         return $comment;
     }
 
+    /**
+     * 수정
+     *
+     * @param Comment $comment comment object
+     * @return Comment
+     */
     public function put(Comment $comment)
     {
         if ($comment->isDirty()) {
@@ -249,34 +318,130 @@ class Handler
         return $comment;
     }
 
+    /**
+     * 휴지통으로 이동
+     *
+     * @param Comment $comment comment object
+     * @return Comment
+     */
     public function trash(Comment $comment)
     {
-        $comment->setTrash();
+        if ($this->hasChild($comment)) {
+            $config = $this->getConfig($comment->instanceId);
+            if ($config->get('removeType') === static::REMOVE_UNABLE) {
+                return false;
+            }
+
+            $comment->setTrash();
+
+            if ($config->get('removeType') === static::REMOVE_BATCH) {
+                $this->createModel()->newQuery()
+                    ->where('head', $comment->head)
+                    ->where('reply', 'like', $comment->reply . str_repeat('_', Comment::getReplyCharLen()))
+                    ->get()->each(function ($child) {
+                        $this->trash($child);
+                    });
+            } elseif ($config->get('removeType') === static::REMOVE_BlIND) {
+                $comment->setDisplay(Comment::DISPLAY_VISIBLE);
+            } else {
+                throw new WrongConfigurationException;
+            }
+        } else {
+            $comment->setTrash();
+        }
 
         return $this->put($comment);
     }
 
+    /**
+     * 휴지통에서 복구
+     *
+     * @param Comment $comment comment object
+     * @return Comment|false
+     */
     public function restore(Comment $comment)
     {
-        // todo: blind trash 상태에서 휴지통 비우기된 댓글은 복구되지 않음 처리 필요
-        // todo: 부모객채가 display 가능한 상태 인지 확인하여 아닌 경우 exception 처리 필요
-        // todo: 또는 복구 정책도 document 를 따르던가?
+        if (!empty($comment->reply)) {
+            $parent = $this->createModel()->newQuery()
+                ->where('head', $comment->head)
+                ->where('reply', substr($comment->reply, 0, -1 * Comment::getReplyCharLen()))
+                ->first();
 
-        // todo: implementing
+            if (!$parent || $parent->display != Comment::DISPLAY_VISIBLE) {
+                return false;
+            }
+        }
 
         $comment->setRestore();
 
         return $this->put($comment);
     }
 
+    /**
+     * 삭제
+     * 
+     * @param Comment $comment comment object
+     * @return bool
+     */
     public function remove(Comment $comment)
     {
-        // todo: 휴지통 상태의 것만 삭제 가능하고 상태에 따라 다른 처리 core의 comment handler 참조
-        $comment->target->delete();
+        if ($comment->status === Comment::STATUS_TRASH && $comment->display === Comment::DISPLAY_HIDDEN) {
+            $this->createModel()->newQuery()
+                ->where('head', $comment->head)
+                ->where('reply', 'like', $comment->reply . str_repeat('_', Comment::getReplyCharLen()))
+                ->get()->each(function ($child) {
+                    $this->remove($child);
+                });
 
-        return $this->documents->remove($comment);
+            $comment->target->delete();
+
+            return $this->documents->remove($comment);
+        }
+
+        return false;
     }
 
+    /**
+     * 승인
+     * 
+     * @param Comment $comment comment object
+     * @return Comment
+     */
+    public function approve(Comment $comment)
+    {
+        return $this->put($comment->setApprove());
+    }
+
+    /**
+     * 승인 반려
+     * 
+     * @param Comment $comment comment object
+     * @return Comment
+     */
+    public function reject(Comment $comment)
+    {
+        $comment->setReject();
+
+        if ($this->hasChild($comment)) {
+            $comment->setDisplay(Comment::DISPLAY_VISIBLE);
+        }
+
+        return $this->put($comment);
+    }
+
+    /**
+     * 자식에 해당하는 댓글이 있는지 확인
+     * @param Comment $comment comment object
+     * @return bool
+     */
+    protected function hasChild(Comment $comment)
+    {
+        return $this->createModel()->newQuery()
+            ->where('head', $comment->head)
+            ->where('reply', 'like', $comment->reply . str_repeat('_', Comment::getReplyCharLen()))
+            ->count() > 0;
+    }
+    
     /**
      * session 에서 사용될 key 를 반환
      *
@@ -320,9 +485,9 @@ class Handler
     /**
      * 찬성 or 추천 or 좋아요
      *
-     * @param Comment $comment comment entity
-     * @param string $option 'assent' or 'dissent'
-     * @param UserInterface $author user instance
+     * @param Comment            $comment comment entity
+     * @param string             $option 'assent' or 'dissent'
+     * @param UserInterface|null $author user instance
      * @return Comment
      */
     public function addVote(Comment $comment, $option, UserInterface $author = null)
@@ -340,9 +505,9 @@ class Handler
     /**
      * 반대 or 비추천 or 싫어요
      *
-     * @param Comment $comment comment entity
-     * @param string $option 'assent' or 'dissent'
-     * @param UserInterface $author user instance
+     * @param Comment            $comment comment entity
+     * @param string             $option 'assent' or 'dissent'
+     * @param UserInterface|null $author user instance
      * @return Comment
      */
     public function removeVote(Comment $comment, $option, UserInterface $author = null)
@@ -357,11 +522,17 @@ class Handler
         return $this->documents->put($comment);
     }
 
+    /**
+     * 값에 따른 컬럼명 반환
+     * 
+     * @param string $opt 'assent' or 'dissent'
+     * @return string
+     */
     private function voteOptToColumn($opt)
     {
-        if ($opt == 'assent') {
+        if ($opt === 'assent') {
             $column = 'assentCount';
-        } elseif ($opt == 'dissent') {
+        } elseif ($opt === 'dissent') {
             $column = 'dissentCount';
         } else {
             throw new \InvalidArgumentException;
@@ -370,16 +541,36 @@ class Handler
         return $column;
     }
 
+    /**
+     * 투표자 목록 반환
+     * 
+     * @param Comment $comment comment object
+     * @param string  $option  'assent' or 'dissent'
+     * @return array
+     */
     public function voteUsers(Comment $comment, $option)
     {
         return $this->counter->getUsers($comment->id, $option);
     }
 
+    /**
+     * 투표자 수 반환
+     * 
+     * @param Comment $comment comment object
+     * @param string  $option  'assent' or 'dissent'
+     * @return int
+     */
     public function voteUserCount(Comment $comment, $option)
     {
         return $this->counter->getPoint($comment->id, $option);
     }
 
+    /**
+     * 현재 사용자의 투표정보 주입
+     * 
+     * @param Comment $comment comment object
+     * @return void
+     */
     public function bindUserVote(Comment $comment)
     {
         if (!$this->auth->guest() && $log = $this->counter->getByName($comment->id, $this->auth->user())) {
@@ -387,6 +578,15 @@ class Handler
         }
     }
 
+    /**
+     * 투표 목록
+     * 
+     * @param Comment     $comment comment object
+     * @param string      $option  'assent' or 'dissent'
+     * @param string|null $startId start id
+     * @param int         $limit   limit count
+     * @return mixed
+     */
     public function votedList(Comment $comment, $option, $startId = null, $limit = 10)
     {
         $query = $this->counter->newModel()->where('counterName', static::COUNTER_VOTE)
@@ -424,11 +624,22 @@ class Handler
         }
     }
 
+    /**
+     * Get default config information
+     * 
+     * @return array
+     */
     public function getDefaultConfig()
     {
         return $this->defaultConfig;
     }
 
+    /**
+     * Get key for permission
+     * 
+     * @param string|null $instanceId comment instance id
+     * @return string
+     */
     public function getKeyForPerm($instanceId = null)
     {
         $name = static::PLUGIN_PREFIX;
@@ -436,6 +647,12 @@ class Handler
         return $instanceId === null ? $name : $name . '.' . $instanceId;
     }
 
+    /**
+     * Create new instance id
+     *
+     * @return string
+     * @throws InstanceIdGenerateFailException
+     */
     protected function createInstanceId()
     {
         $map = $this->getInstanceMap();
@@ -443,7 +660,7 @@ class Handler
 
         do {
             if ($try > 20) {
-                throw new \Exception;
+                throw new InstanceIdGenerateFailException;
             }
             $instanceId = substr(str_replace('-', '', $this->keygen->generate()), 0, 12);
 
@@ -453,6 +670,11 @@ class Handler
         return $instanceId;
     }
 
+    /**
+     * Create model
+     *
+     * @return Comment
+     */
     public function createModel()
     {
         $class = $this->getModel();
@@ -460,11 +682,22 @@ class Handler
         return new $class;
     }
 
+    /**
+     * Get model
+     *
+     * @return string
+     */
     public function getModel()
     {
         return $this->model;
     }
 
+    /**
+     * Set model
+     *
+     * @param string $model comment model class
+     * @return void
+     */
     public function setModel($model)
     {
         $this->model = '\\' . ltrim($model, '\\');

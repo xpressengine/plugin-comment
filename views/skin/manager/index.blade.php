@@ -58,7 +58,7 @@
                                 <td>
 
                                     <strong>[{{ xe_trans($menuItem($comment)->title) }}]</strong>
-                                    {{ str_limit(strip_tags($comment->content), 100) }}
+                                    {{ str_limit($comment->pureContent, 100) }}
                                     <a href="{{ $urlMake($comment, $menuItem($comment)) }}" target="_blank">
                                         <i class="xi-external-link"></i>
                                     </a>
@@ -113,8 +113,6 @@
             }
 
             var $f = $('#__xe_form_list');
-            $('<input>').attr('type', 'hidden').attr('name', 'redirect').val(location.href).appendTo($f);
-
             eval('actions.' + mode + '($f)');
         });
 

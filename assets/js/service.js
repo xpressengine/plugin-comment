@@ -218,6 +218,39 @@
 
             XE.Component.timeago();
         },
+        removeItem: function (item) {
+            var ing = false, targets = [], self = this;
+            $.each(this.items, function (i, o) {
+                if (o.getId() == item.getId()) {
+                    ing = true;
+                } else if (ing === true && o.getIndent() <= item.getIndent()) {
+                    return false;
+                }
+
+                if (ing === true) {
+                    targets.push(o);
+                }
+            });
+
+            var $targets = null;
+            $.each(targets, function (i, o) {
+                if ($targets === null) {
+                    $targets = $(o.getDom());
+                } else {
+                    $targets.add(o);
+                }
+            });
+
+            $targets.fadeOut('slow', function () {
+                $.each(targets, function (i, o) {
+                    self.remove(o);
+                });
+
+                self.renderItems();
+
+                self.setTotalCnt(self.getTotalCnt() - targets.length);
+            });
+        },
         rendered: function (item) {
             return this._getListBox().find('[data-id="' + item.getId() + '"]').length > 0;
         },
@@ -395,18 +428,21 @@
                 self.reset();
 
                 var callback = function (json) {
-                    if (json.items) {
+                    if (!json.success) {
+                        XE.toast('warning', XE.Lang.trans('comment::msgRemoveUnable'));
+                    } else if (json.items) {
                         var items = self.makeItems($.parseHTML(json.items)),
                             nitem = items[0];
                         self.replace(nitem);
                         self.renderItems();
                     } else {
-                        item.fadeOut(function () {
-                            self.remove(item);
-                            self.renderItems();
-
-                            self.setTotalCnt(self.getTotalCnt() - 1);
-                        });
+                        self.removeItem(item);
+                        // item.fadeOut(function () {
+                        //     self.remove(item);
+                        //     self.renderItems();
+                        //
+                        //     self.setTotalCnt(self.getTotalCnt() - 1);
+                        // });
                     }
                 };
 
@@ -511,9 +547,9 @@
 
             $('.__xe_comment_edit_toggle', this.dom).show();
         },
-        fadeOut: function (callback) {
-            $(this.dom).fadeOut('slow', callback);
-        },
+        // fadeOut: function (callback) {
+        //     $(this.dom).fadeOut('slow', callback);
+        // },
         setVoteCnt: function (type, cnt){
             $('.__xe_comment_count.__xe_' + type, this.dom).text(cnt);
         },
@@ -586,7 +622,6 @@
             console.error('unknown vote type');
         },
         remove: function () {
-            React.unmountComponentAtNode($('.__xe_comment_menu', this.dom)[0]);
             $(this.dom).remove();
         },
         isChanged: function () {
