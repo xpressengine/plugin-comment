@@ -74,7 +74,6 @@
 
                             <div class="row">
                                 <div class="col-sm-6">
-
                                     <div class="form-group">
                                         <div class="clearfix">
                                             <label>{{ xe_trans('comment::manage.useApprove') }}</label>
@@ -88,11 +87,11 @@
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <div class="clearfix">
-                                            <label>{{ xe_trans('comment::manage.wysiwyg') }}</label>
+                                            <label>{{ xe_trans('comment::manage.secret') }}</label>
                                         </div>
-                                        <select name="useWysiwyg" class="form-control">
-                                            <option value="true" @if($config->get('useWysiwyg')) selected @endif>{{ xe_trans('xe::use') }}</option>
-                                            <option value="false" @if(!$config->get('useWysiwyg')) selected @endif>{{ xe_trans('xe::disuse') }}</option>
+                                        <select name="secret" class="form-control">
+                                            <option value="true" @if($config->get('secret')) selected @endif>{{ xe_trans('xe::use') }}</option>
+                                            <option value="false" @if(!$config->get('secret')) selected @endif>{{ xe_trans('xe::disuse') }}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -127,17 +126,6 @@
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <div class="clearfix">
-                                            <label>{{ xe_trans('comment::manage.secret') }}</label>
-                                        </div>
-                                        <select name="secret" class="form-control">
-                                            <option value="true" @if($config->get('secret')) selected @endif>{{ xe_trans('xe::use') }}</option>
-                                            <option value="false" @if(!$config->get('secret')) selected @endif>{{ xe_trans('xe::disuse') }}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <div class="clearfix">
                                             <label>{{ xe_trans('comment::manage.removeType') }}</label>
                                         </div>
                                         <select name="removeType" class="form-control">
@@ -146,6 +134,8 @@
                                             <option value="{{ Xpressengine\Plugins\Comment\Handler::REMOVE_UNABLE }}" @if($config->get('removeType') == Xpressengine\Plugins\Comment\Handler::REMOVE_UNABLE) selected @endif>{{ xe_trans('comment::removeUnable') }}</option>
                                         </select>
                                     </div>
+                                </div>
+                                <div class="col-sm-6">
                                 </div>
                             </div>
                         </div>

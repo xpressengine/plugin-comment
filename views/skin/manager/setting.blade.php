@@ -103,17 +103,17 @@
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <div class="clearfix">
-                                            <label>{{ xe_trans('comment::manage.wysiwyg') }}</label>
+                                            <label>{{ xe_trans('comment::manage.secret') }}</label>
                                             <div class="checkbox pull-right">
                                                 <label>
-                                                    <input type="checkbox" class="__xe_inherit" {{ $config->getPure('useWysiwyg') === null ? 'checked' : '' }}>
+                                                    <input type="checkbox" class="__xe_inherit" {{ $config->getPure('secret') === null ? 'checked' : '' }}>
                                                     {{ xe_trans('xe::inheritMode') }}
                                                 </label>
                                             </div>
                                         </div>
-                                        <select name="useWysiwyg" class="form-control">
-                                            <option value="true" @if($config->get('useWysiwyg')) selected @endif>{{ xe_trans('xe::use') }}</option>
-                                            <option value="false" @if(!$config->get('useWysiwyg')) selected @endif>{{ xe_trans('xe::disuse') }}</option>
+                                        <select name="secret" class="form-control">
+                                            <option value="true" @if($config->get('secret')) selected @endif>{{ xe_trans('xe::use') }}</option>
+                                            <option value="false" @if(!$config->get('secret')) selected @endif>{{ xe_trans('xe::disuse') }}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -160,23 +160,6 @@
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <div class="clearfix">
-                                            <label>{{ xe_trans('comment::manage.secret') }}</label>
-                                            <div class="checkbox pull-right">
-                                                <label>
-                                                    <input type="checkbox" class="__xe_inherit" {{ $config->getPure('secret') === null ? 'checked' : '' }}>
-                                                    {{ xe_trans('xe::inheritMode') }}
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <select name="secret" class="form-control">
-                                            <option value="true" @if($config->get('secret')) selected @endif>{{ xe_trans('xe::use') }}</option>
-                                            <option value="false" @if(!$config->get('secret')) selected @endif>{{ xe_trans('xe::disuse') }}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <div class="clearfix">
                                             <label>
                                                 {{ xe_trans('comment::manage.removeType') }}
                                                 <small>reply 가 존재하는 글을 삭제하는 방식을 선택합니다.</small>
@@ -194,6 +177,8 @@
                                             <option value="{{ Xpressengine\Plugins\Comment\Handler::REMOVE_UNABLE }}" @if($config->get('removeType') == Xpressengine\Plugins\Comment\Handler::REMOVE_UNABLE) selected @endif>{{ xe_trans('comment::removeUnable') }}</option>
                                         </select>
                                     </div>
+                                </div>
+                                <div class="col-sm-6">
                                 </div>
                             </div>
                         </div>

@@ -61,7 +61,6 @@ class Handler
         'useApprove' => false,
         'secret' => false,
         'perPage' => 20,
-        'useWysiwyg' => false,
         'removeType' => self::REMOVE_BATCH,
         'reverse' => false
     ];

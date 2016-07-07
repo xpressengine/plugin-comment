@@ -72,9 +72,7 @@ class CommentUIObject extends AbstractUIObject
         ];
 
         /** @var \Xpressengine\Editor\AbstractEditor $editor */
-        $editor = $config->get('useWysiwyg') ? XeEditor::get($instanceId) : null;
-
-        if ($editor) {
+        if ($editor = XeEditor::get($instanceId)) {
             $editor->setArguments(false);
 
             $props['config']['editor'] = [
