@@ -126,7 +126,10 @@
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <div class="clearfix">
-                                            <label>{{ xe_trans('comment::manage.removeType') }}</label>
+                                            <label>
+                                                {{ xe_trans('comment::manage.removeType') }}
+                                                <small>{{ xe_trans('comment::manage.explainRemoveType') }}</small>
+                                            </label>
                                         </div>
                                         <select name="removeType" class="form-control">
                                             <option value="{{ Xpressengine\Plugins\Comment\Handler::REMOVE_BATCH }}" @if($config->get('removeType') == Xpressengine\Plugins\Comment\Handler::REMOVE_BATCH) selected @endif>{{ xe_trans('comment::removeBatch') }}</option>

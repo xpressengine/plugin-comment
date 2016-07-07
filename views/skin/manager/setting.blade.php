@@ -162,7 +162,7 @@
                                         <div class="clearfix">
                                             <label>
                                                 {{ xe_trans('comment::manage.removeType') }}
-                                                <small>reply 가 존재하는 글을 삭제하는 방식을 선택합니다.</small>
+                                                <small>{{ xe_trans('comment::manage.explainRemoveType') }}</small>
                                             </label>
                                             <div class="checkbox pull-right">
                                                 <label>

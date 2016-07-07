@@ -64,6 +64,11 @@ return [
             'ko' => '삭제방식',
             'en' => 'Remove type',
         ],
+        
+        'explainRemoveType' => [
+            'ko' => '하위 댓글이 존재하는 글을 삭제하는 방식을 선택합니다.',
+            'en' => 'Select how to remove the comment that has reply.',
+        ],
 
         'ordering' => [
             'ko' => '정렬',
