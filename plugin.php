@@ -130,10 +130,10 @@ class Plugin extends AbstractPlugin
             }
         );
 
-        $this->createInstanceIntercept();
+        $this->createIntercept();
     }
 
-    private function createInstanceIntercept()
+    private function createIntercept()
     {
         intercept(
             Handler::class . '@createInstance',
@@ -145,6 +145,12 @@ class Plugin extends AbstractPlugin
                 XeEditor::setInstance($instanceId, 'editor/ckeditor@ckEditor');
             }
         );
+
+        intercept(Handler::class . '@remove', static::getId() . '::comment.fileRemove', function ($func, $comment) {
+            app('xe.storage')->unBindAll($comment->getKey());
+
+            return $func($comment);
+        });
     }
 
     private function setRoutes()
