@@ -146,8 +146,9 @@ class Plugin extends AbstractPlugin
             }
         );
 
-        intercept(Handler::class . '@remove', static::getId() . '::comment.fileRemove', function ($func, $comment) {
+        intercept(Handler::class . '@remove', static::getId() . '::comment.realteRemove', function ($func, $comment) {
             app('xe.storage')->unBindAll($comment->getKey());
+            app('xe.tag')->set($comment->getKey(), []);
 
             return $func($comment);
         });
