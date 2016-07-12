@@ -22,6 +22,7 @@ use Gate;
 use XeDB;
 use XeConfig;
 use XeEditor;
+use XeToggleMenu;
 use Schema;
 use Xpressengine\User\Rating;
 
@@ -77,6 +78,8 @@ class Plugin extends AbstractPlugin
         app('xe.permission')->register($handler->getKeyForPerm(), $grant);
         // 기본 설정
         XeConfig::set('comment', $handler->getDefaultConfig());
+        
+        XeToggleMenu::setActivates('comment', null, []);
     }
 
     private function migrate()
