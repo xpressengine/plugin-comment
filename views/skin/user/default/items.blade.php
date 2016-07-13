@@ -26,7 +26,7 @@
                     <a href="#" class="comment_delete __xe_comment_btn_destroy"><i class="xi-trash"></i><span class="bd_hidden">삭제</span></a>
                     @endcan
                     <!-- [D] 클릭시 클래스 on 적용 -->
-                    <a href="#" class="comment_more_view" data-toggle="xe-page-toggle-menu" data-url="{{route('toggleMenuPage')}}" data-data='{!! json_encode(['id'=>$item->id,'type'=>'comment/'.$item->instanceId]) !!}' data-side="dropdown-menu-right"><i class="xi-ellipsis-h"></i><span class="xe-sr-only">{{ xe_trans('xe::more') }}</span></a>
+                    <a href="#" class="comment_more_view" data-toggle="xe-page-toggle-menu" data-url="{{route('toggleMenuPage')}}" data-data='{!! json_encode(['id'=>$item->id,'type'=>'comment', 'instanceId'=>$item->instanceId]) !!}' data-side="dropdown-menu-right"><i class="xi-ellipsis-h"></i><span class="xe-sr-only">{{ xe_trans('xe::more') }}</span></a>
                 </div>
             </div>
             <div class="xe_content __xe_comment_edit_toggle">
