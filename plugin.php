@@ -98,15 +98,15 @@ class Plugin extends AbstractPlugin
         });
     }
 
-    /**
-     * @param null $installedVersion install version
-     * @return bool
-     */
-    public function checkInstalled($installedVersion = null)
-    {
-        $schema = Schema::setConnection(XeDB::connection('document')->master());
-        return $schema->hasTable($this->targetTable);
-    }
+//    /**
+//     * @param null $installedVersion install version
+//     * @return bool
+//     */
+//    public function checkInstalled($installedVersion = null)
+//    {
+//        $schema = Schema::setConnection(XeDB::connection('document')->master());
+//        return $schema->hasTable($this->targetTable);
+//    }
 
     public function boot()
     {
@@ -273,5 +273,31 @@ class Plugin extends AbstractPlugin
     public function assetPath()
     {
         return str_replace(base_path(), '', $this->pluginPath()) . '/assets';
+    }
+
+
+    /**
+     * @param null $installedVersion install version
+     * @return void
+     */
+    public function update($installedVersion = null)
+    {
+        // ver 0.9.1
+        if (XeConfig::get('toggleMenu@comment') == null) {
+            XeToggleMenu::setActivates('comment', null, []);
+        }
+    }
+
+    /**
+     * @return boolean
+     */
+    public function checkUpdated($installedVersion = NULL)
+    {
+        // ver 0.9.1
+        if (XeConfig::get('toggleMenu@comment') == null) {
+            return false;
+        }
+
+        return true;
     }
 }
