@@ -286,6 +286,10 @@ class Plugin extends AbstractPlugin
         if (XeConfig::get(XeToggleMenu::getConfigKey('comment', null)) == null) {
             XeToggleMenu::setActivates('comment', null, []);
         }
+
+        /** @var Translator $trans */
+        $trans = app('xe.translator');
+        $trans->putFromLangDataSource('comment', base_path('plugins/comment/langs/lang.php'));
     }
 
     /**
