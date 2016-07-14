@@ -283,7 +283,7 @@ class Plugin extends AbstractPlugin
     public function update($installedVersion = null)
     {
         // ver 0.9.1
-        if (XeConfig::get('toggleMenu@comment') == null) {
+        if (XeConfig::get(XeToggleMenu::getConfigKey('comment', null)) == null) {
             XeToggleMenu::setActivates('comment', null, []);
         }
     }
@@ -294,7 +294,7 @@ class Plugin extends AbstractPlugin
     public function checkUpdated($installedVersion = NULL)
     {
         // ver 0.9.1
-        if (XeConfig::get('toggleMenu@comment') == null) {
+        if (XeConfig::get(XeToggleMenu::getConfigKey('comment', null)) == null) {
             return false;
         }
 
