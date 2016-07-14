@@ -81,9 +81,13 @@ class ManagerController extends Controller
                 return $menuItems[array_search($comment->instanceId, $map)];
             },
             'urlMake' => function ($comment, $menuItem) use ($modules) {
-                return url($modules->getModuleObject($menuItem->type)
-                        ->getTypeItem($comment->target->targetId)
-                        ->getLink($menuItem->route) . '#comment-'.$comment->id);
+                if ($module = $modules->getModuleObject($menuItem->type)) {
+                    if ($item = $module->getTypeItem($comment->target->targetId)) {
+                        return $item->getLink($menuItem->route) . '#comment-'.$comment->id;
+                    }
+                }
+
+                return null;
             },
         ]);
     }

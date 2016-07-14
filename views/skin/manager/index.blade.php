@@ -59,9 +59,11 @@
 
                                     <strong>[{{ xe_trans($menuItem($comment)->title) }}]</strong>
                                     {{ str_limit($comment->pureContent, 100) }}
-                                    <a href="{{ $urlMake($comment, $menuItem($comment)) }}" target="_blank">
+                                    @if($url = $urlMake($comment, $menuItem($comment)))
+                                    <a href="{{ $url }}" target="_blank">
                                         <i class="xi-external-link"></i>
                                     </a>
+                                    @endif
                                 </td>
                                 <td><a href="#">{{ $comment->writer }}</a></td>
                                 <td>{{ $comment->assentCount }} / {{ $comment->dissentCount }}</td>
