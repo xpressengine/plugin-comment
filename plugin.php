@@ -78,7 +78,7 @@ class Plugin extends AbstractPlugin
         app('xe.permission')->register($handler->getKeyForPerm(), $grant);
         // 기본 설정
         XeConfig::set('comment', $handler->getDefaultConfig());
-        
+
         XeToggleMenu::setActivates('comment', null, []);
     }
 
@@ -220,14 +220,12 @@ class Plugin extends AbstractPlugin
                 'title' => '댓글 관리',
                 'display' => true,
                 'description' => 'blur blur~',
-                'link' => route('manage.comment.index'),
                 'ordering' => 3010
             ],
             'contents.comment.trash' => [
                 'title' => '휴지통',
                 'display' => true,
                 'description' => 'blur blur~',
-                'link' => route('manage.comment.trash'),
                 'ordering' => 3020
             ],
         ];
