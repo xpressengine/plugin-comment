@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>XE3 board</title>
+
+    <!-- core -->
+    <link href="../../../assets/core/common/css/xe-common.css" rel="stylesheet" media="all">
+    <link href="../../../assets/core/xe-ui-component/xe-ui-component.css" rel="stylesheet" media="all">
+    <link href="http://cdn.jsdelivr.net/xeicon/2.0.0/xeicon.min.css" rel="stylesheet" media="all">
+    <script>var xeBaseURL = '../../../';</script>
+    <script src="../../../assets/core/common/js/dynamicLoadManager.js"></script>
+    <script src="../../../assets/jspm_packages/system.js"></script>
+    <script src="../../../assets/systemjs.config.js"></script>
+    <script src="../../../assets/vendor/jquery/jquery.min.js"></script>
+    <script src="../../../assets/core/common/js/xe.bundle.js"></script>
+
+    <!-- additional -->        
+    <link rel="stylesheet" href="../../plugin-comment/assets/css/comment.css">           
+</head>
+<body>   
+    <div class="xe-container">
+        <!-- 댓글 -->
+        <div class="board_comment">
+            <div class="comment_header">
+                <h1 class="xe-sr-only">댓글 리스트</h1>
+                <p class="total_count"><span class="total_count_num">11</span>개 댓글</p>
+                <div class="temp_save">
+                    <!-- <a href="#" class="temp_save_num" data-toggle="xe-modal" data-target="#Modal"><strong>3</strong>개의 임시 저장 글</a> -->
+                </div>            
+            </div>
+            <form action="" class="comment_form">
+                <div class="comment_form_editor">
+                    <div class="comment_form_ckeditor">
+                        <div class="cke">임시 에디터 영역</div>
+                    </div>                        
+                    <div class="comment_form_controller">
+                        <div class="comment_form_group">
+                            <div class="comment_form_option">
+                                <label class="xe-label">
+                                    <input type="checkbox">
+                                    <span class="xe-input-helper"></span>
+                                    <span class="xe-label-text">비밀글</span>
+                                </label>
+                            </div>
+                            <div class="comment_form_btn">
+                                <a href="#" class="xe-btn xe-btn-secondary">임시저장</a>
+                                <a href="#" class="xe-btn xe-btn-secondary">미리보기</a>
+                                <a href="#" class="xe-btn xe-btn-black">등록</a>
+                            </div>
+                        </div>
+                    </div>                        
+                </div>
+            </form>
+            <div class="comment_list">
+                <!-- [D] 댓글 뎁스 적용시 depth1, depth2 추가(현재 6단계지 설정) -->
+                <div class="comment_entity depth0">
+                    <div class="comment_entity_avatar">
+                        <img src="sample/@iu.jpg" alt="아이유">
+                        <!-- [D] 소셜로그인시 클래스 kakao, google, facebook, github, naver, twitter -->
+                        <span class="social_badge facebook"></span>
+                    </div>
+                    <div class="comment_entity_body">
+                        <div class="comment_entity_body_meta">
+                            <!-- [D] 클릭시 클래스 on 적용 -->
+                            <a href="#" class="author">gunil</a>
+                            <span class="date">12시간전</span>
+                            <div class="ly_popup">
+                                <ul>
+                                <li><a href="#">신고</a></li>
+                                <li><a href="#">스패머관리</a></li>
+                                <li><a href="#">휴지통</a></li>
+                                <li><a href="#">등등</a></li>
+                                </ul>
+                            </div>
+                            <div class="comment_entity_tool">
+                                <a href="#" class="comment_modify"><i class="xi-eraser"></i><span class="xe-sr-only">수정</span></a>
+                                <a href="#" class="comment_delete"><i class="xi-trash"></i><span class="xe-sr-only">삭제</span></a>
+                                <div class="comment_more">
+                                    <!-- [D] 클릭시 클래스 on 적용 -->
+                                    <a href="#" class="comment_more_view"><i class="xi-ellipsis-h"></i><span class="xe-sr-only">더보기</span></a>
+                                    <div class="ly_popup">
+                                        <ul>
+                                        <li><a href="#">신고</a></li>
+                                        <li><a href="#">스패머관리</a></li>
+                                        <li><a href="#">휴지통</a></li>
+                                        <li><a href="#">등등</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="xe_content">
+                            <p>안녕하세요<br>반갑습니다. 반갑습니다. 반갑습니다. 반갑습니다. 반갑습니다. 반갑습니다. 반갑습니다. 반갑습니다</p>
+                            <p>반갑습니다</p>
+                        </div>
+                        <div class="comment_action">
+                            <div class="comment_file_list">
+                                <!-- [D] 클릭시 클래스 on 적용 -->
+                                <a href="#" class="btn_file">첨부파일 <strong class="file_num">4</strong></a>
+                                <ul>
+                                <li><a href="#"><i class="xi-download"></i> 아이유 사진.jpg <span class="file_size">(5Mb)</span></a></li>
+                                <li><a href="#"><i class="xi-download"></i> 아이유 사진.jpg <span class="file_size">(5Mb)</span></a></li>
+                                <li><a href="#"><i class="xi-download"></i> 아이유 사진.jpg <span class="file_size">(5Mb)</span></a></li>
+                                </ul>
+                            </div>
+                            <div class="vote">
+                                <!-- [D] 클릭시 클래스 on 적용 -->
+                                <a href="#" class="btn_share like"><i class="xi-heart"></i> <span class="xe-sr-only">좋아요</span></a>
+                                <!-- [D] 클릭시 클래스 on 적용 및 vote_list 영역 활성화 -->
+                                <a href="#" class="btn_share like_num">9</a>
+                            </div>
+                            <!-- [D] 클릭시 클래스 on 적용 및 comment_action_area 활성화 -->
+                            <a href="#" class="btn_share reply"><i class="xi-reply"></i> 답글</a>
+                            <!-- [D] 클릭시 클래스 on 적용 -->
+                            <a href="#" class="btn_share share"><i class="xi-external-link"></i> 공유</a>
+                            <div class="comment_share_area">
+                                <ul class="share_service">
+                                <li><a href="#" class="facebook"><i class="xi-facebook"></i> <span class="xe-sr-only">페이스북 공유</span></a></li>
+                                <li><a href="#" class="twitter"><i class="xi-twitter"></i> <span class="xe-sr-only">트위터 겅유</span></a></li>
+                                <li><a href="#" class="permalink"><i class="xi-link"></i> <span class="xe-sr-only">링크 복사</span></a> <input type="text" class="sharelink" value="http://www.test.com" readonly></li>
+                                </ul>
+                            </div>
+                            <div class="vote_list">
+                                <ul>
+                                <li><img src="sample/@iu.jpg" alt="아이유" title="아이유"></li>
+                                <li><img src="sample/@iu.jpg" alt="아이유" title="아이유"></li>
+                                <li><img src="sample/@iu.jpg" alt="아이유" title="아이유"></li>
+                                <li><img src="sample/@iu.jpg" alt="아이유" title="아이유"></li>
+                                <li><img src="sample/@iu.jpg" alt="아이유" title="아이유"></li>
+                                <!-- [D] 해당글이 본인일 경우 클래스 on 적용 -->
+                                <li class="on"><img src="sample/@iu.jpg" alt="아이유" title="아이유"></li>
+                                <li><img src="sample/@iu.jpg" alt="아이유" title="아이유"></li>
+                                <li><img src="sample/@iu.jpg" alt="아이유" title="아이유"></li>
+                                <li><img src="sample/@iu.jpg" alt="아이유" title="아이유"></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="comment_action_area">
+                            <div class="comment_action_area_avatar">
+                                <!-- [D] 비로그인 및 프로필 이미지가 없을 경우 기본 이미지 적용 -->
+                                <img src="../assets/img/defalut_profile.jpg" alt="default profile">
+                            </div>
+                            <form action="" class="comment_form">
+                                <div class="comment_form_editor">
+                                    <div class="comment_form_ckeditor">
+                                        <div class="cke">임시 에디터 영역</div>
+                                    </div>
+                                    <div class="comment_form_controller">
+                                        <div class="comment_form_input">
+                                            <input type="text" class="xe-form-control" placeholder="이름" title="이름">
+                                            <input type="text" class="xe-form-control" placeholder="비밀번호" title="비밀번호">
+                                            <input type="text" class="xe-form-control v2" placeholder="이메일 주소" title="이메일 주소">
+                                        </div>
+                                        <div class="comment_form_group">
+                                            <div class="comment_form_option">
+                                                <label class="xe-label">
+                                                    <input type="checkbox">
+                                                    <span class="xe-input-helper"></span>
+                                                    <span class="xe-label-text">비밀글</span>
+                                                </label>
+                                            </div>
+                                            <div class="comment_form_btn nologin">
+                                                <a href="#" class="xe-btn xe-btn-secondary">미리보기</a>
+                                                <a href="#" class="xe-btn xe-btn-black">등록</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment_entity depth1">
+                    <div class="comment_entity_avatar">
+                        <img src="sample/@iu.jpg" alt="naver">
+                        <span class="social_badge naver"></span>
+                    </div>
+                    <div class="comment_entity_body">
+                        <div class="comment_entity_body_meta">
+                            <!-- [D] 클릭시 클래스 on 적용 -->
+                            <a href="#" class="author">naver</a>
+                            <span class="date">12시간전</span>
+                            <div class="ly_popup">
+                                <ul>
+                                <li><a href="#">신고</a></li>
+                                <li><a href="#">스패머관리</a></li>
+                                <li><a href="#">휴지통</a></li>
+                                <li><a href="#">등등</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="comment_entity_tool">
+                            <div class="comment_more">
+                                <!-- [D] 클릭시 클래스 on 적용 -->
+                                <a href="#" class="comment_more_view"><i class="xi-ellipsis-h"></i><span class="xe-sr-only">더보기</span></a>
+                                <div class="ly_popup">
+                                    <ul>
+                                    <li><a href="#">신고</a></li>
+                                    <li><a href="#">스패머관리</a></li>
+                                    <li><a href="#">휴지통</a></li>
+                                    <li><a href="#">등등</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="xe_content">
+                            <p>안녕하세요 아이유 입니다.</p>
+                        </div>
+                        <div class="comment_action">
+                            <div class="vote">
+                                <a href="#" class="btn_share like"><i class="xi-heart"></i> <span class="xe-sr-only">좋아요</span></a>
+                                <a href="#" class="btn_share like_num">1</a>
+                            </div>
+                            <a href="#" class="btn_share reply"><i class="xi-reply"></i> 답글</a>
+                            <a href="#" class="btn_share share"><i class="xi-external-link"></i> 공유</a>
+                            <div class="comment_share_area">
+                                <ul class="share_service">
+                                <li><a href="#" class="facebook"><i class="xi-facebook"></i> <span class="xe-sr-only">페이스북 공유</span></a></li>
+                                <li><a href="#" class="twitter"><i class="xi-twitter"></i> <span class="xe-sr-only">트위터 겅유</span></a></li>
+                                <li><a href="#" class="permalink"><i class="xi-link"></i> <span class="xe-sr-only">링크 복사</span></a> <input type="text" class="sharelink" value="http://www.test.com" readonly></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="comment_action_area">
+                            <div class="comment_action_area_avatar">
+                                <img src="sample/@iu.jpg" alt="아이유">
+                            </div>
+                            <form action="" class="comment_form">
+                                <div class="comment_form_editor">
+                                    <div class="comment_form_ckeditor">
+                                        <div class="cke">임시 에디터 영역</div>
+                                    </div>
+                                    <div class="comment_form_controller">
+                                        <div class="comment_form_group">
+                                            <div class="comment_form_option">                                                    
+                                                <input type="checkbox" id=""><label for="">비밀글</label>
+                                            </div>
+                                            <div class="comment_form_btn nologin">
+                                                <a href="#" class="bd_btn btn_preview">미리보기</a>
+                                                <a href="#" class="bd_btn btn_submit">등록</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment_entity depth2">
+                    <div class="comment_entity_avatar">
+                        <img src="sample/@iu.jpg" alt="github">
+                        <span class="social_badge github"></span>
+                    </div>
+                    <div class="comment_entity_body">
+                        <div class="comment_entity_body_meta">
+                             <!-- [D] 클릭시 클래스 on 적용 -->
+                            <a href="#" class="author">github</a>
+                            <span class="date">12시간전</span>
+                            <div class="ly_popup">
+                                <ul>
+                                <li><a href="#">신고</a></li>
+                                <li><a href="#">스패머관리</a></li>
+                                <li><a href="#">휴지통</a></li>
+                                <li><a href="#">등등</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="comment_entity_tool">
+                            <div class="comment_more">
+                                <!-- [D] 클릭시 클래스 on 적용 -->
+                                <a href="#" class="comment_more_view"><i class="xi-ellipsis-h"></i><span class="xe-sr-only">더보기</span></a>
+                                <div class="ly_popup">
+                                    <ul>
+                                    <li><a href="#">신고</a></li>
+                                    <li><a href="#">스패머관리</a></li>
+                                    <li><a href="#">휴지통</a></li>
+                                    <li><a href="#">등등</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="xe_content">
+                            <p>안녕하세요 아이유 입니다.</p>
+                        </div>
+                        <div class="comment_action">
+                            <div class="vote">
+                                <a href="#" class="btn_share like"><i class="xi-heart"></i> <span class="xe-sr-only">좋아요</span></a>
+                                <a href="#" class="btn_share like_num">1</a>
+                            </div>
+                            <a href="#" class="btn_share share"><i class="xi-external-link"></i> 공유</a>
+                            <div class="comment_share_area">
+                                <ul class="share_service">
+                                <li><a href="#" class="facebook"><i class="xi-facebook"></i> <span class="xe-sr-only">페이스북 공유</span></a></li>
+                                <li><a href="#" class="twitter"><i class="xi-twitter"></i> <span class="xe-sr-only">트위터 겅유</span></a></li>
+                                <li><a href="#" class="permalink"><i class="xi-link"></i> <span class="xe-sr-only">링크 복사</span></a> <input type="text" class="sharelink" value="http://www.test.com" readonly></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="pagination_seemore">
+                <a href="#">더보기 (3개의 댓글 더 있음)</a>
+            </div>
+        </div>
+        <!--// 댓글  -->
+    </div>
+</body>
+</html>
