@@ -21,7 +21,7 @@ use Xpressengine\Menu\MenuHandler;
 use XePresenter;
 use XeConfig;
 use XeDB;
-use Xpressengine\Module\ModuleHandler;
+use Xpressengine\Menu\ModuleHandler;
 use Xpressengine\Permission\PermissionSupport;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\Support\Exceptions\InvalidArgumentException;
