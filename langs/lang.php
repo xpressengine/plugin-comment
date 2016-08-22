@@ -1,6 +1,18 @@
 <?php
 
 return [
+    'comment' => [
+        'ko' => '댓글',
+        'en' => 'Comment',
+    ],
+    'commentMange' => [
+        'ko' => '댓글 관리',
+        'en' => 'Comment Manage',
+    ],
+    'trash' => [
+        'ko' => '휴지통',
+        'en' => 'Trash Manage',
+    ],
     'manage' => [
         'detailSetting' => [
             'ko' => '댓글 상세 설정',

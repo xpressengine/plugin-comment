@@ -211,19 +211,19 @@ class Plugin extends AbstractPlugin
     {
         $menus = [
             'contents.comment' => [
-                'title' => '댓글',
+                'title' => 'comment::comment',
                 'display' => true,
                 'description' => 'blur blur~',
                 'ordering' => 3000
             ],
             'contents.comment.content' => [
-                'title' => '댓글 관리',
+                'title' => 'comment::commentMange',
                 'display' => true,
                 'description' => 'blur blur~',
                 'ordering' => 3010
             ],
             'contents.comment.trash' => [
-                'title' => '휴지통',
+                'title' => 'comment::trash',
                 'display' => true,
                 'description' => 'blur blur~',
                 'ordering' => 3020
