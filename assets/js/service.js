@@ -207,7 +207,7 @@
                     }
                 } else if (item.isChanged()) {
                     var old = this._getListBox().find('[data-id="' + item.getId() + '"]')[0];
-                    $(old).after(dom);
+                    $(old).before(dom);
                     $(old).remove();
                     item.unsetChanged();
                 }
