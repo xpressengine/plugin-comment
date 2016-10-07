@@ -57,7 +57,7 @@
                     form = new Form(dom, 'create', function (json) {
                         this._assetLoad(json.XE_ASSET_LOAD);
 
-                        var items = this.makeItems($.parseHTML(json.items)),
+                        var items = this.makeItems($.parseHTML(json.items, document, true)),
                             item = items[0];
                         this.lastIn(item);
                         this.renderItems();
@@ -105,7 +105,7 @@
                 success: function (json) {
                     this._assetLoad(json.XE_ASSET_LOAD);
 
-                    var items = this.makeItems($.parseHTML(json.items));
+                    var items = this.makeItems($.parseHTML(json.items, document, true));
                     for (var i in items) {
                         if (this.props.config.reverse === true) {
                             this.append(items[i]);
@@ -354,7 +354,7 @@
                     item.setForm(new Form($.parseHTML(json.html), 'reply', function (json) {
                         self._assetLoad(json.XE_ASSET_LOAD);
 
-                        var items = self.makeItems($.parseHTML(json.items)),
+                        var items = self.makeItems($.parseHTML(json.items, document, true)),
                             child = items[0];
                         self.spotIn(child);
                         item.removeForm();
@@ -392,7 +392,7 @@
                         var form = new Form($.parseHTML(json.html), mode, function (json) {
                             self._assetLoad(json.XE_ASSET_LOAD);
 
-                            var items = self.makeItems($.parseHTML(json.items)),
+                            var items = self.makeItems($.parseHTML(json.items, document, true)),
                                 item = items[0];
                             item.setChanged();
                             self.replace(item);
