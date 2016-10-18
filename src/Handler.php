@@ -280,6 +280,8 @@ class Handler
         if (!$user instanceof Guest) {
             $inputs['userId'] = $user->getId();
             $inputs['writer'] = $user->getDisplayName();
+        } else {
+            $inputs['userId'] = '';
         }
 
         $doc = $this->documents->add($inputs);
