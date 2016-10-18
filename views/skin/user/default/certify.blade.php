@@ -1,8 +1,5 @@
-<form class="comment_form" action="{{ route('plugin.comment.certify') }}">
+<form class="comment_form" action="{{ route('plugin.comment.certify', ['instanceId' => $comment->instanceId, 'id' => $comment->id]) }}">
     <input type="hidden" name="mode" value="{{ $mode }}">
-    <input type="hidden" name="instanceId" value="{{ $comment->instanceId }}">
-    <input type="hidden" name="targetId" value="{{ $comment->targetId }}">
-    <input type="hidden" name="id" value="{{ $comment->id }}">
     <div class="comment_form_controller">
         <input type="email" class="bd_input v2" name="email" placeholder="E-mail">
         <input type="password" class="bd_input" name="certifyKey" placeholder="Password">

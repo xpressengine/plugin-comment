@@ -1,10 +1,6 @@
 <div class="comment_action_area modify">
-    <form action="{{ route('plugin.comment.update') }}" class="comment_form">
-        <!-- input hidden area start -->
-        <input type="hidden" name="targetId" value="{{ $targetId }}">
-        <input type="hidden" name="instanceId" value="{{ $instanceId }}">
-        <input type="hidden" name="id" value="{{ $comment->id }}">
-        <!-- input hidden area end -->
+    <form action="{{ route('plugin.comment.update', ['instanceId' => $comment->instanceId, 'id' => $comment->id]) }}" class="comment_form">
+        {{ method_field('PUT') }}
 
         <div class="comment_form_editor">
             <div class="comment_form_ckeditor __xe_content">

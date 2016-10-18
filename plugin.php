@@ -189,21 +189,24 @@ class Plugin extends AbstractPlugin
             ]);
         }, ['namespace' => __NAMESPACE__]);
 
-        Route::fixed('comment', function () {
-            Route::get('index', ['as' => 'plugin.comment.index', 'uses' => 'UserController@index']);
-            Route::post('store', ['as' => 'plugin.comment.store', 'uses' => 'UserController@store']);
-            Route::post('update', ['as' => 'plugin.comment.update', 'uses' => 'UserController@update']);
-            Route::post('destroy', ['as' => 'plugin.comment.destroy', 'uses' => 'UserController@destroy']);
+        Route::fixed('comment/{instanceId}', function () {
+            Route::get('/', ['as' => 'plugin.comment.index', 'uses' => 'UserController@index']);
+            Route::post('/', ['as' => 'plugin.comment.store', 'uses' => 'UserController@store']);
+            Route::put('{id}', ['as' => 'plugin.comment.update', 'uses' => 'UserController@update']);
+            Route::delete('{id}', ['as' => 'plugin.comment.destroy', 'uses' => 'UserController@destroy']);
 
-            Route::get('form', 'UserController@form');
-            Route::post('certify', ['as' => 'plugin.comment.certify', 'uses' => 'UserController@certify']);
-            Route::get('voteInfo', 'UserController@voteInfo');
-            Route::post('voteOn', 'UserController@voteOn');
-            Route::post('voteOff', 'UserController@voteOff');
+            Route::get('create', 'UserController@create');
+            Route::get('{id}/edit', 'UserController@edit');
+            Route::get('{id}/reply', 'UserController@reply');
 
-            Route::get('votedUser', 'UserController@votedUser');
-            Route::get('votedModal', ['as' => 'plugin.comment.voted.modal', 'uses' => 'UserController@votedModal']);
-            Route::get('votedList', ['as' => 'plugin.comment.voted.list', 'uses' => 'UserController@votedList']);
+            Route::post('{id}/certify', ['as' => 'plugin.comment.certify', 'uses' => 'UserController@certify']);
+
+            Route::get('{id}/votes', 'UserController@vote');
+            Route::post('{id}/votes', 'UserController@storeVote');
+            Route::delete('{id}/votes', 'UserController@destroyVote');
+
+            Route::get('{id}/votes/modal', ['as' => 'plugin.comment.vote.modal', 'uses' => 'UserController@voteModal']);
+            Route::get('{id}/votes/item', ['as' => 'plugin.comment.vote.item', 'uses' => 'UserController@voteItem']);
         }, ['namespace' => __NAMESPACE__]);
     }
 

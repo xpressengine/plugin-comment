@@ -54,11 +54,9 @@ class UserController extends Controller
         XePresenter::setSkinTargetId($plugin->getId());
     }
 
-    public function index()
+    public function index($instanceId)
     {
         $targetId = Input::get('targetId');
-        $instanceId = Input::get('instanceId');
-        $targetAuthorId = Input::get('targetAuthorId');
 
         $offsetHead = !empty(Input::get('offsetHead')) ? Input::get('offsetHead') : null;
         $offsetReply = !empty(Input::get('offsetReply')) ? Input::get('offsetReply') : null;
@@ -130,10 +128,58 @@ class UserController extends Controller
         ]);
     }
 
-    public function store()
+    public function create($instanceId)
     {
-        $instanceId = Input::get('instanceId');
+        $targetId = Input::get('targetId');
+        $targetAuthorId = Input::get('targetAuthorId');
 
+        if (Gate::allows('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
+            $config = $this->handler->getConfig($instanceId);
+
+            $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
+
+            $content = $this->skin->setView('create')->setData([
+                'targetId' => $targetId,
+                'instanceId' => $instanceId,
+                'targetAuthorId' => $targetAuthorId,
+                'config' => $config,
+                'fieldTypes' => $fieldTypes,
+            ])->render();
+
+            $data = ['mode' => 'create', 'html' => $content];
+        } else {
+            $data = ['mode' => 'create'];
+        }
+
+        return XePresenter::makeApi($data);
+    }
+
+    public function reply($instanceId, $id)
+    {
+        if (Gate::denies('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
+            throw new AccessDeniedHttpException;
+        }
+
+        $model = $this->handler->createModel();
+        if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
+            throw new UnknownIdentifierException;
+        }
+
+        $config = $this->handler->getConfig($comment->instanceId);
+
+        $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
+
+        $content = $this->skin->setView('reply')->setData([
+            'config' => $config,
+            'comment' => $comment,
+            'fieldTypes' => $fieldTypes,
+        ])->render();
+
+        return XePresenter::makeApi(['mode' => 'reply', 'html' => $content]);
+    }
+
+    public function store($instanceId)
+    {
         $inputs = Input::except(['_token']);
 
         // purifier 에 의해 몇몇 태그 속성이 사라짐
@@ -176,7 +222,7 @@ class UserController extends Controller
         $inputs['format'] = $editor->htmlable() ? Comment::FORMAT_HTML : Comment::FORMAT_NONE;
 
         /** @var Comment $comment */
-        $comment = $this->handler->create($inputs);
+        $comment = $this->handler->create(array_merge($inputs, ['instanceId' => $instanceId]));
 
         // file 처리
         XeStorage::sync($comment->getKey(), array_get($inputs, $editor->getFileInputName(), []));
@@ -198,11 +244,37 @@ class UserController extends Controller
         ]));
     }
 
-    public function update()
+    public function edit($instanceId, $id)
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $inputs = Input::except(['instanceId', 'id', '_token']);
+        $model = $this->handler->createModel();
+        if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
+            throw new UnknownIdentifierException;
+        }
+
+        if (Gate::denies('update', $comment)) {
+            if (Gate::allows('update-visible', $comment)) {
+                return $this->getCertifyForm('edit', $comment);
+            }
+
+            throw new AccessDeniedHttpException;
+        }
+
+        $config = $this->handler->getConfig($comment->instanceId);
+
+        $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
+
+        $content = $this->skin->setView('edit')->setData([
+            'config' => $config,
+            'comment' => $comment,
+            'fieldTypes' => $fieldTypes,
+        ])->render();
+
+        return XePresenter::makeApi(['mode' => 'edit', 'html' => $content, 'etc' => ['files' => \XeEditor::getFiles($comment->getKey())]]);
+    }
+
+    public function update($instanceId, $id)
+    {
+        $inputs = Input::except(['_token', '_method']);
 
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
@@ -210,7 +282,6 @@ class UserController extends Controller
         $inputs['content'] = $originInput['content'];
 
         $rules = [
-            'targetId' => 'Required',
             'content' => 'Required|Min:4',
         ];
 
@@ -274,11 +345,8 @@ class UserController extends Controller
         ]));
     }
 
-    public function destroy()
+    public function destroy($instanceId, $id)
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-
         $model = $this->handler->createModel();
         if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
             throw new UnknownIdentifierException;
@@ -316,10 +384,81 @@ class UserController extends Controller
         return XePresenter::makeApi(array_merge($data, ['success' => true]));
     }
 
-    public function voteOn()
+    protected function getCertifyForm($mode, $comment)
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
+        $content = $this->skin->setView('certify')->setData([
+            'mode' => $mode,
+            'comment' => $comment
+        ])->render();
+
+//        return response()->make(XePresenter::makeApi(['mode' => 'certify', 'html' => $content]), 205);
+        return XePresenter::makeApi(['mode' => 'certify', 'html' => $content]);
+    }
+
+    public function certify($instanceId, $id)
+    {
+        $inputs = Input::except('_token');
+
+        $rules = [
+            'email' => 'Required|Between:3,64|Email',
+            'certifyKey' => 'Required|AlphaNum|Between:4,8',
+        ];
+
+        $validator = Validator::make($inputs, $rules);
+
+        if ($validator->fails()) {
+            $e = new InvalidArgumentException;
+            $e->setMessage($validator->errors()->first());
+
+            throw $e;
+        }
+
+        $model = $this->handler->createModel();
+        if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
+            throw new UnknownIdentifierException;
+        }
+
+        if (
+            $inputs['email'] !== $comment->email
+            || Hash::check($inputs['certifyKey'], $comment->certifyKey) === false
+        ) {
+            throw new NotMatchCertifyKeyException;
+        }
+
+        $this->handler->certified($comment);
+
+        if (Input::get('mode') == 'edit') {
+            return $this->edit($instanceId, $id);
+        } elseif (Input::get('mode') == 'destroy') {
+            return $this->destroy($instanceId, $id);
+        }
+
+        throw new BadRequestException;
+    }
+
+    public function vote($instanceId, $id)
+    {
+        $option = Input::get('option');
+
+        $model = $this->handler->createModel();
+        $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
+        $users = $this->handler->voteUsers($comment, $option);
+
+        $users = new LengthAwarePaginator($users, count($users), 10);
+
+
+        return apiRender('vote', [
+            'users' => $users,
+            'instanceId' => $instanceId,
+            'id' => $id,
+            'data' => [
+                'option' => $option,
+            ]
+        ]);
+    }
+
+    public function storeVote($instanceId, $id)
+    {
         $option = Input::get('option');
 
         if (Auth::guest() !== true) {
@@ -347,10 +486,8 @@ class UserController extends Controller
         return XePresenter::makeApi($data);
     }
 
-    public function voteOff()
+    public function destroyVote($instanceId, $id)
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
         $option = Input::get('option');
 
         if (Auth::guest() !== true) {
@@ -378,52 +515,26 @@ class UserController extends Controller
         return XePresenter::makeApi($data);
     }
 
-    public function votedUser()
+    public function voteModal($instanceId, $id)
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $option = Input::get('option');
-
-        $model = $this->handler->createModel();
-        $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
-        $users = $this->handler->voteUsers($comment, $option);
-
-        $users = new LengthAwarePaginator($users, count($users), 10);
-
-        return apiRender('voted', [
-            'users' => $users,
-            'data' => [
-                'instanceId' => $instanceId,
-                'id' => $id,
-                'option' => $option,
-            ]
-        ]);
-    }
-    
-    public function votedModal()
-    {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
         $option = Input::get('option');
 
         $model = $this->handler->createModel();
         $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
         $count = $this->handler->voteUserCount($comment, $option);
 
-        return apiRender('votedModal', [
+        return apiRender('voteModal', [
             'count' => $count,
+            'instanceId' => $instanceId,
+            'id' => $id,
             'data' => [
-                'instanceId' => $instanceId,
-                'id' => $id,
                 'option' => $option,
             ]
         ]);
     }
     
-    public function votedList()
+    public function voteItem($instanceId, $id)
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
         $option = Input::get('option');
         $startId = Input::get('startId');
         $limit = Input::get('limit', 10);
@@ -457,156 +568,5 @@ class UserController extends Controller
             'list' => $list,
             'nextStartId' => $nextStartId,
         ]);
-    }
-
-    public function form()
-    {
-        $mode = Input::get('mode');
-
-        $method = 'get' . ucfirst($mode) . 'Form';
-
-        return $this->$method();
-    }
-
-    protected function getCreateForm()
-    {
-        $targetId = Input::get('targetId');
-        $instanceId = Input::get('instanceId');
-        $targetAuthorId = Input::get('targetAuthorId');
-
-        if (Gate::allows('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
-            $config = $this->handler->getConfig($instanceId);
-
-            $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
-
-            $content = $this->skin->setView('create')->setData([
-                'targetId' => $targetId,
-                'instanceId' => $instanceId,
-                'targetAuthorId' => $targetAuthorId,
-                'config' => $config,
-                'fieldTypes' => $fieldTypes,
-            ])->render();
-
-            $data = ['mode' => 'create', 'html' => $content];
-        } else {
-            $data = ['mode' => 'create'];
-        }
-
-        return XePresenter::makeApi($data);
-    }
-
-    protected function getEditForm()
-    {
-        $targetId = Input::get('targetId');
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-
-        $model = $this->handler->createModel();
-        if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
-            throw new UnknownIdentifierException;
-        }
-
-        if (Gate::denies('update', $comment)) {
-            if (Gate::allows('update-visible', $comment)) {
-                return $this->getCertifyForm('edit', $comment);
-            }
-
-            throw new AccessDeniedHttpException;
-        }
-
-        $config = $this->handler->getConfig($comment->instanceId);
-
-        $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
-
-        $content = $this->skin->setView('edit')->setData([
-            'targetId' => $targetId,
-            'instanceId' => $instanceId,
-            'config' => $config,
-            'comment' => $comment,
-            'fieldTypes' => $fieldTypes,
-        ])->render();
-
-        return XePresenter::makeApi(['mode' => 'edit', 'html' => $content, 'etc' => ['files' => \XeEditor::getFiles($comment->getKey())]]);
-    }
-
-    protected function getReplyForm()
-    {
-        $id = Input::get('id');
-        $instanceId = Input::get('instanceId');
-
-        if (Gate::denies('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
-            throw new AccessDeniedHttpException;
-        }
-
-        $model = $this->handler->createModel();
-        if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
-            throw new UnknownIdentifierException;
-        }
-
-        $config = $this->handler->getConfig($comment->instanceId);
-
-        $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
-
-        $content = $this->skin->setView('reply')->setData([
-            'config' => $config,
-            'comment' => $comment,
-            'fieldTypes' => $fieldTypes,
-        ])->render();
-
-        return XePresenter::makeApi(['mode' => 'reply', 'html' => $content]);
-    }
-
-    protected function getCertifyForm($mode, $comment)
-    {
-        $content = $this->skin->setView('certify')->setData([
-            'mode' => $mode,
-            'comment' => $comment
-        ])->render();
-
-        return XePresenter::makeApi(['mode' => 'certify', 'html' => $content]);
-    }
-
-    public function certify()
-    {
-        $inputs = Input::except('_token');
-
-        $rules = [
-            'id' => 'Required',
-            'instanceId' => 'Required',
-            'email' => 'Required|Between:3,64|Email',
-            'certifyKey' => 'Required|AlphaNum|Between:4,8',
-        ];
-
-        $validator = Validator::make($inputs, $rules);
-
-        if ($validator->fails()) {
-            // todo: validation lang 과 translation lang 호환 처리
-            $e = new InvalidArgumentException;
-            $e->setMessage($validator->errors()->first());
-
-            throw $e;
-        }
-
-        $model = $this->handler->createModel();
-        if (!$comment = $model->newQuery()->where('instanceId', $inputs['instanceId'])->where('id', $inputs['id'])->first()) {
-            throw new UnknownIdentifierException;
-        }
-
-        if (
-            $inputs['email'] !== $comment->email
-            || Hash::check($inputs['certifyKey'], $comment->certifyKey) === false
-        ) {
-            throw new NotMatchCertifyKeyException;
-        }
-
-        $this->handler->certified($comment);
-
-        if (Input::get('mode') == 'edit') {
-            return $this->getEditForm();
-        } elseif (Input::get('mode') == 'destroy') {
-            return $this->destroy();
-        }
-
-        throw new BadRequestException;
     }
 }

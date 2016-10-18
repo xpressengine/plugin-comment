@@ -3,9 +3,8 @@
         <!-- [D] 비로그인 및 프로필 이미지가 없을 경우 기본 이미지 적용 -->
         <img src="{{ Auth::user()->getProfileImage() }}" alt="default profile">
     </div>
-    <form action="{{ route('plugin.comment.store') }}" class="comment_form">
+    <form action="{{ route('plugin.comment.store', ['instanceId' => $comment->instanceId]) }}" class="comment_form">
         <!-- input hidden area start -->
-        <input type="hidden" name="instanceId" value="{{ $comment->instanceId }}">
         <input type="hidden" name="targetId" value="{{ $comment->target->targetId }}">
         <input type="hidden" name="parentId" value="{{ $comment->id }}">
         <input type="hidden" name="targetAuthorId" value="{{ $comment->target->targetAuthorId }}">

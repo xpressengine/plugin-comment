@@ -22,9 +22,15 @@
         XE.toast('xe-warning', errorMessage ? errorMessage : responseText.exception);
     };
 
-    var url = function (relativePath) {
+    var url = function (relativePath, instanceId) {
         var prefix = comment.urlPrefix == '' ? '' : '/' + comment.urlPrefix;
-        return prefix + '/comment' + (relativePath.charAt(0) == '/' ? '' : '/') + relativePath;
+        prefix = prefix + '/comment/' + instanceId;
+
+        if (!relativePath || relativePath === '/') {
+            return prefix;
+        }
+
+        return prefix + (relativePath.charAt(0) == '/' ? '' : '/') + relativePath;
     };
 
     function Comment(props, container)
@@ -47,13 +53,12 @@
         run: function () {
             this.getListMore();
 
-            this.getForm('create', null, function (json) {
+            this.getCreateForm(function (json) {
                 if (!json.html) {
                     return false;
                 }
 
-                var self = this,
-                    dom = $.parseHTML(json.html),
+                var dom = $.parseHTML(json.html),
                     form = new Form(dom, 'create', function (json) {
                         this._assetLoad(json.XE_ASSET_LOAD);
 
@@ -63,7 +68,7 @@
                         this.renderItems();
 
                         this.setTotalCnt(this.getTotalCnt() + 1);
-                    }.bind(this), self.props.config.editor);
+                    }.bind(this), this.props.config.editor);
 
                 form.render(this._getFormBox());
 
@@ -88,8 +93,8 @@
             this.loading = true;
             var data = {
                 targetId: this.props.targetId,
-                instanceId: this.props.instanceId,
-                targetAuthorId: this.props.targetAuthorId
+                // instanceId: this.props.instanceId,
+                // targetAuthorId: this.props.targetAuthorId
             };
 
             if (this.items.length > 0) {
@@ -98,7 +103,7 @@
             }
 
             XE.ajax({
-                url: url('/index'),
+                url: url('/', this.props.instanceId),
                 type: 'get',
                 dataType: 'json',
                 data: data,
@@ -269,24 +274,28 @@
                 return this.items[0];
             }
         },
-        getForm: function (mode, id, callback) {
-            // mode is create, edit and reply
-            var data = {
-                targetId: this.props.targetId,
-                instanceId: this.props.instanceId,
-                targetAuthorId: this.props.targetAuthorId
-            };
-            $.extend(data, {mode: mode, id: id});
+        getForm: function (url, callback, data) {
+            data = data || {};
 
             XE.ajax({
-                url: url('/form'),
+                url: url,
                 type: 'get',
                 dataType: 'json',
                 data: data,
-                success: function (json) {
-                    callback(json);
-                }.bind(this)
+                success: callback
             });
+        },
+        getCreateForm: function (callback) {
+            this.getForm(url('create', this.props.instanceId), callback, {
+                targetId: this.props.targetId,
+                targetAuthorId: this.props.targetAuthorId
+            });
+        },
+        getEditForm: function (id, callback) {
+            this.getForm(url(id + '/edit', this.props.instanceId), callback);
+        },
+        getReplyForm: function (id, callback) {
+            this.getForm(url(id + '/reply', this.props.instanceId), callback);
         },
 
         find: function (id) {
@@ -350,7 +359,7 @@
 
                 self.reset();
 
-                self.getForm('reply', item.getId(), function (json) {
+                self.getReplyForm(item.getId(), function (json) {
                     item.setForm(new Form($.parseHTML(json.html), 'reply', function (json) {
                         self._assetLoad(json.XE_ASSET_LOAD);
 
@@ -401,7 +410,8 @@
 
                         item.setForm(form);
                     };
-                self.getForm(mode, item.getId(), function (json) {
+                self.getEditForm(item.getId(), function (json, textStatus, jqXHR) {
+                    // if (jqXHR.status === 205) {
                     if (json.mode === 'certify') {
                         var form = new Certify($.parseHTML(json.html), callback);
                         item.setForm(form);
@@ -447,11 +457,11 @@
                 };
 
                 XE.ajax({
-                    url: url('/destroy'),
-                    type: 'post',
+                    url: url(item.getId(), self.props.instanceId),
+                    type: 'delete',
                     dataType: 'json',
-                    data: {instanceId: self.props.instanceId, id: item.getId()},
-                    success: function (json) {
+                    success: function (json, textStatus, jqXHR) {
+                        // if (jqXHR.status === 205) {
                         if (json.mode && json.mode === 'certify') {
                             var dom = $.parseHTML(json.html);
                             item.setForm(new Certify(dom, callback));
@@ -565,13 +575,15 @@
                 self.state.ing = true;
 
                 var type = self._currentVoteType(this),
-                    urlSuffix = $(this).hasClass('on') ? 'voteOff' : 'voteOn';
+                    method = $(this).hasClass('on') ? 'delete' : 'post';
 
                 XE.ajax({
-                    url: url('/' + urlSuffix),
-                    type: 'post',
+                    url: url(self.getId() + '/votes', self.getInstanceId()),
+                    type: method,
                     dataType: 'json',
-                    data: {instanceId: self.getInstanceId(), id: self.getId(), option: type.current},
+                    data: {
+                        option: type.current
+                    },
                     success: function (json) {
                         if (json[type.current] || json[type.current] === 0) {
                             self.setVoteCnt(type.current, json[type.current]);
@@ -601,10 +613,8 @@
                     return;
                 }
 
-                XE.page(url('/votedUser'), $('.__xe_comment_voters.__xe_' + type.current, self.dom), {
+                XE.page(url(self.getId() + '/votes', self.getInstanceId()), $('.__xe_comment_voters.__xe_' + type.current, self.dom), {
                     data: {
-                        instanceId: self.getInstanceId(),
-                        id: self.getId(),
                         option: type.current
                     }
                 }, function () {

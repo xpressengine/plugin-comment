@@ -1,7 +1,6 @@
-<form action="{{ route('plugin.comment.store') }}" class="comment_form">
+<form action="{{ route('plugin.comment.store', ['instanceId' => $instanceId]) }}" class="comment_form">
     <!-- input hidden file area start -->
     <input type="hidden" name="targetId" value="{{ $targetId }}">
-    <input type="hidden" name="instanceId" value="{{ $instanceId }}">
     <input type="hidden" name="targetAuthorId" value="{{ $targetAuthorId }}">
     <!-- input hidden file area end -->
 
