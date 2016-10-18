@@ -133,6 +133,7 @@ class UserController extends Controller
         $targetId = Input::get('targetId');
         $targetAuthorId = Input::get('targetAuthorId');
 
+        $data = [];
         if (Gate::allows('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             $config = $this->handler->getConfig($instanceId);
 
@@ -146,9 +147,7 @@ class UserController extends Controller
                 'fieldTypes' => $fieldTypes,
             ])->render();
 
-            $data = ['mode' => 'create', 'html' => $content];
-        } else {
-            $data = ['mode' => 'create'];
+            $data = ['html' => $content];
         }
 
         return XePresenter::makeApi($data);
@@ -175,7 +174,7 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return XePresenter::makeApi(['mode' => 'reply', 'html' => $content]);
+        return XePresenter::makeApi(['html' => $content]);
     }
 
     public function store($instanceId)
@@ -269,7 +268,7 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return XePresenter::makeApi(['mode' => 'edit', 'html' => $content, 'etc' => ['files' => \XeEditor::getFiles($comment->getKey())]]);
+        return XePresenter::makeApi(['html' => $content, 'etc' => ['files' => \XeEditor::getFiles($comment->getKey())]]);
     }
 
     public function update($instanceId, $id)
@@ -391,8 +390,8 @@ class UserController extends Controller
             'comment' => $comment
         ])->render();
 
-//        return response()->make(XePresenter::makeApi(['mode' => 'certify', 'html' => $content]), 205);
-        return XePresenter::makeApi(['mode' => 'certify', 'html' => $content]);
+        return response()->make(XePresenter::makeApi(['html' => $content]), 203);
+//        return XePresenter::makeApi(['mode' => 'certify', 'html' => $content]);
     }
 
     public function certify($instanceId, $id)

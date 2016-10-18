@@ -411,8 +411,7 @@
                         item.setForm(form);
                     };
                 self.getEditForm(item.getId(), function (json, textStatus, jqXHR) {
-                    // if (jqXHR.status === 205) {
-                    if (json.mode === 'certify') {
+                    if (jqXHR.status === 203) {
                         var form = new Certify($.parseHTML(json.html), callback);
                         item.setForm(form);
                     } else {
@@ -461,8 +460,7 @@
                     type: 'delete',
                     dataType: 'json',
                     success: function (json, textStatus, jqXHR) {
-                        // if (jqXHR.status === 205) {
-                        if (json.mode && json.mode === 'certify') {
+                        if (jqXHR.status === 203) {
                             var dom = $.parseHTML(json.html);
                             item.setForm(new Certify(dom, callback));
                         } else {
