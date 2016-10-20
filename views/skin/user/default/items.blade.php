@@ -19,10 +19,10 @@
                     </ul>
                 </div>
                 <div class="comment_entity_tool">
-                    @can('update', $item)
+                    @can('update-visible', $item)
                     <a href="#" class="comment_modify __xe_comment_btn_edit"><i class="xi-eraser"></i><span class="bd_hidden">수정</span></a>
                     @endcan
-                    @can('delete', $item)
+                    @can('delete-visible', $item)
                     <a href="#" class="comment_delete __xe_comment_btn_destroy"><i class="xi-trash"></i><span class="bd_hidden">삭제</span></a>
                     @endcan
                     <!-- [D] 클릭시 클래스 on 적용 -->

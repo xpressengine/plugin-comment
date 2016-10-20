@@ -123,7 +123,7 @@ class Plugin extends AbstractPlugin
         XeSkin::setDefaultSkin($this->getId(), 'comment/skin/comment@default');
         XeSkin::setDefaultSettingsSkin($this->getId(), 'comment/settingsSkin/comment@default');
 
-        XeTrash::register(Waste::class);
+        XeTrash::register(RecycleBin::class);
 
         $app = app();
 

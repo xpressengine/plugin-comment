@@ -10,14 +10,13 @@
 namespace Xpressengine\Plugins\Comment;
 
 use Xpressengine\Plugins\Comment\Models\Comment;
-use Xpressengine\Trash\WasteInterface;
+use Xpressengine\Trash\RecycleBinInterface;
 use XeTrash;
 
-class Waste implements WasteInterface
+class RecycleBin implements RecycleBinInterface
 {
     /**
      * 휴지통 이름 반환
-     *
      *
      * @return string
      */
@@ -57,7 +56,7 @@ class Waste implements WasteInterface
         $handler = $plugin->getHandler();
 
         $model = $handler->createModel();
-        $count = $model->newQuery()->where('status', 'trash')->count();
+        $count = $model->newQuery()->where('status', 'trash')->where('type', Plugin::getId())->count();
 
         // todo: translation
         return sprintf('휴지통에 %s건의 문서가 있습니다.', $count);
