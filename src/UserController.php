@@ -139,7 +139,7 @@ class UserController extends Controller
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
         $originInput = Input::originAll();
-        $inputs['content'] = $originInput['content'];
+        $inputs['content'] = purify($originInput['content']);
 
         if (Gate::denies('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             throw new AccessDeniedHttpException;
@@ -207,7 +207,7 @@ class UserController extends Controller
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
         $originInput = Input::originAll();
-        $inputs['content'] = $originInput['content'];
+        $inputs['content'] = purify($originInput['content']);
 
         $rules = [
             'targetId' => 'Required',
