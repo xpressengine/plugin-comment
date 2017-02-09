@@ -15,6 +15,7 @@
     /**
      * 코어에서 제공함 . XE.Request 참고
      * @param jqXHR
+     * @deprecated
      */
     var jqXHRError = function (jqXHR) {
         var responseText = $.parseJSON(jqXHR.responseText);
@@ -23,8 +24,8 @@
     };
 
     var url = function (relativePath) {
-        var prefix = comment.urlPrefix == '' ? '' : '/' + comment.urlPrefix;
-        return prefix + '/comment' + (relativePath.charAt(0) == '/' ? '' : '/') + relativePath;
+        var prefix = comment.urlPrefix == '' ? '/' : '/' + comment.urlPrefix;
+        return xeBaseURL + prefix + '/comment' + (relativePath.charAt(0) == '/' ? '' : '/') + relativePath;
     };
 
     function Comment(props, container)
