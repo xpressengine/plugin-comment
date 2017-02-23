@@ -203,7 +203,7 @@ class ManagerController extends Controller
         $editorSection = new EditorSection($instanceId);
 
         $dynamicFieldSection = new DynamicFieldSection(
-            str_replace('.', '_', $config->name),
+            sprintf('documents_%s', $instanceId),
             $this->handler->createModel()->getConnection()
         );
         $toggleMenuSection = new ToggleMenuSection($this->plugin->getId(), $instanceId);

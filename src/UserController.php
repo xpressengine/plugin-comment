@@ -98,7 +98,7 @@ class UserController extends Controller
         $comments = new Paginator($comments, $take);
 
         // generator 로 반환 되어 목록에서 재사용이 불가능
-        $fieldTypesGenerator = XeDynamicField::gets(str_replace('.', '_', $config->name));
+        $fieldTypesGenerator = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
         $fieldTypes = [];
         foreach ($fieldTypesGenerator as $fieldType) {
             $fieldTypes[] = $fieldType;
@@ -184,7 +184,7 @@ class UserController extends Controller
         XeTag::set($comment->getKey(), array_get($inputs, $editor->getTagInputName(), []), $instanceId);
 
         $config = $this->handler->getConfig($instanceId);
-        $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
+        $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
         $content = $this->skin->setView('items')->setData([
             'items' => [$comment],
@@ -260,7 +260,7 @@ class UserController extends Controller
         XeTag::set($comment->getKey(), array_get($inputs, $editor->getTagInputName(), []), $instanceId);
 
         $config = $this->handler->getConfig($instanceId);
-        $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
+        $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
         $content = $this->skin->setView('items')->setData([
             'items' => [$comment],
@@ -477,7 +477,7 @@ class UserController extends Controller
         if (Gate::allows('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             $config = $this->handler->getConfig($instanceId);
 
-            $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
+            $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
             $content = $this->skin->setView('create')->setData([
                 'targetId' => $targetId,
@@ -516,7 +516,7 @@ class UserController extends Controller
 
         $config = $this->handler->getConfig($comment->instanceId);
 
-        $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
+        $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
         $content = $this->skin->setView('edit')->setData([
             'targetId' => $targetId,
@@ -545,7 +545,7 @@ class UserController extends Controller
 
         $config = $this->handler->getConfig($comment->instanceId);
 
-        $fieldTypes = XeDynamicField::gets(str_replace('.', '_', $config->name));
+        $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
         $content = $this->skin->setView('reply')->setData([
             'config' => $config,
