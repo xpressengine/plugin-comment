@@ -286,7 +286,7 @@ class Handler
 
         $doc = $this->documents->add($inputs);
         /** @var Comment $comment */
-        $comment = $this->createModel()->newQuery()->find($doc->getKey());
+        $comment = $this->createModel($inputs['instanceId'])->newQuery()->find($doc->getKey());
         $comment->target()->create([
             'targetId' => $inputs['targetId'],
             'targetAuthorId' => $inputs['targetAuthorId']
@@ -313,6 +313,12 @@ class Handler
     public function put(Comment $comment)
     {
         if ($comment->isDirty()) {
+            $documentConfig = $this->documents->getConfig($comment->instanceId);
+            $comment->setConfig(
+                $documentConfig,
+                $this->documents->getDivisionTableName($documentConfig)
+            );
+
             return $this->documents->put($comment);
         }
 
@@ -363,7 +369,7 @@ class Handler
     public function restore(Comment $comment)
     {
         if (!empty($comment->reply)) {
-            $parent = $this->createModel()->newQuery()
+            $parent = $this->createModel($comment->instanceId)->newQuery()
                 ->where('head', $comment->head)
                 ->where('reply', substr($comment->reply, 0, -1 * Comment::getReplyCharLen()))
                 ->first();
@@ -387,7 +393,7 @@ class Handler
     public function remove(Comment $comment)
     {
         if ($comment->status === Comment::STATUS_TRASH && $comment->display === Comment::DISPLAY_HIDDEN) {
-            $this->createModel()->newQuery()
+            $this->createModel($comment->instanceId)->newQuery()
                 ->where('head', $comment->head)
                 ->where('reply', 'like', $comment->reply . str_repeat('_', Comment::getReplyCharLen()))
                 ->get()->each(function ($child) {
@@ -437,7 +443,7 @@ class Handler
      */
     protected function hasChild(Comment $comment)
     {
-        return $this->createModel()->newQuery()
+        return $this->createModel($comment->instanceId)->newQuery()
             ->where('head', $comment->head)
             ->where('reply', 'like', $comment->reply . str_repeat('_', Comment::getReplyCharLen()))
             ->count() > 0;
@@ -618,10 +624,28 @@ class Handler
             $query->where('targetId', $target->getUid());
         })->get();
 
+        $dstConfig = $this->getConfig($newInstanceId);
+
         foreach ($comments as $comment) {
+            $originInstanceId = $comment->instanceId;
+            $originConfig = $this->getConfig($originInstanceId);
+
             $comment->instanceId = $newInstanceId;
 
             $this->documents->put($comment);
+
+            if ($dstConfig->get('division') === true) {
+                $documentConfig = $this->documents->getConfig($newInstanceId);
+                $comment->exists = false;
+                $comment->setTable($this->documents->getDivisionTableName($documentConfig));
+                $comment->save();
+            }
+            if ($originConfig->get('division') === true) {
+                $documentConfig = $this->documents->getConfig($originInstanceId);
+                $origin = Comment::where('instanceId', $originInstanceId)->where('id', $comment->id);
+                $origin->from($this->documents->getDivisionTableName($documentConfig));
+                $origin->delete();
+            }
         }
     }
 
@@ -674,13 +698,24 @@ class Handler
     /**
      * Create model
      *
+     * @param string $instanceId comment instance id
      * @return Comment
      */
-    public function createModel()
+    public function createModel($instanceId = null)
     {
         $class = $this->getModel();
 
-        return new $class;
+        $instance = new $class;
+
+        if ($instanceId !== null) {
+            $documentConfig = $this->documents->getConfig($instanceId);
+            $instance->setConfig(
+                $documentConfig,
+                $this->documents->getDivisionTableName($documentConfig)
+            );
+        }
+
+        return $instance;
     }
 
     /**

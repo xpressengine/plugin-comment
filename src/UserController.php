@@ -67,7 +67,7 @@ class UserController extends Controller
 
         $take = Input::get('perPage', $config['perPage']);
 
-        $model = $this->handler->createModel();
+        $model = $this->handler->createModel($instanceId);
         $query = $model->newQuery()->whereHas('target', function ($query) use ($targetId) {
             $query->where('targetId', $targetId);
         })
@@ -201,6 +201,7 @@ class UserController extends Controller
     public function update()
     {
         $instanceId = Input::get('instanceId');
+        $config = $this->handler->getConfig($instanceId);
         $id = Input::get('id');
         $inputs = Input::except(['instanceId', 'id', '_token']);
 
@@ -214,7 +215,7 @@ class UserController extends Controller
             'content' => 'Required|Min:4',
         ];
 
-        $model = $this->handler->createModel();
+        $model = $this->handler->createModel($instanceId);
         /** @var Comment $comment */
         if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
             throw new UnknownIdentifierException;
@@ -259,7 +260,6 @@ class UserController extends Controller
         // tag 처리
         XeTag::set($comment->getKey(), array_get($inputs, $editor->getTagInputName(), []), $instanceId);
 
-        $config = $this->handler->getConfig($instanceId);
         $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
         $content = $this->skin->setView('items')->setData([
@@ -279,7 +279,7 @@ class UserController extends Controller
         $instanceId = Input::get('instanceId');
         $id = Input::get('id');
 
-        $model = $this->handler->createModel();
+        $model = $this->handler->createModel($instanceId);
         if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
             throw new UnknownIdentifierException;
         }
@@ -326,7 +326,7 @@ class UserController extends Controller
             XeDB::beginTransaction();
 
             try {
-                $model = $this->handler->createModel();
+                $model = $this->handler->createModel($instanceId);
                 $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
                 $comment = $this->handler->addVote($comment, $option);
             } catch (\Exception $e) {
@@ -357,7 +357,7 @@ class UserController extends Controller
             XeDB::beginTransaction();
 
             try {
-                $model = $this->handler->createModel();
+                $model = $this->handler->createModel($instanceId);
                 $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
                 $comment = $this->handler->removeVote($comment, $option);
             } catch (\Exception $e) {
@@ -406,7 +406,7 @@ class UserController extends Controller
         $id = Input::get('id');
         $option = Input::get('option');
 
-        $model = $this->handler->createModel();
+        $model = $this->handler->createModel($instanceId);
         $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
         $count = $this->handler->voteUserCount($comment, $option);
 
@@ -428,7 +428,7 @@ class UserController extends Controller
         $startId = Input::get('startId');
         $limit = Input::get('limit', 10);
 
-        $model = $this->handler->createModel();
+        $model = $this->handler->createModel($instanceId);
         $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
         $logs = $this->handler->votedList($comment, $option, $startId, $limit);
 
@@ -501,7 +501,7 @@ class UserController extends Controller
         $instanceId = Input::get('instanceId');
         $id = Input::get('id');
 
-        $model = $this->handler->createModel();
+        $model = $this->handler->createModel($instanceId);
         if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
             throw new UnknownIdentifierException;
         }
@@ -538,7 +538,7 @@ class UserController extends Controller
             throw new AccessDeniedHttpException;
         }
 
-        $model = $this->handler->createModel();
+        $model = $this->handler->createModel($instanceId);
         if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
             throw new UnknownIdentifierException;
         }
@@ -587,7 +587,7 @@ class UserController extends Controller
             throw $e;
         }
 
-        $model = $this->handler->createModel();
+        $model = $this->handler->createModel($inputs['instanceId']);
         if (!$comment = $model->newQuery()->where('instanceId', $inputs['instanceId'])->where('id', $inputs['id'])->first()) {
             throw new UnknownIdentifierException;
         }
