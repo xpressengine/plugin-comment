@@ -624,28 +624,10 @@ class Handler
             $query->where('targetId', $target->getUid());
         })->get();
 
-        $dstConfig = $this->getConfig($newInstanceId);
-
         foreach ($comments as $comment) {
-            $originInstanceId = $comment->instanceId;
-            $originConfig = $this->getConfig($originInstanceId);
-
             $comment->instanceId = $newInstanceId;
 
             $this->documents->put($comment);
-
-            if ($dstConfig->get('division') === true) {
-                $documentConfig = $this->documents->getConfig($newInstanceId);
-                $comment->exists = false;
-                $comment->setTable($this->documents->getDivisionTableName($documentConfig));
-                $comment->save();
-            }
-            if ($originConfig->get('division') === true) {
-                $documentConfig = $this->documents->getConfig($originInstanceId);
-                $origin = Comment::where('instanceId', $originInstanceId)->where('id', $comment->id);
-                $origin->from($this->documents->getDivisionTableName($documentConfig));
-                $origin->delete();
-            }
         }
     }
 
@@ -705,14 +687,11 @@ class Handler
     {
         $class = $this->getModel();
 
+        /** @var Comment $instance */
         $instance = new $class;
 
         if ($instanceId !== null) {
-            $documentConfig = $this->documents->getConfig($instanceId);
-            $instance->setConfig(
-                $documentConfig,
-                $this->documents->getDivisionTableName($documentConfig)
-            );
+            $instance->setDivision($instanceId);
         }
 
         return $instance;
