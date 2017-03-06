@@ -21,6 +21,7 @@ use Xpressengine\Menu\MenuHandler;
 use XePresenter;
 use XeConfig;
 use XeDB;
+use Xpressengine\Menu\Models\MenuItem;
 use Xpressengine\Menu\ModuleHandler;
 use Xpressengine\Permission\PermissionSupport;
 use Xpressengine\Plugins\Comment\Models\Comment;
@@ -78,12 +79,21 @@ class ManagerController extends Controller
         return XePresenter::make('index', [
             'comments' => $comments,
             'menuItem' => function ($comment) use ($menuItems, $map) {
-                return $menuItems[array_search($comment->instanceId, $map)];
+                $index = array_search($comment->instanceId, $map);
+                if (isset($menuItems[$index]) === false) {
+                    $tmpMenuItem = new MenuItem;
+                    $tmpMenuItem->title = $index;
+                    return $tmpMenuItem;
+                } else {
+                    return $menuItems[$index];
+                }
             },
             'urlMake' => function ($comment, $menuItem) use ($modules) {
-                if ($module = $modules->getModuleObject($menuItem->type)) {
-                    if ($item = $module->getTypeItem($comment->target->targetId)) {
-                        return app('url')->to($item->getLink($menuItem->route) . '#comment-'.$comment->id);
+                if (isset($menuItem->type) == true) {
+                    if ($module = $modules->getModuleObject($menuItem->type)) {
+                        if ($item = $module->getTypeItem($comment->target->targetId)) {
+                            return app('url')->to($item->getLink($menuItem->route) . '#comment-'.$comment->id);
+                        }
                     }
                 }
 
@@ -155,7 +165,14 @@ class ManagerController extends Controller
         return XePresenter::make('trash', [
             'comments' => $comments,
             'menuItem' => function ($comment) use ($menuItems, $map) {
-                return $menuItems[array_search($comment->instanceId, $map)];
+                $index = array_search($comment->instanceId, $map);
+                if (isset($menuItems[$index]) === false) {
+                    $tmpMenuItem = new MenuItem;
+                    $tmpMenuItem->title = $index;
+                    return $tmpMenuItem;
+                } else {
+                    return $menuItems[$index];
+                }
             },
         ]);
     }
