@@ -700,13 +700,23 @@
         },
         _eventBind: function () {
             var self = this;
+            var submitting = false;
+
             $(this.container).on('submit', 'form', function (e) {
                 e.preventDefault();
+
+                if(submitting) {
+                    return false;
+                }
 
                 $('button', self.dom)
                     .add('input[type=submit]', self.dom)
                     .add('input[type=button]', self.dom)
                     .prop('disabled', true);
+
+                if(!submitting) {
+                    submitting = true;
+                }
 
                 XE.ajax({
                     url: $(this).attr('action'),
@@ -725,6 +735,8 @@
                         .add('input[type=submit]', self.dom)
                         .add('input[type=button]', self.dom)
                         .prop('disabled', false);
+
+                    submitting = false;
                 });
             });
         }
