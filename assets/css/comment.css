@@ -7,7 +7,7 @@
 .comment_entity_body_meta .author,
 .comment_action .vote .like_num,
 .comment_action .btn_share,
-.comment_form_controller .comment_form_btn > a,
+.comment_form_editor .comment_form_btn > button,
 .temp_save .temp_save_num,
 .board_comment .ly_popup li > a,
 .pagination_seemore > a,
@@ -206,7 +206,7 @@
 .comment_form_controller .xe-form-control.v2 {
     width: 200px;
 }
-.comment_form_controller .comment_form_btn > a {
+.comment_form_editor .comment_form_btn > button {
     float: left;
     min-width: 80px;
     margin-left: 6px;
@@ -840,13 +840,13 @@
     .comment_form_btn {
         float: none;
     }
-    .comment_form_controller .comment_form_btn > a {
+    .comment_form_editor .comment_form_btn > button {
         margin: 0;
         min-width: auto;
         width: 32%;
         margin-left: 2%;
     }
-    .comment_form_controller .comment_form_btn > a:first-child {
+    .comment_form_editor .comment_form_btn > button:first-child {
         margin-left: 0;
     }
     .comment_form_controller .comment_form_btn.nologin > a {
