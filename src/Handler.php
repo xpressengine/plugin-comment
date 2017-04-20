@@ -313,12 +313,6 @@ class Handler
     public function put(Comment $comment)
     {
         if ($comment->isDirty()) {
-            $documentConfig = $this->documents->getConfig($comment->instanceId);
-            $comment->setConfig(
-                $documentConfig,
-                $this->documents->getDivisionTableName($documentConfig)
-            );
-
             return $this->documents->put($comment);
         }
 
