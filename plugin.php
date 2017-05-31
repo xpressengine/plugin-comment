@@ -13,16 +13,20 @@ use Illuminate\Database\Schema\Blueprint;
 use Xpressengine\Permission\Grant;
 use Xpressengine\Plugin\AbstractPlugin;
 use Xpressengine\Plugins\Comment\Models\Comment;
-use Xpressengine\Translation\Translator;
 use Route;
-use XeTrash;
-use XeSkin;
 use View;
 use Gate;
 use XeDB;
 use XeConfig;
 use XeEditor;
+use XeLang;
+use XeRegister;
+use XeSkin;
+use XeStorage;
+use XeTag;
 use XeToggleMenu;
+use XeTrash;
+use XeUI;
 use Schema;
 use Xpressengine\User\Rating;
 
@@ -50,9 +54,7 @@ class Plugin extends AbstractPlugin
     public function install()
     {
         // put translation source
-        /** @var Translator $trans */
-        $trans = app('xe.translator');
-        $trans->putFromLangDataSource('comment', base_path('plugins/comment/langs/lang.php'));
+        XeLang::putFromLangDataSource('comment', base_path('plugins/comment/langs/lang.php'));
 
         // pivot table
         $this->migrate();
@@ -98,16 +100,6 @@ class Plugin extends AbstractPlugin
         });
     }
 
-//    /**
-//     * @param null $installedVersion install version
-//     * @return bool
-//     */
-//    public function checkInstalled($installedVersion = null)
-//    {
-//        $schema = Schema::setConnection(XeDB::connection('document')->master());
-//        return $schema->hasTable($this->targetTable);
-//    }
-
     public function boot()
     {
         $this->setRoutes();
@@ -118,7 +110,7 @@ class Plugin extends AbstractPlugin
             return static::getHandler()->isCertified($comment);
         });
 
-        app('xe.uiobject')->setAlias('comment', 'uiobject/comment@comment');
+        XeUI::setAlias('comment', 'uiobject/comment@comment');
 
         XeSkin::setDefaultSkin($this->getId(), 'comment/skin/comment@default');
         XeSkin::setDefaultSettingsSkin($this->getId(), 'comment/settingsSkin/comment@default');
@@ -149,9 +141,9 @@ class Plugin extends AbstractPlugin
             }
         );
 
-        intercept(Handler::class . '@remove', static::getId() . '::comment.realteRemove', function ($func, $comment) {
-            app('xe.storage')->unBindAll($comment->getKey());
-            app('xe.tag')->set($comment->getKey(), []);
+        intercept(Handler::class . '@remove', static::getId() . '::comment.relateRemove', function ($func, $comment) {
+            XeStorage::unBindAll($comment->getKey(), true);
+            XeTag::set($comment->getKey(), []);
 
             return $func($comment);
         });
@@ -230,7 +222,7 @@ class Plugin extends AbstractPlugin
             ],
         ];
         foreach ($menus as $id => $menu) {
-            app('xe.register')->push('settings/menu', $id, $menu);
+            XeRegister::push('settings/menu', $id, $menu);
         }
     }
 
@@ -285,9 +277,7 @@ class Plugin extends AbstractPlugin
             XeToggleMenu::setActivates('comment', null, []);
         }
 
-        /** @var Translator $trans */
-        $trans = app('xe.translator');
-        $trans->putFromLangDataSource('comment', base_path('plugins/comment/langs/lang.php'));
+        XeLang::putFromLangDataSource('comment', base_path('plugins/comment/langs/lang.php'));
     }
 
     /**
