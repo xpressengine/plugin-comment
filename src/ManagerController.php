@@ -16,13 +16,12 @@ use App\Http\Sections\SkinSection;
 use App\Http\Sections\ToggleMenuSection;
 use Input;
 use Validator;
-use Xpressengine\Http\Request;
-use Xpressengine\Menu\MenuHandler;
 use XePresenter;
 use XeConfig;
 use XeDB;
+use Xpressengine\Http\Request;
+use Xpressengine\Menu\MenuHandler;
 use Xpressengine\Menu\Models\MenuItem;
-use Xpressengine\Menu\ModuleHandler;
 use Xpressengine\Permission\PermissionSupport;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\Support\Exceptions\InvalidArgumentException;
@@ -56,7 +55,7 @@ class ManagerController extends Controller
         return $instanceIds;
     }
 
-    public function index(MenuHandler $menus, ModuleHandler $modules)
+    public function index(MenuHandler $menus)
     {
         Input::flash();
 
@@ -74,7 +73,7 @@ class ManagerController extends Controller
         $comments = $query->orderBy(Comment::CREATED_AT)->with('target')->paginate();
 
         $map = $this->handler->getInstanceMap();
-        $menuItems = $menus->getItemIn(array_keys($map), 'route')->getDictionary();
+        $menuItems = $menus->items()->fetchIn(array_keys($map), 'route')->getDictionary();
 
         return XePresenter::make('index', [
             'comments' => $comments,
@@ -88,9 +87,9 @@ class ManagerController extends Controller
                     return $menuItems[$index];
                 }
             },
-            'urlMake' => function ($comment, $menuItem) use ($modules) {
+            'urlMake' => function ($comment, $menuItem) use ($menus) {
                 if (isset($menuItem->type) == true) {
-                    if ($module = $modules->getModuleObject($menuItem->type)) {
+                    if ($module = $menus->getModuleHandler()->getModuleObject($menuItem->type)) {
                         if ($item = $module->getTypeItem($comment->target->targetId)) {
                             return app('url')->to($item->getLink($menuItem->route) . '#comment-'.$comment->id);
                         }
@@ -160,7 +159,7 @@ class ManagerController extends Controller
             ->orderBy(Comment::CREATED_AT)->paginate();
 
         $map = $this->handler->getInstanceMap();
-        $menuItems = $menus->getItemIn(array_keys($map), 'route')->getDictionary();
+        $menuItems = $menus->items()->fetchIn(array_keys($map), 'route')->getDictionary();
 
         return XePresenter::make('trash', [
             'comments' => $comments,
@@ -225,7 +224,7 @@ class ManagerController extends Controller
         );
         $toggleMenuSection = new ToggleMenuSection($this->plugin->getId(), $instanceId);
 
-        $menuItem = $menus->getItem($targetInstanceId);
+        $menuItem = $menus->items()->find($targetInstanceId);
 
         return XePresenter::make('setting', [
             'targetInstanceId' => $targetInstanceId,
