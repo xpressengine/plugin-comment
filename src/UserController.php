@@ -23,6 +23,7 @@ use XeSkin;
 use XeStorage;
 use XeEditor;
 use XeTag;
+use Xpressengine\Editor\PurifierModules\EditorTool;
 use Xpressengine\Permission\Instance;
 use Xpressengine\Support\Exceptions\AccessDeniedHttpException;
 use Xpressengine\Support\Purifier;
@@ -33,6 +34,7 @@ use Xpressengine\Plugins\Comment\Exceptions\UnknownIdentifierException;
 use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
 use XeDynamicField;
 use Gate;
+use Xpressengine\Support\PurifierModules\Html5;
 use Xpressengine\User\Models\UnknownUser;
 
 class UserController extends Controller
@@ -140,7 +142,8 @@ class UserController extends Controller
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
         $purifier = new Purifier();
-        $purifier->allowModule('XeEditorTool');
+        $purifier->allowModule(EditorTool::class);
+        $purifier->allowModule(HTML5::class);
         $originInput = Input::originAll();
         $inputs['content'] = $purifier->purify($originInput['content']);
 
@@ -211,7 +214,8 @@ class UserController extends Controller
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
         $purifier = new Purifier();
-        $purifier->allowModule('XeEditorTool');
+        $purifier->allowModule(EditorTool::class);
+        $purifier->allowModule(HTML5::class);
         $originInput = Input::originAll();
         $inputs['content'] = $purifier->purify($originInput['content']);
 
