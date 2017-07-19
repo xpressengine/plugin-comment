@@ -7,7 +7,7 @@
  * @link        https://xpressengine.io
  */
 
-namespace Xpressengine\Plugins\Comment;
+namespace Xpressengine\Plugins\Comment\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Pagination\LengthAwarePaginator;

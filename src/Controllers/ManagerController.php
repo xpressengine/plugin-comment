@@ -7,7 +7,7 @@
  * @link        https://xpressengine.io
  */
 
-namespace Xpressengine\Plugins\Comment;
+namespace Xpressengine\Plugins\Comment\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Sections\DynamicFieldSection;
@@ -206,102 +206,5 @@ class ManagerController extends Controller
         }
 
         return redirect()->back();
-    }
-
-    public function getSetting(MenuHandler $menus, $targetInstanceId)
-    {
-        $instanceId = $this->handler->getInstanceId($targetInstanceId);
-        $config = $this->handler->getConfig($instanceId);
-
-        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm($instanceId), ['create']);
-
-        $skinSection = new SkinSection($this->plugin->getId(), $instanceId);
-        $editorSection = new EditorSection($instanceId);
-
-        $dynamicFieldSection = new DynamicFieldSection(
-            sprintf('documents_%s', $instanceId),
-            $this->handler->createModel()->getConnection()
-        );
-        $toggleMenuSection = new ToggleMenuSection($this->plugin->getId(), $instanceId);
-
-        $menuItem = $menus->items()->find($targetInstanceId);
-
-        return XePresenter::make('setting', [
-            'targetInstanceId' => $targetInstanceId,
-            'config' => $config,
-            'permArgs' => $permArgs,
-            'skinSection' => $skinSection,
-            'editorSection' => $editorSection,
-            'dynamicFieldSection' => $dynamicFieldSection,
-            'toggleMenuSection' => $toggleMenuSection,
-            'menuItem' => $menuItem,
-        ]);
-    }
-
-    public function postSetting(Request $request, $targetInstanceId)
-    {
-        $instanceId = $this->handler->getInstanceId($targetInstanceId);
-
-        $configInputs = array_filter($request->except(['_token']), function ($key) {
-            return substr($key, 0, strlen('create')) !== 'create';
-        }, ARRAY_FILTER_USE_KEY);
-
-        $validator = Validator::make([
-            'perPage' => $request->get('perPage')
-        ], [
-            'perPage' => 'Numeric'
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->with('alert', ['type' => 'danger', 'message' => $validator->errors()]);
-        }
-
-        $this->handler->configure($instanceId, $configInputs);
-
-        $this->permissionRegister($request, $this->handler->getKeyForPerm($instanceId), ['create']);
-
-        return redirect()->back();
-    }
-
-    public function getGlobalSetting()
-    {
-        $config = $this->handler->getConfig();
-
-        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm(), ['create']);
-
-        return XePresenter::make('global', ['config' => $config, 'permArgs' => $permArgs]);
-    }
-
-    public function postGlobalSetting(Request $request)
-    {
-        $configInputs = array_filter($request->except(['_token']), function ($key) {
-            return substr($key, 0, strlen('create')) !== 'create';
-        }, ARRAY_FILTER_USE_KEY);
-
-        /** @var \Illuminate\Validation\Validator $validator */
-        $validator = Validator::make(
-            ['perPage' => $request->get('perPage')],
-            ['perPage' => 'Numeric']
-        );
-
-        if ($validator->fails()) {
-            return redirect()->back()->with('alert', ['type' => 'danger', 'message' => $validator->errors()]);
-        }
-
-        XeDB::beginTransaction();
-
-        try {
-            $this->handler->configure(null, $configInputs);
-
-            $this->permissionRegister($request, $this->handler->getKeyForPerm(), ['create']);
-
-            XeDB::commit();
-        } catch (\Exception $e) {
-            XeDB::rollBack();
-
-            return redirect()->back()->with('alert', ['type' => 'danger', 'message' => $e->getMessage()]);
-        }
-
-        return redirect()->route('manage.comment.setting.global');
     }
 }

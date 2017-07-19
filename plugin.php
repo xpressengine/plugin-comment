@@ -160,26 +160,34 @@ class Plugin extends AbstractPlugin
             Route::post('destroy', ['as' => 'manage.comment.destroy', 'uses' => 'ManagerController@destroy']);
             Route::post('restore', ['as' => 'manage.comment.restore', 'uses' => 'ManagerController@restore']);
 
-            Route::get('setting/{targetInstanceId}', [
-                'as' => 'manage.comment.setting',
-                'uses' => 'ManagerController@getSetting'
-            ]);
+            Route::group(['prefix' => 'setting/{targetInstanceId}', 'as' => 'manage.comment.setting'], function () {
+                Route::get('/', function ($targetInstanceId) {
+                    return redirect()->route('manage.comment.setting.config', $targetInstanceId);
+                });
+                Route::get('config', ['as' => '.config', 'uses' => 'SettingController@getConfig']);
+                Route::post('config', ['as' => '.config', 'uses' => 'SettingController@postConfig']);
 
-            Route::post('setting/{targetInstanceId}', [
-                'as' => 'manage.comment.setting',
-                'uses' => 'ManagerController@postSetting'
-            ]);
+                Route::get('perm', ['as' => '.perm', 'uses' => 'SettingController@getPerm']);
+                Route::post('perm', ['as' => '.perm', 'uses' => 'SettingController@postPerm']);
 
-            Route::get('global', [
-                'as' => 'manage.comment.setting.global',
-                'uses' => 'ManagerController@getGlobalSetting'
-            ]);
+                Route::get('skin', ['as' => '.skin', 'uses' => 'SettingController@getSkin']);
+                Route::get('editor', ['as' => '.editor', 'uses' => 'SettingController@getEditor']);
+                Route::get('df', ['as' => '.df', 'uses' => 'SettingController@getDF']);
+                Route::get('tm', ['as' => '.tm', 'uses' => 'SettingController@getTM']);
+            });
 
-            Route::post('global', [
-                'as' => 'manage.comment.setting.global',
-                'uses' => 'ManagerController@postGlobalSetting'
-            ]);
-        }, ['namespace' => __NAMESPACE__]);
+            Route::group(['prefix' => 'global', 'as' => 'manage.comment.setting.global'], function () {
+                Route::get('/', function () {
+                    return redirect()->route('manage.comment.setting.global.config');
+                });
+                Route::get('config', ['as' => '.config', 'uses' => 'SettingController@getGlobalConfig']);
+                Route::post('config', ['as' => '.config', 'uses' => 'SettingController@postGlobalConfig']);
+
+                Route::get('perm', ['as' => '.perm', 'uses' => 'SettingController@getGlobalPerm']);
+                Route::post('perm', ['as' => '.perm', 'uses' => 'SettingController@postGlobalPerm']);
+            });
+
+        }, ['namespace' => 'Xpressengine\\Plugins\\Comment\\Controllers']);
 
         Route::fixed('comment', function () {
             Route::get('index', ['as' => 'plugin.comment.index', 'uses' => 'UserController@index']);
@@ -196,7 +204,7 @@ class Plugin extends AbstractPlugin
             Route::get('votedUser', 'UserController@votedUser');
             Route::get('votedModal', ['as' => 'plugin.comment.voted.modal', 'uses' => 'UserController@votedModal']);
             Route::get('votedList', ['as' => 'plugin.comment.voted.list', 'uses' => 'UserController@votedList']);
-        }, ['namespace' => __NAMESPACE__]);
+        }, ['namespace' => 'Xpressengine\\Plugins\\Comment\\Controllers']);
     }
 
     private function registerSettingsMenu()
