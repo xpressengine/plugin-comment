@@ -68,7 +68,7 @@ class SettingController extends Controller
     {
         $permArgs = $this->getPermArguments(
             $this->handler->getKeyForPerm($this->handler->getInstanceId($targetInstanceId)),
-            ['create']
+            ['create', 'manage']
         );
 
         return XePresenter::make('instance.perm', [
@@ -82,7 +82,7 @@ class SettingController extends Controller
         $this->permissionRegister(
             $request,
             $this->handler->getKeyForPerm($this->handler->getInstanceId($targetInstanceId)),
-            ['create']
+            ['create', 'manage']
         );
 
         return redirect()->back();
@@ -142,14 +142,14 @@ class SettingController extends Controller
 
     public function getGlobalPerm()
     {
-        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm(), ['create']);
+        $permArgs = $this->getPermArguments($this->handler->getKeyForPerm(), ['create', 'manage']);
 
         return XePresenter::make('global.perm', ['permArgs' => $permArgs]);
     }
 
     public function postGlobalPerm(Request $request)
     {
-        $this->permissionRegister($request, $this->handler->getKeyForPerm(), ['create']);
+        $this->permissionRegister($request, $this->handler->getKeyForPerm(), ['create', 'manage']);
 
         return redirect()->back();
     }

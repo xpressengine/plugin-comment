@@ -3,7 +3,7 @@
     <div class="panel">
         <div class="panel-heading">
             <div class="pull-left">
-                <h3 class="panel-title">{{xe_trans('comment::manage.globalSetting')}}</h3>
+                <h3 class="panel-title">{{xe_trans('xe::permission')}}</h3>
             </div>
         </div>
         <div class="panel-collapse collapse in">
@@ -18,6 +18,17 @@
                                 <h4>{{ xe_trans('comment::manage.permission.create') }}</h4>
                                 <div class="well">
                                     {!! uio('permission', $permArgs['create']) !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <h4>{{ xe_trans('comment::manage.permission.manage') }}</h4>
+                                <div class="well">
+                                    {!! uio('permission', $permArgs['manage']) !!}
                                 </div>
                             </div>
                         </div>

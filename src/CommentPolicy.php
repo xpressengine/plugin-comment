@@ -9,13 +9,25 @@
 
 namespace Xpressengine\Plugins\Comment;
 
+use Illuminate\Contracts\Auth\Access\Gate;
+use Xpressengine\Permission\Instance;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\User\Models\Guest;
 use Xpressengine\User\UserInterface;
 
 class CommentPolicy
 {
+    protected $gate;
+
+    protected $handler;
+
     protected static $certifiedResolver;
+
+    public function __construct(Gate $gate, Handler $handler)
+    {
+        $this->gate = $gate;
+        $this->handler = $handler;
+    }
 
     public function read(UserInterface $user, Comment $comment)
     {
@@ -55,6 +67,10 @@ class CommentPolicy
         }
 
         if ($user->isManager()) {
+            return true;
+        }
+
+        if ($this->gate->allows('manage', new Instance($this->handler->getKeyForPerm($comment->instanceId)))) {
             return true;
         }
 

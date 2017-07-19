@@ -70,8 +70,8 @@ class Plugin extends AbstractPlugin
             Grant::EXCEPT_TYPE => [],
             Grant::VGROUP_TYPE => []
         ]);
-        $grant->set('download', [
-            Grant::RATING_TYPE => Rating::MEMBER,
+        $grant->set('manage', [
+            Grant::RATING_TYPE => Rating::MANAGER,
             Grant::GROUP_TYPE => [],
             Grant::USER_TYPE => [],
             Grant::EXCEPT_TYPE => [],
@@ -117,13 +117,24 @@ class Plugin extends AbstractPlugin
 
         XeTrash::register(RecycleBin::class);
 
-        $app = app();
+        app()->singleton('xe.plugin.comment', function () {
+            return $this;
+        });
 
-        $app['xe.plugin.comment'] = $app->share(
-            function ($app) {
-                return $this;
-            }
-        );
+        app()->singleton(Handler::class, function ($app) {
+            $proxyClass = $app['xe.interception']->proxy(Handler::class);
+            $counter = $app['xe.counter']->make($app['request'], Handler::COUNTER_VOTE, ['assent', 'dissent']);
+            return new $proxyClass(
+                $app['xe.document'],
+                $app['session.store'],
+                $counter,
+                $app['xe.auth'],
+                $app['xe.permission'],
+                $app['xe.config'],
+                $app['xe.keygen']
+            );
+        });
+        app()->alias(Handler::class, 'xe.plugin.comment.handler');
 
         $this->createIntercept();
     }
@@ -246,21 +257,7 @@ class Plugin extends AbstractPlugin
 
     public function getHandler()
     {
-        if (!$this->handler) {
-            $proxyClass = app('xe.interception')->proxy(Handler::class);
-            $counter = app('xe.counter')->make(app('request'), Handler::COUNTER_VOTE, ['assent', 'dissent']);
-            $this->handler = new $proxyClass(
-                app('xe.document'),
-                app('session.store'),
-                $counter,
-                app('xe.auth'),
-                app('xe.permission'),
-                app('xe.config'),
-                app('xe.keygen')
-            );
-        }
-
-        return $this->handler;
+        return app(Handler::class);
     }
 
     public function pluginPath()
@@ -285,6 +282,26 @@ class Plugin extends AbstractPlugin
             XeToggleMenu::setActivates('comment', null, []);
         }
 
+        // ver 0.9.13
+        $handler = $this->getHandler();
+        $permission = app('xe.permission')->getOrNew($handler->getKeyForPerm());
+        if (!$permission['manage']) {
+            $grant = new Grant();
+            $create = $permission['create'];
+            foreach ($create as $type => $value) {
+                $grant->add('create', $type, $value);
+            }
+
+            $grant->set('manage', [
+                Grant::RATING_TYPE => Rating::MANAGER,
+                Grant::GROUP_TYPE => [],
+                Grant::USER_TYPE => [],
+                Grant::EXCEPT_TYPE => [],
+                Grant::VGROUP_TYPE => []
+            ]);
+            app('xe.permission')->register($handler->getKeyForPerm(), $grant);
+        }
+
         XeLang::putFromLangDataSource('comment', base_path('plugins/comment/langs/lang.php'));
     }
 
@@ -295,6 +312,13 @@ class Plugin extends AbstractPlugin
     {
         // ver 0.9.1
         if (XeConfig::get(XeToggleMenu::getConfigKey('comment', null)) == null) {
+            return false;
+        }
+
+        // ver 0.9.13
+        $handler = $this->getHandler();
+        $permission = app('xe.permission')->getOrNew($handler->getKeyForPerm());
+        if (!$permission['manage']) {
             return false;
         }
 

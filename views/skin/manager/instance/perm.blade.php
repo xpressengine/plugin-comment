@@ -22,6 +22,17 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>{{ xe_trans('comment::manage.permission.manage') }}</label>
+                                <div class="well">
+                                    {!! uio('permission', $permArgs['manage']) !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="panel-footer">
