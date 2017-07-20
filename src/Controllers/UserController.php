@@ -7,7 +7,7 @@
  * @link        https://xpressengine.io
  */
 
-namespace Xpressengine\Plugins\Comment;
+namespace Xpressengine\Plugins\Comment\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -23,15 +23,18 @@ use XeSkin;
 use XeStorage;
 use XeEditor;
 use XeTag;
+use Xpressengine\Editor\PurifierModules\EditorTool;
 use Xpressengine\Permission\Instance;
+use Xpressengine\Support\Exceptions\AccessDeniedHttpException;
+use Xpressengine\Support\Purifier;
 use Xpressengine\Plugins\Comment\Exceptions\BadRequestException;
 use Xpressengine\Plugins\Comment\Models\Comment;
-use Xpressengine\Support\Exceptions\AccessDeniedHttpException;
 use Xpressengine\Plugins\Comment\Exceptions\NotMatchCertifyKeyException;
 use Xpressengine\Plugins\Comment\Exceptions\UnknownIdentifierException;
 use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
 use XeDynamicField;
 use Gate;
+use Xpressengine\Support\PurifierModules\Html5;
 use Xpressengine\User\Models\UnknownUser;
 
 class UserController extends Controller
@@ -138,8 +141,11 @@ class UserController extends Controller
 
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
+        $purifier = new Purifier();
+        $purifier->allowModule(EditorTool::class);
+        $purifier->allowModule(HTML5::class);
         $originInput = Input::originAll();
-        $inputs['content'] = purify($originInput['content']);
+        $inputs['content'] = $purifier->purify($originInput['content']);
 
         if (Gate::denies('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             throw new AccessDeniedHttpException;
@@ -207,8 +213,11 @@ class UserController extends Controller
 
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
+        $purifier = new Purifier();
+        $purifier->allowModule(EditorTool::class);
+        $purifier->allowModule(HTML5::class);
         $originInput = Input::originAll();
-        $inputs['content'] = purify($originInput['content']);
+        $inputs['content'] = $purifier->purify($originInput['content']);
 
         $rules = [
             'targetId' => 'Required',

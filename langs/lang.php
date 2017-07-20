@@ -91,6 +91,10 @@ return [
             'create' => [
                 'ko' => '댓글 작성 권한',
                 'en' => 'Create permission',
+            ],
+            'manage' => [
+                'ko' => '관리 권한',
+                'en' => 'Manage permission',
             ]
         ],
 

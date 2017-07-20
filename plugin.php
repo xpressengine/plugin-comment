@@ -70,8 +70,8 @@ class Plugin extends AbstractPlugin
             Grant::EXCEPT_TYPE => [],
             Grant::VGROUP_TYPE => []
         ]);
-        $grant->set('download', [
-            Grant::RATING_TYPE => Rating::MEMBER,
+        $grant->set('manage', [
+            Grant::RATING_TYPE => Rating::MANAGER,
             Grant::GROUP_TYPE => [],
             Grant::USER_TYPE => [],
             Grant::EXCEPT_TYPE => [],
@@ -117,15 +117,29 @@ class Plugin extends AbstractPlugin
 
         XeTrash::register(RecycleBin::class);
 
-        $app = app();
-
-        $app['xe.plugin.comment'] = $app->share(
-            function ($app) {
-                return $this;
-            }
-        );
-
         $this->createIntercept();
+    }
+
+    public function register()
+    {
+        app()->singleton('xe.plugin.comment', function () {
+            return $this;
+        });
+
+        app()->singleton(Handler::class, function ($app) {
+            $proxyClass = $app['xe.interception']->proxy(Handler::class);
+            $counter = $app['xe.counter']->make($app['request'], Handler::COUNTER_VOTE, ['assent', 'dissent']);
+            return new $proxyClass(
+                $app['xe.document'],
+                $app['session.store'],
+                $counter,
+                $app['xe.auth'],
+                $app['xe.permission'],
+                $app['xe.config'],
+                $app['xe.keygen']
+            );
+        });
+        app()->alias(Handler::class, 'xe.plugin.comment.handler');
     }
 
     private function createIntercept()
@@ -160,26 +174,34 @@ class Plugin extends AbstractPlugin
             Route::post('destroy', ['as' => 'manage.comment.destroy', 'uses' => 'ManagerController@destroy']);
             Route::post('restore', ['as' => 'manage.comment.restore', 'uses' => 'ManagerController@restore']);
 
-            Route::get('setting/{targetInstanceId}', [
-                'as' => 'manage.comment.setting',
-                'uses' => 'ManagerController@getSetting'
-            ]);
+            Route::group(['prefix' => 'setting/{targetInstanceId}', 'as' => 'manage.comment.setting'], function () {
+                Route::get('/', function ($targetInstanceId) {
+                    return redirect()->route('manage.comment.setting.config', $targetInstanceId);
+                });
+                Route::get('config', ['as' => '.config', 'uses' => 'SettingController@getConfig']);
+                Route::post('config', ['as' => '.config', 'uses' => 'SettingController@postConfig']);
 
-            Route::post('setting/{targetInstanceId}', [
-                'as' => 'manage.comment.setting',
-                'uses' => 'ManagerController@postSetting'
-            ]);
+                Route::get('perm', ['as' => '.perm', 'uses' => 'SettingController@getPerm']);
+                Route::post('perm', ['as' => '.perm', 'uses' => 'SettingController@postPerm']);
 
-            Route::get('global', [
-                'as' => 'manage.comment.setting.global',
-                'uses' => 'ManagerController@getGlobalSetting'
-            ]);
+                Route::get('skin', ['as' => '.skin', 'uses' => 'SettingController@getSkin']);
+                Route::get('editor', ['as' => '.editor', 'uses' => 'SettingController@getEditor']);
+                Route::get('df', ['as' => '.df', 'uses' => 'SettingController@getDF']);
+                Route::get('tm', ['as' => '.tm', 'uses' => 'SettingController@getTM']);
+            });
 
-            Route::post('global', [
-                'as' => 'manage.comment.setting.global',
-                'uses' => 'ManagerController@postGlobalSetting'
-            ]);
-        }, ['namespace' => __NAMESPACE__]);
+            Route::group(['prefix' => 'global', 'as' => 'manage.comment.setting.global'], function () {
+                Route::get('/', function () {
+                    return redirect()->route('manage.comment.setting.global.config');
+                });
+                Route::get('config', ['as' => '.config', 'uses' => 'SettingController@getGlobalConfig']);
+                Route::post('config', ['as' => '.config', 'uses' => 'SettingController@postGlobalConfig']);
+
+                Route::get('perm', ['as' => '.perm', 'uses' => 'SettingController@getGlobalPerm']);
+                Route::post('perm', ['as' => '.perm', 'uses' => 'SettingController@postGlobalPerm']);
+            });
+
+        }, ['namespace' => 'Xpressengine\\Plugins\\Comment\\Controllers']);
 
         Route::fixed('comment', function () {
             Route::get('index', ['as' => 'plugin.comment.index', 'uses' => 'UserController@index']);
@@ -196,7 +218,7 @@ class Plugin extends AbstractPlugin
             Route::get('votedUser', 'UserController@votedUser');
             Route::get('votedModal', ['as' => 'plugin.comment.voted.modal', 'uses' => 'UserController@votedModal']);
             Route::get('votedList', ['as' => 'plugin.comment.voted.list', 'uses' => 'UserController@votedList']);
-        }, ['namespace' => __NAMESPACE__]);
+        }, ['namespace' => 'Xpressengine\\Plugins\\Comment\\Controllers']);
     }
 
     private function registerSettingsMenu()
@@ -238,21 +260,7 @@ class Plugin extends AbstractPlugin
 
     public function getHandler()
     {
-        if (!$this->handler) {
-            $proxyClass = app('xe.interception')->proxy(Handler::class);
-            $counter = app('xe.counter')->make(app('request'), Handler::COUNTER_VOTE, ['assent', 'dissent']);
-            $this->handler = new $proxyClass(
-                app('xe.document'),
-                app('session.store'),
-                $counter,
-                app('xe.auth'),
-                app('xe.permission'),
-                app('xe.config'),
-                app('xe.keygen')
-            );
-        }
-
-        return $this->handler;
+        return app(Handler::class);
     }
 
     public function pluginPath()
@@ -277,6 +285,26 @@ class Plugin extends AbstractPlugin
             XeToggleMenu::setActivates('comment', null, []);
         }
 
+        // ver 0.9.13
+        $handler = $this->getHandler();
+        $permission = app('xe.permission')->getOrNew($handler->getKeyForPerm());
+        if (!$permission['manage']) {
+            $grant = new Grant();
+            $create = $permission['create'];
+            foreach ($create as $type => $value) {
+                $grant->add('create', $type, $value);
+            }
+
+            $grant->set('manage', [
+                Grant::RATING_TYPE => Rating::MANAGER,
+                Grant::GROUP_TYPE => [],
+                Grant::USER_TYPE => [],
+                Grant::EXCEPT_TYPE => [],
+                Grant::VGROUP_TYPE => []
+            ]);
+            app('xe.permission')->register($handler->getKeyForPerm(), $grant);
+        }
+
         XeLang::putFromLangDataSource('comment', base_path('plugins/comment/langs/lang.php'));
     }
 
@@ -287,6 +315,13 @@ class Plugin extends AbstractPlugin
     {
         // ver 0.9.1
         if (XeConfig::get(XeToggleMenu::getConfigKey('comment', null)) == null) {
+            return false;
+        }
+
+        // ver 0.9.13
+        $handler = $this->getHandler();
+        $permission = app('xe.permission')->getOrNew($handler->getKeyForPerm());
+        if (!$permission['manage']) {
             return false;
         }
 
