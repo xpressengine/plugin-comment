@@ -75,7 +75,7 @@ class ManagerController extends Controller
         $map = $this->handler->getInstanceMap();
         $menuItems = $menus->items()->fetchIn(array_keys($map), 'route')->getDictionary();
 
-        return XePresenter::make('index', [
+        return XePresenter::make('docs.index', [
             'comments' => $comments,
             'menuItem' => function ($comment) use ($menuItems, $map) {
                 $index = array_search($comment->instanceId, $map);
@@ -161,7 +161,7 @@ class ManagerController extends Controller
         $map = $this->handler->getInstanceMap();
         $menuItems = $menus->items()->fetchIn(array_keys($map), 'route')->getDictionary();
 
-        return XePresenter::make('trash', [
+        return XePresenter::make('docs.trash', [
             'comments' => $comments,
             'menuItem' => function ($comment) use ($menuItems, $map) {
                 $index = array_search($comment->instanceId, $map);
