@@ -117,6 +117,11 @@ class Plugin extends AbstractPlugin
 
         XeTrash::register(RecycleBin::class);
 
+        $this->createIntercept();
+    }
+
+    public function register()
+    {
         app()->singleton('xe.plugin.comment', function () {
             return $this;
         });
@@ -135,8 +140,6 @@ class Plugin extends AbstractPlugin
             );
         });
         app()->alias(Handler::class, 'xe.plugin.comment.handler');
-
-        $this->createIntercept();
     }
 
     private function createIntercept()
