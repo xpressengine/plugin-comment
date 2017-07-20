@@ -360,6 +360,8 @@
                         self.spotIn(child);
                         item.removeForm();
                         self.renderItems();
+
+                        self.setTotalCnt(self.getTotalCnt() + 1);
                     }, self.props.config.editor));
 
                     self.state.ing = false;
