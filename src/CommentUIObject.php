@@ -62,9 +62,6 @@ class CommentUIObject extends AbstractUIObject
         $this->initAssets();
 
         $props = [
-            'targetId' => $target->getUid(),
-            'instanceId' => $instanceId,
-            'targetAuthorId' => $target->getAuthor()->getId(),
             'config' => [
                 'reverse' => $config->get('reverse'),
                 'editor' => null,
@@ -86,20 +83,19 @@ class CommentUIObject extends AbstractUIObject
         $skin = XeSkin::getAssigned($plugin->getId());
         $view = $skin->setView('container')->setData(compact('config'))->render();
 
-        $view = View::make(sprintf('%s::views.uio', $plugin->getId()), [
+        return view(sprintf('%s::views.uio', $plugin->getId()), [
+            'instanceId' => $instanceId,
             'target' => $target,
             'editor' => $editor,
             'inner' => $view,
-            'props' => json_enc($props)
+            'props' => $props
         ]);
 
-        return $view;
+
     }
 
     protected function loadDependencies()
     {
-//        XeFrontend::css('/assets/core/common/css/temporary.css')->load();
-//        XeFrontend::js('/assets/core/common/js/temporary.js')->appendTo('head')->before('/assets/vendor/react/react-with-addons.js')->load();
         XeFrontend::js('/assets/core/xe-ui-component/js/xe-page.js')->load();
     }
 
