@@ -5,41 +5,22 @@
 
     var comment = {};
 
-    comment.urlPrefix = '';
-    comment.init = function (props, container) {
-        var obj = new Comment(props, container);
+    comment.init = function (container) {
+        var obj = new Comment(container);
 
         obj.run();
     };
 
-    /**
-     * 코어에서 제공함 . XE.Request 참고
-     * @param jqXHR
-     * @deprecated
-     */
-    var jqXHRError = function (jqXHR) {
-        var responseText = $.parseJSON(jqXHR.responseText);
-        var errorMessage = responseText.message;
-        XE.toast('xe-warning', errorMessage ? errorMessage : responseText.exception);
-    };
-
-    var url = function (relativePath) {
-        var prefix = comment.urlPrefix == '' ? '/' : '/' + comment.urlPrefix;
-        return xeBaseURL + prefix + '/comment' + (relativePath.charAt(0) == '/' ? '' : '/') + relativePath;
-    };
-
-    function Comment(props, container)
+    function Comment(container)
     {
         var defaultProps = {
-            targetId: null,
-            instanceId: null,
-            targetAuthorId: null,
             config: {}
         };
 
-        this.props = $.extend({}, defaultProps, props);
-        this.state = {ing: false};
         this.container = container;
+        this.props = $.extend({}, defaultProps, $(container).data('props'));
+        this.state = {ing: false};
+
     }
 
     Comment.prototype = {
@@ -68,16 +49,6 @@
 
                 form.render(this._getFormBox());
 
-                // todo: 임시 비 사용 처리
-                // var temporary = $('textarea', form.getDom()).temporary({
-                //     key: 'comment|' + this.props.targetId,
-                //     btnLoad: $('.__xe_temp_btn_load', form.getDom()),
-                //     btnSave: $('.__xe_temp_btn_save', form.getDom()),
-                //     container: $('.__xe_temp_container', form.getDom()),
-                //     withForm: true,
-                //     callback: function (data) { form.editorSync(); }
-                // });
-
             }.bind(this));
 
             this.eventBind();
@@ -88,9 +59,9 @@
             }
             this.loading = true;
             var data = {
-                targetId: this.props.targetId,
-                instanceId: this.props.instanceId,
-                targetAuthorId: this.props.targetAuthorId
+                targetId: $(this.container).data('target_id'),
+                instanceId: $(this.container).data('instance_id'),
+                targetAuthorId: $(this.container).data('target_author_id')
             };
 
             if (this.items.length > 0) {
@@ -99,7 +70,7 @@
             }
 
             XE.ajax({
-                url: url('/index'),
+                url: $(this.container).data('urls').index,
                 type: 'get',
                 dataType: 'json',
                 data: data,
@@ -273,14 +244,14 @@
         getForm: function (mode, id, callback) {
             // mode is create, edit and reply
             var data = {
-                targetId: this.props.targetId,
-                instanceId: this.props.instanceId,
-                targetAuthorId: this.props.targetAuthorId
+                targetId: $(this.container).data('target_id'),
+                instanceId: $(this.container).data('instance_id'),
+                targetAuthorId: $(this.container).data('target_author_id')
             };
             $.extend(data, {mode: mode, id: id});
 
             XE.ajax({
-                url: url('/form'),
+                url: $(this.container).data('urls').form,
                 type: 'get',
                 dataType: 'json',
                 data: data,
@@ -450,10 +421,10 @@
                 };
 
                 XE.ajax({
-                    url: url('/destroy'),
+                    url: $(self.container).data('urls').destroy,
                     type: 'post',
                     dataType: 'json',
-                    data: {instanceId: self.props.instanceId, id: item.getId()},
+                    data: {instanceId: $(self.container).data('instance_id'), id: item.getId()},
                     success: function (json) {
                         if (json.mode && json.mode === 'certify') {
                             var dom = $.parseHTML(json.html);
@@ -465,6 +436,74 @@
                 }).always(function () {
                     self.state.ing = false;
                 });
+            });
+
+            $(this.container).on('click', '.__xe_comment_btn_vote', function (e) {
+                e.preventDefault();
+
+                if (self.state.ing === true) {
+                    return false;
+                }
+                self.state.ing = true;
+
+                var context = $(this).closest('.__xe_comment_list_item'),
+                    item = self.find(context.data('id'));
+
+                var type = item.currentVoteType(this),
+                    urlSuffix = $(this).hasClass('on') ? 'voteOff' : 'voteOn';
+
+                XE.ajax({
+                    url: $(self.container).data('urls')[urlSuffix],
+                    type: 'post',
+                    dataType: 'json',
+                    data: {instanceId: item.getInstanceId(), id: item.getId(), option: type.current},
+                    success: function (json) {
+                        if (json[type.current] || json[type.current] === 0) {
+                            item.setVoteCnt(type.current, json[type.current]);
+                            $(this).toggleClass('on');
+                            $('.__xe_comment_count.__xe_' + type.current, context).trigger('click', [true]);
+                        }
+                    }.bind(this)
+                }).always(function () {
+                    self.state.ing = false;
+                    $(this).blur();
+                }.bind(this));
+            });
+
+            $(this.container).on('click', '.__xe_comment_count', function (e, noToggle) {
+                e.preventDefault();
+
+                var context = $(this).closest('.__xe_comment_list_item'),
+                    item = self.find(context.data('id'));
+
+                var type = item.currentVoteType(this);
+
+                if (!noToggle) {
+                    $('.__xe_comment_count.__xe_' + type.opposite, context).removeClass('on');
+                    $('.__xe_comment_voters.__xe_' + type.opposite, context).hide();
+
+                    $(this).toggleClass('on');
+                }
+
+                if (!$(this).hasClass('on')) {
+                    $('.__xe_comment_voters.__xe_' + type.current, context).hide();
+                    return;
+                }
+
+                XE.page(
+                    $(self.container).data('urls').votedUser,
+                    $('.__xe_comment_voters.__xe_' + type.current, context),
+                    {
+                        data: {
+                            instanceId: item.getInstanceId(),
+                            id: item.getId(),
+                            option: type.current
+                        }
+                    },
+                    function () {
+                        $('.__xe_comment_voters.__xe_' + type.current, context).show();
+                    }
+                );
             });
 
             $(this.container).on('click', '.__xe_comment_btn_toggle_file', function (e) {
@@ -485,9 +524,7 @@
     {
         this.dom = dom;
         this.form = null;
-        this.state = {ing: false, changed: false};
-
-        this.eventBind();
+        this.state = {changed: false};
     }
 
     Item.prototype = {
@@ -556,66 +593,7 @@
         setVoteCnt: function (type, cnt){
             $('.__xe_comment_count.__xe_' + type, this.dom).text(cnt);
         },
-        eventBind: function () {
-            var self = this;
-
-            $('.__xe_comment_btn_vote', this.dom).click(function (e) {
-                e.preventDefault();
-
-                if (self.state.ing === true) {
-                    return false;
-                }
-                self.state.ing = true;
-
-                var type = self._currentVoteType(this),
-                    urlSuffix = $(this).hasClass('on') ? 'voteOff' : 'voteOn';
-
-                XE.ajax({
-                    url: url('/' + urlSuffix),
-                    type: 'post',
-                    dataType: 'json',
-                    data: {instanceId: self.getInstanceId(), id: self.getId(), option: type.current},
-                    success: function (json) {
-                        if (json[type.current] || json[type.current] === 0) {
-                            self.setVoteCnt(type.current, json[type.current]);
-                            $(this).toggleClass('on');
-                            $('.__xe_comment_count.__xe_' + type.current, self.dom).trigger('click', [true]);
-                        }
-                    }.bind(this)
-                }).always(function () {
-                    self.state.ing = false;
-                });
-            });
-
-            $('.__xe_comment_count', this.dom).click(function (e, noToggle) {
-                e.preventDefault();
-
-                var type = self._currentVoteType(this);
-
-                if (!noToggle) {
-                    $('.__xe_comment_count.__xe_' + type.opposite, self.dom).removeClass('on');
-                    $('.__xe_comment_voters.__xe_' + type.opposite, self.dom).hide();
-
-                    $(this).toggleClass('on');
-                }
-
-                if (!$(this).hasClass('on')) {
-                    $('.__xe_comment_voters.__xe_' + type.current, self.dom).hide();
-                    return;
-                }
-
-                XE.page(url('/votedUser'), $('.__xe_comment_voters.__xe_' + type.current, self.dom), {
-                    data: {
-                        instanceId: self.getInstanceId(),
-                        id: self.getId(),
-                        option: type.current
-                    }
-                }, function () {
-                    $('.__xe_comment_voters.__xe_' + type.current, self.dom).show();
-                });
-            });
-        },
-        _currentVoteType: function (elem) {
+        currentVoteType: function (elem) {
             if ($(elem).hasClass('__xe_assent')) {
                 return {current: 'assent', opposite: 'dissent'};
             } else if ($(elem).hasClass('__xe_dissent')) {

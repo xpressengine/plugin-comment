@@ -209,13 +209,13 @@ class Plugin extends AbstractPlugin
             Route::post('update', ['as' => 'plugin.comment.update', 'uses' => 'UserController@update']);
             Route::post('destroy', ['as' => 'plugin.comment.destroy', 'uses' => 'UserController@destroy']);
 
-            Route::get('form', 'UserController@form');
+            Route::get('form', ['as' => 'plugin.comment.form', 'uses' => 'UserController@form']);
             Route::post('certify', ['as' => 'plugin.comment.certify', 'uses' => 'UserController@certify']);
-            Route::get('voteInfo', 'UserController@voteInfo');
-            Route::post('voteOn', 'UserController@voteOn');
-            Route::post('voteOff', 'UserController@voteOff');
+            Route::get('voteInfo', ['as' => 'plugin.comment.vote.info', 'uses' => 'UserController@voteInfo']);
+            Route::post('voteOn', ['as' => 'plugin.comment.vote.on', 'uses' => 'UserController@voteOn']);
+            Route::post('voteOff', ['as' => 'plugin.comment.vote.off', 'uses' => 'UserController@voteOff']);
 
-            Route::get('votedUser', 'UserController@votedUser');
+            Route::get('votedUser', ['as' => 'plugin.comment.voted.user', 'uses' => 'UserController@votedUser']);
             Route::get('votedModal', ['as' => 'plugin.comment.voted.modal', 'uses' => 'UserController@votedModal']);
             Route::get('votedList', ['as' => 'plugin.comment.voted.list', 'uses' => 'UserController@votedList']);
         }, ['namespace' => 'Xpressengine\\Plugins\\Comment\\Controllers']);
