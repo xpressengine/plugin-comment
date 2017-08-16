@@ -242,7 +242,7 @@ class Handler
         $this->configs->remove($config);
 
         $target = $this->getTargetInstanceId($instanceId);
-        $this->configs->setVal(implode('.', [$key, $target]), null);
+        $this->configs->setVal(implode('.', ['comment_map', $target]), null);
     }
 
     /**
