@@ -1,3 +1,6 @@
+<?php
+use Xpressengine\Plugins\Comment\Models\Comment;
+?>
 <div class="row">
     <div class="col-sm-12">
         <div class="panel-group">
@@ -18,10 +21,10 @@
                                 <ul class="dropdown-menu" role="menu">
                                     <li><strong>필터</strong></li>
                                     <li class="active"><a href="#" value="">{{ xe_trans('comment::manage.all') }}</a></li>
-                                    <li><a href="#" value="display|{{ Xpressengine\Plugins\Comment\Models\Comment::DISPLAY_VISIBLE }}">{{ xe_trans('comment::manage.public') }}</a></li>
-                                    <li><a href="#" value="display|{{ Xpressengine\Plugins\Comment\Models\Comment::DISPLAY_SECRET }}">{{ xe_trans('comment::manage.secret') }}</a></li>
-                                    <li><a href="#" value="approved|{{ Xpressengine\Plugins\Comment\Models\Comment::APPROVED_APPROVED }}">{{ xe_trans('comment::manage.approved.approved') }}</a></li>
-                                    <li><a href="#" value="approved|{{ Xpressengine\Plugins\Comment\Models\Comment::APPROVED_WAITING }}">{{ xe_trans('comment::manage.approved.waiting') }}</a></li>
+                                    <li><a href="#" value="display|{{ Comment::DISPLAY_VISIBLE }}">{{ xe_trans('comment::manage.public') }}</a></li>
+                                    <li><a href="#" value="display|{{ Comment::DISPLAY_SECRET }}">{{ xe_trans('comment::manage.secret') }}</a></li>
+                                    <li><a href="#" value="approved|{{ Comment::APPROVED_APPROVED }}">{{ xe_trans('comment::manage.approved.approved') }}</a></li>
+                                    <li><a href="#" value="approved|{{ Comment::APPROVED_WAITING }}">{{ xe_trans('comment::manage.approved.waiting') }}</a></li>
                                 </ul>
                             </div>
                         </form>
@@ -138,13 +141,13 @@
 
         var actions = {
             approve: function ($f) {
-                $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Xpressengine\Plugins\Comment\Models\Comment::APPROVED_APPROVED }}).appendTo($f);
+                $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Comment::APPROVED_APPROVED }}).appendTo($f);
 
                 $f.attr('action', '{{ route('comment::manage.approve') }}');
                 $f.submit();
             },
             reject: function ($f) {
-                $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Xpressengine\Plugins\Comment\Models\Comment::APPROVED_REJECTED }}).appendTo($f);
+                $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Comment::APPROVED_REJECTED }}).appendTo($f);
 
                 $f.attr('action', '{{ route('comment::manage.approve') }}');
                 $f.submit();

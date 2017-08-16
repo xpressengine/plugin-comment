@@ -1,3 +1,7 @@
+<?php
+use Xpressengine\Plugins\Comment\Models\Comment;
+use Xpressengine\User\Rating;
+?>
 @foreach($items as $item)
     <div class="comment_entity depth{{ $item->getDepth() }} __xe_comment_list_item" id="#comment-{{ $item->id }}" data-instanceid="{{ $item->instanceId }}" data-id="{{ $item->id }}" data-head="{{ $item->head }}" data-reply="{{ $item->reply }}" data-parentid="{{ $item->parentId }}" data-indent="{{ $item->getDepth() }}">
         <div class="comment_entity_avatar">
@@ -8,7 +12,7 @@
         <div class="comment_entity_body">
             <div class="comment_entity_body_meta">
                 <!-- [D] 클릭시 클래스 on 적용 -->
-                <a href="#" class="author {{ $item->getAuthor()->getRating() !== Xpressengine\User\Rating::GUEST ? '__xe_member' : '' }}" data-id="{{ $item->userId }}">{{ $item->writer }}</a>
+                <a href="#" class="author {{ $item->getAuthor()->getRating() !== Rating::GUEST ? '__xe_member' : '' }}" data-id="{{ $item->userId }}">{{ $item->writer }}</a>
                 <span class="date" data-xe-timeago="{{ $item->createdAt }}" title="{{ $item->createdAt }}">{{ $item->createdAt }}</span>
                 <div class="ly_popup">
                     <ul>
@@ -31,9 +35,9 @@
             </div>
             <div class="xe_content __xe_comment_edit_toggle">
                 @can('read', $item)
-                {!! compile($item->instanceId, $item->getContent(), $item->format === Xpressengine\Plugins\Comment\Models\Comment::FORMAT_HTML) !!}
+                {!! compile($item->instanceId, $item->getContent(), $item->format === Comment::FORMAT_HTML) !!}
                 @else
-                    @if($item->display == Xpressengine\Plugins\Comment\Models\Comment::DISPLAY_SECRET)
+                    @if($item->display == Comment::DISPLAY_SECRET)
                         {{ xe_trans('comment::SecretContent') }}
                     @else
                         {{ xe_trans('comment::NotAllowContent') }}
