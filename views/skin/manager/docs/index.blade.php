@@ -140,17 +140,17 @@
             approve: function ($f) {
                 $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Xpressengine\Plugins\Comment\Models\Comment::APPROVED_APPROVED }}).appendTo($f);
 
-                $f.attr('action', '{{ route('manage.comment.approve') }}');
+                $f.attr('action', '{{ route('comment::manage.approve') }}');
                 $f.submit();
             },
             reject: function ($f) {
                 $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Xpressengine\Plugins\Comment\Models\Comment::APPROVED_REJECTED }}).appendTo($f);
 
-                $f.attr('action', '{{ route('manage.comment.approve') }}');
+                $f.attr('action', '{{ route('comment::manage.approve') }}');
                 $f.submit();
             },
             trash: function ($f) {
-                $f.attr('action', '{{ route('manage.comment.totrash') }}');
+                $f.attr('action', '{{ route('comment::manage.totrash') }}');
                 $f.submit();
             }
         };

@@ -6,7 +6,7 @@
             </div>
         </div>
         <div id="commentBasic" class="panel-collapse collapse in">
-            <form id="fCommentSetting" method="post" action="{{ route('manage.comment.setting.config', $targetInstanceId) }}">
+            <form id="fCommentSetting" method="post" action="{{ route('comment::setting.config', $targetInstanceId) }}">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
                 <div class="panel-body">

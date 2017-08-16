@@ -215,12 +215,12 @@ class Plugin extends AbstractPlugin
 
     public function getSettingsURI()
     {
-        return route('manage.comment.setting.global');
+        return route('comment::setting.global');
     }
 
     public function getInstanceSettingURI($instanceId)
     {
-        return route('manage.comment.setting', $instanceId);
+        return route('comment::setting', $instanceId);
     }
 
     public function getHandler()

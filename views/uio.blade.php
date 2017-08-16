@@ -8,12 +8,12 @@
         data-instance_id="{{ $instanceId }}"
         data-target_author_id="{{ $target->getAuthor()->getId() }}"
         data-urls="{{ json_enc([
-            'index' => route('plugin.comment.index'),
-            'form' => route('plugin.comment.form'),
-            'destroy' => route('plugin.comment.destroy'),
-            'voteOn' => route('plugin.comment.vote.on'),
-            'voteOff' => route('plugin.comment.vote.off'),
-            'votedUser' => route('plugin.comment.voted.user')
+            'index' => route('comment::index'),
+            'form' => route('comment::form'),
+            'destroy' => route('comment::destroy'),
+            'voteOn' => route('comment::vote.on'),
+            'voteOff' => route('comment::vote.off'),
+            'votedUser' => route('comment::voted.user')
         ]) }}"
         data-props="{{ json_enc($props) }}"
 >

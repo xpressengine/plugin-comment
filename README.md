@@ -47,6 +47,6 @@ blade view 에서 댓글을 표시하기 위해 다음 코드를 댓글이 나�
 어떤 페이지는 페이지가 속하는 인스턴스마다 설정이 있을것 입니다. 그리고 이 인스턴마다 사용되는 댓글도 각각 설정을 지정해야 할 것입니다.
 설정페이지는 플러그인에 의해 제공됩니다. 사용자는 인스턴스의 고유 아이디를 이용해 댓글의 설정 페이지를 연결하기만 하면 됩니다.
 ```
-<a href="{{ route('manage.comment.setting', ['targetInstanceId' => '인스턴스 아이디']) }}">댓글 설정으로 이동</a>
+<a href="{{ route('comment::setting', ['targetInstanceId' => '인스턴스 아이디']) }}">댓글 설정으로 이동</a>
 ```
 `인스턴스 아이디` 는 `Xpressengine\Plugins\Comment\CommentUsable::getInstanceId` 에서 반화되는 값과 같은 값입니다. 

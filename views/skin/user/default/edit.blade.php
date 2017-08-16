@@ -1,5 +1,5 @@
 <div class="comment_action_area modify">
-    <form action="{{ route('plugin.comment.update') }}" class="comment_form">
+    <form action="{{ route('comment::update') }}" class="comment_form">
         <!-- input hidden area start -->
         <input type="hidden" name="targetId" value="{{ $targetId }}">
         <input type="hidden" name="instanceId" value="{{ $instanceId }}">

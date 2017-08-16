@@ -15,7 +15,7 @@
             </div>
         </div>
         <div class="panel-collapse collapse in">
-            <form method="post" action="{{ route('manage.comment.setting.global') }}">
+            <form method="post" action="{{ route('comment::setting.global') }}">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
                 <div class="panel-body">

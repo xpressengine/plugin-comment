@@ -96,7 +96,7 @@ class CommentUIObject extends AbstractUIObject
 
     protected function loadDependencies()
     {
-        XeFrontend::js('/assets/core/xe-ui-component/js/xe-page.js')->load();
+        XeFrontend::js('assets/core/xe-ui-component/js/xe-page.js')->load();
     }
 
     protected function initAssets()
