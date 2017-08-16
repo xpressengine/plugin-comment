@@ -101,8 +101,8 @@ class CommentUIObject extends AbstractUIObject
 
     protected function initAssets()
     {
-        XeFrontend::css(app('xe.plugin.comment')->assetPath() . '/css/comment.css')->load();
-        XeFrontend::js(app('xe.plugin.comment')->assetPath() . '/js/service.js')->appendTo('head')->load();
+        XeFrontend::css('plugins/comment/assets/css/comment.css')->load();
+        XeFrontend::js('plugins/comment/assets/js/service.js')->appendTo('head')->load();
 
         XeFrontend::translation(['xe::autoSave', 'xe::tempSave', 'comment::msgRemoveUnable']);
     }
