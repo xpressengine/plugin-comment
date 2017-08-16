@@ -12,6 +12,7 @@ namespace Xpressengine\Plugins\Comment;
 use Illuminate\Database\Schema\Blueprint;
 use Xpressengine\Permission\Grant;
 use Xpressengine\Plugin\AbstractPlugin;
+use Xpressengine\Plugins\Comment\Migrations\Migration;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Route;
 use View;
@@ -32,9 +33,6 @@ use Xpressengine\User\Rating;
 
 class Plugin extends AbstractPlugin
 {
-    private $targetTable = 'comment_target';
-
-    private $handler;
     /**
      * activate
      *
@@ -56,47 +54,67 @@ class Plugin extends AbstractPlugin
         // put translation source
         XeLang::putFromLangDataSource('comment', base_path('plugins/comment/langs/lang.php'));
 
-        // pivot table
-        $this->migrate();
+        XeDB::transaction(function () {
+            /** @var Handler $handler */
+            $handler = $this->getHandler();
 
-        /** @var Handler $handler */
-        $handler = $this->getHandler();
+            $grant = new Grant();
+            $grant->set('create', [
+                Grant::RATING_TYPE => Rating::MEMBER,
+                Grant::GROUP_TYPE => [],
+                Grant::USER_TYPE => [],
+                Grant::EXCEPT_TYPE => [],
+                Grant::VGROUP_TYPE => []
+            ]);
+            $grant->set('manage', [
+                Grant::RATING_TYPE => Rating::MANAGER,
+                Grant::GROUP_TYPE => [],
+                Grant::USER_TYPE => [],
+                Grant::EXCEPT_TYPE => [],
+                Grant::VGROUP_TYPE => []
+            ]);
+            app('xe.permission')->register($handler->getKeyForPerm(), $grant);
+            // 기본 설정
+            XeConfig::set('comment', $handler->getDefaultConfig());
 
-        $grant = new Grant();
-        $grant->set('create', [
-            Grant::RATING_TYPE => Rating::MEMBER,
-            Grant::GROUP_TYPE => [],
-            Grant::USER_TYPE => [],
-            Grant::EXCEPT_TYPE => [],
-            Grant::VGROUP_TYPE => []
-        ]);
-        $grant->set('manage', [
-            Grant::RATING_TYPE => Rating::MANAGER,
-            Grant::GROUP_TYPE => [],
-            Grant::USER_TYPE => [],
-            Grant::EXCEPT_TYPE => [],
-            Grant::VGROUP_TYPE => []
-        ]);
-        app('xe.permission')->register($handler->getKeyForPerm(), $grant);
-        // 기본 설정
-        XeConfig::set('comment', $handler->getDefaultConfig());
+            XeToggleMenu::setActivates('comment', null, []);
 
-        XeToggleMenu::setActivates('comment', null, []);
+            // pivot table
+            // schema 처리는 transaction 에 의해 롤백 되지 않으므로 가장 마지막에 수행 함
+            (new Migration())->up();
+        });
     }
 
-    private function migrate()
+    public function checkInstalled()
     {
-        $schema = Schema::setConnection(XeDB::connection('document')->master());
-        $schema->create($this->targetTable, function (Blueprint $table) {
-            $table->engine = "InnoDB";
+        return (new Migration())->tableExists();
+    }
 
-            $table->increments('id');
-            $table->string('docId', 36);
-            $table->string('targetId', 36);
-            $table->string('targetAuthorId', 36);
+    public function uninstall()
+    {
+        XeDB::transaction(function () {
+            $map = XeConfig::getOrNew('comment_map');
+            foreach ($map as $instanceId) {
+                // document instance 및 instance config 제거
+                $this->getHandler()->drop($instanceId);
+                // instance permission 제거
+                app('xe.permission')->destroy($this->getHandler()->getKeyForPerm($instanceId));
+                // toggle menu 설정 제거
+                XeConfig::removeByName(XeToggleMenu::getConfigKey('comment', $instanceId));
+            }
 
-            $table->unique('docId');
-            $table->index('targetId');
+            // 최상위 permissin 제거
+            app('xe.permission')->destroy($this->getHandler()->getKeyForPerm());
+            // 최상위 config 제거
+            XeConfig::removeByName('comment');
+            // map data 제거
+            XeConfig::removeByName('comment_map');
+            // 최상위 설정 제거
+            XeConfig::removeByName(XeToggleMenu::getConfigKey('comment', null));
+
+            // drop pivot table
+            // schema 처리는 transaction 에 의해 롤백 되지 않으므로 가장 마지막에 수행 함
+            (new Migration())->down();
         });
     }
 

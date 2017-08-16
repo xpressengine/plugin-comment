@@ -57,7 +57,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Xpressengine\\Plugins\\Comment\\": "src/"
+      "Xpressengine\\Plugins\\Comment\\": "src/",
+      "Xpressengine\\Plugins\\Comment\\Migrations\\": "migrations/"
     }
   }
 }
