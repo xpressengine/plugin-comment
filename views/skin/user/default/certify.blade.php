@@ -1,4 +1,4 @@
-<form class="comment_form" action="{{ route('plugin.comment.certify') }}">
+<form class="comment_form" action="{{ route('comment::certify') }}">
     <input type="hidden" name="mode" value="{{ $mode }}">
     <input type="hidden" name="instanceId" value="{{ $comment->instanceId }}">
     <input type="hidden" name="targetId" value="{{ $comment->targetId }}">

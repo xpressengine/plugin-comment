@@ -93,11 +93,11 @@
 
         var actions = {
             restore: function ($f) {
-                $f.attr('action', '{{ route('manage.comment.restore') }}');
+                $f.attr('action', '{{ route('comment::manage.restore') }}');
                 $f.submit();
             },
             destroy: function ($f) {
-                $f.attr('action', '{{ route('manage.comment.destroy') }}');
+                $f.attr('action', '{{ route('comment::manage.destroy') }}');
                 $f.submit();
             }
         };

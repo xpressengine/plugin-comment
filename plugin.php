@@ -9,9 +9,9 @@
 
 namespace Xpressengine\Plugins\Comment;
 
-use Illuminate\Database\Schema\Blueprint;
 use Xpressengine\Permission\Grant;
 use Xpressengine\Plugin\AbstractPlugin;
+use Xpressengine\Plugins\Comment\Migrations\Migration;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Route;
 use View;
@@ -32,9 +32,6 @@ use Xpressengine\User\Rating;
 
 class Plugin extends AbstractPlugin
 {
-    private $targetTable = 'comment_target';
-
-    private $handler;
     /**
      * activate
      *
@@ -56,68 +53,87 @@ class Plugin extends AbstractPlugin
         // put translation source
         XeLang::putFromLangDataSource('comment', base_path('plugins/comment/langs/lang.php'));
 
-        // pivot table
-        $this->migrate();
+        XeDB::transaction(function () {
+            /** @var Handler $handler */
+            $handler = $this->getHandler();
 
-        /** @var Handler $handler */
-        $handler = $this->getHandler();
+            $grant = new Grant();
+            $grant->set('create', [
+                Grant::RATING_TYPE => Rating::MEMBER,
+                Grant::GROUP_TYPE => [],
+                Grant::USER_TYPE => [],
+                Grant::EXCEPT_TYPE => [],
+                Grant::VGROUP_TYPE => []
+            ]);
+            $grant->set('manage', [
+                Grant::RATING_TYPE => Rating::MANAGER,
+                Grant::GROUP_TYPE => [],
+                Grant::USER_TYPE => [],
+                Grant::EXCEPT_TYPE => [],
+                Grant::VGROUP_TYPE => []
+            ]);
+            app('xe.permission')->register($handler->getKeyForPerm(), $grant);
+            // 기본 설정
+            XeConfig::set('comment', $handler->getDefaultConfig());
 
-        $grant = new Grant();
-        $grant->set('create', [
-            Grant::RATING_TYPE => Rating::MEMBER,
-            Grant::GROUP_TYPE => [],
-            Grant::USER_TYPE => [],
-            Grant::EXCEPT_TYPE => [],
-            Grant::VGROUP_TYPE => []
-        ]);
-        $grant->set('manage', [
-            Grant::RATING_TYPE => Rating::MANAGER,
-            Grant::GROUP_TYPE => [],
-            Grant::USER_TYPE => [],
-            Grant::EXCEPT_TYPE => [],
-            Grant::VGROUP_TYPE => []
-        ]);
-        app('xe.permission')->register($handler->getKeyForPerm(), $grant);
-        // 기본 설정
-        XeConfig::set('comment', $handler->getDefaultConfig());
+            XeToggleMenu::setActivates('comment', null, []);
 
-        XeToggleMenu::setActivates('comment', null, []);
+            // pivot table
+            // schema 처리는 transaction 에 의해 롤백 되지 않으므로 가장 마지막에 수행 함
+            (new Migration())->up();
+        });
     }
 
-    private function migrate()
+    public function checkInstalled()
     {
-        $schema = Schema::setConnection(XeDB::connection('document')->master());
-        $schema->create($this->targetTable, function (Blueprint $table) {
-            $table->engine = "InnoDB";
+        return (new Migration())->tableExists();
+    }
 
-            $table->increments('id');
-            $table->string('docId', 36);
-            $table->string('targetId', 36);
-            $table->string('targetAuthorId', 36);
+    public function uninstall()
+    {
+        XeDB::transaction(function () {
+            $map = XeConfig::getOrNew('comment_map');
+            foreach ($map as $instanceId) {
+                // document instance 및 instance config 제거
+                $this->getHandler()->drop($instanceId);
+                // instance permission 제거
+                app('xe.permission')->destroy($this->getHandler()->getKeyForPerm($instanceId));
+                // toggle menu 설정 제거
+                XeConfig::removeByName(XeToggleMenu::getConfigKey('comment', $instanceId));
+            }
 
-            $table->unique('docId');
-            $table->index('targetId');
+            // 최상위 permissin 제거
+            app('xe.permission')->destroy($this->getHandler()->getKeyForPerm());
+            // 최상위 config 제거
+            XeConfig::removeByName('comment');
+            // map data 제거
+            XeConfig::removeByName('comment_map');
+            // 최상위 설정 제거
+            XeConfig::removeByName(XeToggleMenu::getConfigKey('comment', null));
+
+            // drop pivot table
+            // schema 처리는 transaction 에 의해 롤백 되지 않으므로 가장 마지막에 수행 함
+            (new Migration())->down();
         });
     }
 
     public function boot()
     {
-        $this->setRoutes();
+        $this->routes();
+        $this->intercept();
         $this->registerSettingsMenu();
 
         Gate::policy(Comment::class, CommentPolicy::class);
         CommentPolicy::setCertifiedResolver(function (Comment $comment) {
-            return static::getHandler()->isCertified($comment);
+            return $this->getHandler()->isCertified($comment);
         });
 
         XeUI::setAlias('comment', 'uiobject/comment@comment');
 
-        XeSkin::setDefaultSkin($this->getId(), 'comment/skin/comment@default');
-        XeSkin::setDefaultSettingsSkin($this->getId(), 'comment/settingsSkin/comment@default');
+        XeSkin::setDefaultSkin('comment', 'comment/skin/comment@default');
+        XeSkin::setDefaultSettingsSkin('comment', 'comment/settingsSkin/comment@default');
 
         XeTrash::register(RecycleBin::class);
-
-        $this->createIntercept();
     }
 
     public function register()
@@ -127,7 +143,7 @@ class Plugin extends AbstractPlugin
         });
 
         app()->singleton(Handler::class, function ($app) {
-            $proxyClass = $app['xe.interception']->proxy(Handler::class);
+            $proxyClass = $app['xe.interception']->proxy(Handler::class, 'XeComment');
             $counter = $app['xe.counter']->make($app['request'], Handler::COUNTER_VOTE, ['assent', 'dissent']);
             return new $proxyClass(
                 $app['xe.document'],
@@ -139,14 +155,14 @@ class Plugin extends AbstractPlugin
                 $app['xe.keygen']
             );
         });
-        app()->alias(Handler::class, 'xe.plugin.comment.handler');
+        app()->alias(Handler::class, 'xe.comment');
     }
 
-    private function createIntercept()
+    private function intercept()
     {
         intercept(
-            Handler::class . '@createInstance',
-            static::getId() . '::comment.createInstance',
+            'XeComment@createInstance',
+             'comment::setEditor',
             function ($func, $targetInstanceId, $division = false) {
                 $func($targetInstanceId, $division);
 
@@ -155,7 +171,7 @@ class Plugin extends AbstractPlugin
             }
         );
 
-        intercept(Handler::class . '@remove', static::getId() . '::comment.relateRemove', function ($func, $comment) {
+        intercept('XeComment@remove', 'comment::relateRemove', function ($func, $comment) {
             XeStorage::unBindAll($comment->getKey(), true);
             XeTag::set($comment->getKey(), []);
 
@@ -163,62 +179,11 @@ class Plugin extends AbstractPlugin
         });
     }
 
-    private function setRoutes()
+    private function routes()
     {
-        Route::settings($this->getId(), function () {
-            Route::get('/', ['as' => 'manage.comment.index', 'uses' => 'ManagerController@index', 'settings_menu' => 'contents.comment.content']);
-            Route::post('approve', ['as' => 'manage.comment.approve', 'uses' => 'ManagerController@approve']);
-            Route::post('totrash', ['as' => 'manage.comment.totrash', 'uses' => 'ManagerController@toTrash']);
-
-            Route::get('trash', ['as' => 'manage.comment.trash', 'uses' => 'ManagerController@trash', 'settings_menu' => 'contents.comment.trash']);
-            Route::post('destroy', ['as' => 'manage.comment.destroy', 'uses' => 'ManagerController@destroy']);
-            Route::post('restore', ['as' => 'manage.comment.restore', 'uses' => 'ManagerController@restore']);
-
-            Route::group(['prefix' => 'setting/{targetInstanceId}', 'as' => 'manage.comment.setting'], function () {
-                Route::get('/', function ($targetInstanceId) {
-                    return redirect()->route('manage.comment.setting.config', $targetInstanceId);
-                });
-                Route::get('config', ['as' => '.config', 'uses' => 'SettingController@getConfig']);
-                Route::post('config', ['as' => '.config', 'uses' => 'SettingController@postConfig']);
-
-                Route::get('perm', ['as' => '.perm', 'uses' => 'SettingController@getPerm']);
-                Route::post('perm', ['as' => '.perm', 'uses' => 'SettingController@postPerm']);
-
-                Route::get('skin', ['as' => '.skin', 'uses' => 'SettingController@getSkin']);
-                Route::get('editor', ['as' => '.editor', 'uses' => 'SettingController@getEditor']);
-                Route::get('df', ['as' => '.df', 'uses' => 'SettingController@getDF']);
-                Route::get('tm', ['as' => '.tm', 'uses' => 'SettingController@getTM']);
-            });
-
-            Route::group(['prefix' => 'global', 'as' => 'manage.comment.setting.global'], function () {
-                Route::get('/', function () {
-                    return redirect()->route('manage.comment.setting.global.config');
-                });
-                Route::get('config', ['as' => '.config', 'uses' => 'SettingController@getGlobalConfig']);
-                Route::post('config', ['as' => '.config', 'uses' => 'SettingController@postGlobalConfig']);
-
-                Route::get('perm', ['as' => '.perm', 'uses' => 'SettingController@getGlobalPerm']);
-                Route::post('perm', ['as' => '.perm', 'uses' => 'SettingController@postGlobalPerm']);
-            });
-
-        }, ['namespace' => 'Xpressengine\\Plugins\\Comment\\Controllers']);
-
-        Route::fixed('comment', function () {
-            Route::get('index', ['as' => 'plugin.comment.index', 'uses' => 'UserController@index']);
-            Route::post('store', ['as' => 'plugin.comment.store', 'uses' => 'UserController@store']);
-            Route::post('update', ['as' => 'plugin.comment.update', 'uses' => 'UserController@update']);
-            Route::post('destroy', ['as' => 'plugin.comment.destroy', 'uses' => 'UserController@destroy']);
-
-            Route::get('form', ['as' => 'plugin.comment.form', 'uses' => 'UserController@form']);
-            Route::post('certify', ['as' => 'plugin.comment.certify', 'uses' => 'UserController@certify']);
-            Route::get('voteInfo', ['as' => 'plugin.comment.vote.info', 'uses' => 'UserController@voteInfo']);
-            Route::post('voteOn', ['as' => 'plugin.comment.vote.on', 'uses' => 'UserController@voteOn']);
-            Route::post('voteOff', ['as' => 'plugin.comment.vote.off', 'uses' => 'UserController@voteOff']);
-
-            Route::get('votedUser', ['as' => 'plugin.comment.voted.user', 'uses' => 'UserController@votedUser']);
-            Route::get('votedModal', ['as' => 'plugin.comment.voted.modal', 'uses' => 'UserController@votedModal']);
-            Route::get('votedList', ['as' => 'plugin.comment.voted.list', 'uses' => 'UserController@votedList']);
-        }, ['namespace' => 'Xpressengine\\Plugins\\Comment\\Controllers']);
+        Route::group(['namespace' => 'Xpressengine\\Plugins\\Comment\\Controllers'], function () {
+            require plugins_path('comment/routes.php');
+        });
     }
 
     private function registerSettingsMenu()
@@ -250,29 +215,18 @@ class Plugin extends AbstractPlugin
 
     public function getSettingsURI()
     {
-        return route('manage.comment.setting.global');
+        return route('comment::setting.global');
     }
 
     public function getInstanceSettingURI($instanceId)
     {
-        return route('manage.comment.setting', $instanceId);
+        return route('comment::setting', $instanceId);
     }
 
     public function getHandler()
     {
         return app(Handler::class);
     }
-
-    public function pluginPath()
-    {
-        return __DIR__;
-    }
-
-    public function assetPath()
-    {
-        return str_replace(base_path(), '', $this->pluginPath()) . '/assets';
-    }
-
 
     /**
      * @param null $installedVersion install version

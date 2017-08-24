@@ -2,7 +2,7 @@
   "name": "xpressengine-plugin/comment",
   "description": "XpressEngine's plugin for bundle (XE)",
   "keywords": ["xpressengine bundle", "comment", "comment service"],
-  "version": "0.9.14",
+  "version": "0.9.15",
   "support": {
     "email": "developers@xpressengine.com",
     "issues": "http://xpressengine.com/issues",
@@ -57,7 +57,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Xpressengine\\Plugins\\Comment\\": "src/"
+      "Xpressengine\\Plugins\\Comment\\": "src/",
+      "Xpressengine\\Plugins\\Comment\\Migrations\\": "migrations/"
     }
   }
 }
