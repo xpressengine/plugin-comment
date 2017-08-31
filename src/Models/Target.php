@@ -33,7 +33,7 @@ class Target extends DynamicModel
      *
      * @var array
      */
-    protected $fillable = ['docId', 'targetId', 'targetAuthorId'];
+    protected $fillable = ['doc_id', 'target_id', 'target_author_id'];
 
     /**
      * Indicates if the model should be timestamped.
@@ -44,12 +44,12 @@ class Target extends DynamicModel
 
     public function comment()
     {
-        return $this->belongsTo(Comment::class, 'docId');
+        return $this->belongsTo(Comment::class, 'doc_id');
     }
 
     public function author()
     {
-        return $this->belongsTo(User::class, 'targetAuthorId');
+        return $this->belongsTo(User::class, 'target_author_id');
     }
 
     /**

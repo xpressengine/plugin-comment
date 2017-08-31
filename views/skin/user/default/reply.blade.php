@@ -5,10 +5,10 @@
     </div>
     <form action="{{ route('comment::store') }}" class="comment_form">
         <!-- input hidden area start -->
-        <input type="hidden" name="instanceId" value="{{ $comment->instanceId }}">
-        <input type="hidden" name="targetId" value="{{ $comment->target->targetId }}">
-        <input type="hidden" name="parentId" value="{{ $comment->id }}">
-        <input type="hidden" name="targetAuthorId" value="{{ $comment->target->targetAuthorId }}">
+        <input type="hidden" name="instance_id" value="{{ $comment->instance_id }}">
+        <input type="hidden" name="target_id" value="{{ $comment->target->target_id }}">
+        <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+        <input type="hidden" name="target_author_id" value="{{ $comment->target->target_author_id }}">
         <!-- input hidden area end -->
 
         <div class="comment_form_editor">
@@ -26,7 +26,7 @@
                 @if(Auth::guest())
                 <div class="comment_form_input">
                     <input type="text" class="bd_input" name="writer" placeholder="Name">
-                    <input type="password" class="bd_input" name="certifyKey" placeholder="Password">
+                    <input type="password" class="bd_input" name="certify_key" placeholder="Password">
                     <input type="email" class="bd_input v2" name="email" placeholder="E-mail">
                 </div>
                 @endif

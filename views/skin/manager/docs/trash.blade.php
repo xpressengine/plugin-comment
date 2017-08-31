@@ -38,12 +38,12 @@
                                     <td><input type="checkbox" name="id[]" class="__xe_checkbox" value="{{ $comment->id }}"></td>
                                     <td>
                                         <strong>[{{ xe_trans($menuItem($comment)->title) }}]</strong>
-                                        {{ str_limit($comment->pureContent, 100) }}
+                                        {{ str_limit($comment->pure_content, 100) }}
                                     </td>
                                     <td><a href="#">{{ $comment->writer }}</a></td>
-                                    <td>{{ $comment->assentCount }} / {{ $comment->dissentCount }}</td>
-                                    <td><a href="#">{{ str_replace('-', '.', substr($comment->createdAt, 0, 16)) }}</a></td>
-                                    <td><a href="#">{{ str_replace('-', '.', substr($comment->deletedAt, 0, 16)) }}</a></td>
+                                    <td>{{ $comment->assent_count }} / {{ $comment->dissent_count }}</td>
+                                    <td><a href="#">{{ str_replace('-', '.', substr($comment->created_at, 0, 16)) }}</a></td>
+                                    <td><a href="#">{{ str_replace('-', '.', substr($comment->deleted_at, 0, 16)) }}</a></td>
                                     <td><a href="#">{{ $comment->ipaddress }}</a></td>
                                 </tr>
                             @endforeach

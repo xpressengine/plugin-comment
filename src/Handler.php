@@ -278,25 +278,25 @@ class Handler
         $user = $user ?: $this->auth->user();
 
         if (!$user instanceof Guest) {
-            $inputs['userId'] = $user->getId();
+            $inputs['user_id'] = $user->getId();
             $inputs['writer'] = $user->getDisplayName();
         } else {
-            $inputs['userId'] = '';
+            $inputs['user_id'] = '';
         }
 
         $doc = $this->documents->add($inputs);
         /** @var Comment $comment */
-        $comment = $this->createModel($inputs['instanceId'])->newQuery()->find($doc->getKey());
+        $comment = $this->createModel($inputs['instance_id'])->newQuery()->find($doc->getKey());
         $comment->target()->create([
-            'targetId' => $inputs['targetId'],
-            'targetAuthorId' => $inputs['targetAuthorId']
+            'target_id' => $inputs['target_id'],
+            'target_author_id' => $inputs['target_author_id']
         ]);
 
         if ($user instanceof Guest) {
             $this->certified($comment);
         }
 
-        $config = $this->getConfig($comment->instanceId);
+        $config = $this->getConfig($comment->instance_id);
         if ($config->get('useApprove') === true) {
             $comment = $this->put($comment->setApproveWait());
         }
@@ -328,7 +328,7 @@ class Handler
     public function trash(Comment $comment)
     {
         if ($this->hasChild($comment)) {
-            $config = $this->getConfig($comment->instanceId);
+            $config = $this->getConfig($comment->instance_id);
             if ($config->get('removeType') === static::REMOVE_UNABLE) {
                 return false;
             }
@@ -363,7 +363,7 @@ class Handler
     public function restore(Comment $comment)
     {
         if (!empty($comment->reply)) {
-            $parent = $this->createModel($comment->instanceId)->newQuery()
+            $parent = $this->createModel($comment->instance_id)->newQuery()
                 ->where('head', $comment->head)
                 ->where('reply', substr($comment->reply, 0, -1 * Comment::getReplyCharLen()))
                 ->first();
@@ -387,7 +387,7 @@ class Handler
     public function remove(Comment $comment)
     {
         if ($comment->status === Comment::STATUS_TRASH && $comment->display === Comment::DISPLAY_HIDDEN) {
-            $this->createModel($comment->instanceId)->newQuery()
+            $this->createModel($comment->instance_id)->newQuery()
                 ->where('head', $comment->head)
                 ->where('reply', 'like', $comment->reply . str_repeat('_', Comment::getReplyCharLen()))
                 ->get()->each(function ($child) {
@@ -437,7 +437,7 @@ class Handler
      */
     protected function hasChild(Comment $comment)
     {
-        return $this->createModel($comment->instanceId)->newQuery()
+        return $this->createModel($comment->instance_id)->newQuery()
             ->where('head', $comment->head)
             ->where('reply', 'like', $comment->reply . str_repeat('_', Comment::getReplyCharLen()))
             ->count() > 0;
@@ -532,9 +532,9 @@ class Handler
     private function voteOptToColumn($opt)
     {
         if ($opt === 'assent') {
-            $column = 'assentCount';
+            $column = 'assent_count';
         } elseif ($opt === 'dissent') {
-            $column = 'dissentCount';
+            $column = 'dissent_count';
         } else {
             throw new \InvalidArgumentException;
         }
@@ -575,7 +575,7 @@ class Handler
     public function bindUserVote(Comment $comment)
     {
         if (!$this->auth->guest() && $log = $this->counter->getByName($comment->id, $this->auth->user())) {
-            $comment->setVoteType($log->counterOption);
+            $comment->setVoteType($log->counter_option);
         }
     }
 
@@ -590,8 +590,8 @@ class Handler
      */
     public function votedList(Comment $comment, $option, $startId = null, $limit = 10)
     {
-        $query = $this->counter->newModel()->where('counterName', static::COUNTER_VOTE)
-            ->where('targetId', $comment->id)->where('counterOption', $option);
+        $query = $this->counter->newModel()->where('counter_name', static::COUNTER_VOTE)
+            ->where('target_id', $comment->id)->where('counter_option', $option);
 
         if ($startId) {
             $query->where('id', '<', $startId);
@@ -615,7 +615,7 @@ class Handler
 
         $model = $this->createModel();
         $comments = $model->newQuery()->whereHas('target', function ($query) use ($target) {
-            $query->where('targetId', $target->getUid());
+            $query->where('target_id', $target->getUid());
         })->get();
 
         foreach ($comments as $comment) {
