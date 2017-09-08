@@ -275,8 +275,17 @@ class Handler
     public function create(array $inputs, UserInterface $user = null)
     {
         $inputs['type'] = CommentPlugin::getId();
-        $user = $user ?: $this->auth->user();
+        if (isset($inputs['title']) === false) {
+            $inputs['title'] = '';
+        }
+        if (isset($inputs['head']) === false) {
+            $inputs['head'] = '';
+        }
+        if (isset($inputs['certify_key']) === false) {
+            $inputs['certify_key'] = '';
+        }
 
+        $user = $user ?: $this->auth->user();
         if (!$user instanceof Guest) {
             $inputs['user_id'] = $user->getId();
             $inputs['writer'] = $user->getDisplayName();
