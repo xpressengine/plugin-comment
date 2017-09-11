@@ -149,7 +149,7 @@ class Plugin extends AbstractPlugin
                 $app['xe.document'],
                 $app['session.store'],
                 $counter,
-                $app['xe.auth'],
+                $app['auth']->guard(),
                 $app['xe.permission'],
                 $app['xe.config'],
                 $app['xe.keygen']
