@@ -12,7 +12,7 @@ namespace Xpressengine\Plugins\Comment\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
-use Input;
+use Request;
 use XePresenter;
 use Validator;
 use Hash;
@@ -59,16 +59,16 @@ class UserController extends Controller
 
     public function index()
     {
-        $targetId = Input::get('targetId');
-        $instanceId = Input::get('instanceId');
-        $targetAuthorId = Input::get('targetAuthorId');
+        $targetId = Request::get('targetId');
+        $instanceId = Request::get('instanceId');
+        $targetAuthorId = Request::get('targetAuthorId');
 
-        $offsetHead = !empty(Input::get('offsetHead')) ? Input::get('offsetHead') : null;
-        $offsetReply = !empty(Input::get('offsetReply')) ? Input::get('offsetReply') : null;
+        $offsetHead = !empty(Request::get('offsetHead')) ? Request::get('offsetHead') : null;
+        $offsetReply = !empty(Request::get('offsetReply')) ? Request::get('offsetReply') : null;
 
         $config = $this->handler->getConfig($instanceId);
 
-        $take = Input::get('perPage', $config['perPage']);
+        $take = Request::get('perPage', $config['perPage']);
 
         $model = $this->handler->createModel($instanceId);
         $query = $model->newQuery()->whereHas('target', function ($query) use ($targetId) {
@@ -135,16 +135,16 @@ class UserController extends Controller
 
     public function store()
     {
-        $instanceId = Input::get('instanceId');
+        $instanceId = Request::get('instanceId');
 
-        $inputs = Input::except(['_token']);
+        $inputs = Request::except(['_token']);
 
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
         $purifier = new Purifier();
         $purifier->allowModule(EditorTool::class);
         $purifier->allowModule(HTML5::class);
-        $originInput = Input::originAll();
+        $originInput = Request::originAll();
         $inputs['content'] = $purifier->purify($originInput['content']);
 
         if (Gate::denies('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
@@ -206,17 +206,17 @@ class UserController extends Controller
 
     public function update()
     {
-        $instanceId = Input::get('instanceId');
+        $instanceId = Request::get('instanceId');
         $config = $this->handler->getConfig($instanceId);
-        $id = Input::get('id');
-        $inputs = Input::except(['instanceId', 'id', '_token']);
+        $id = Request::get('id');
+        $inputs = Request::except(['instanceId', 'id', '_token']);
 
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
         $purifier = new Purifier();
         $purifier->allowModule(EditorTool::class);
         $purifier->allowModule(HTML5::class);
-        $originInput = Input::originAll();
+        $originInput = Request::originAll();
         $inputs['content'] = $purifier->purify($originInput['content']);
 
         $rules = [
@@ -285,8 +285,8 @@ class UserController extends Controller
 
     public function destroy()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
+        $instanceId = Request::get('instanceId');
+        $id = Request::get('id');
 
         $model = $this->handler->createModel($instanceId);
         if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
@@ -327,9 +327,9 @@ class UserController extends Controller
 
     public function voteOn()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $option = Input::get('option');
+        $instanceId = Request::get('instanceId');
+        $id = Request::get('id');
+        $option = Request::get('option');
 
         if (Auth::guest() !== true) {
             XeDB::beginTransaction();
@@ -358,9 +358,9 @@ class UserController extends Controller
 
     public function voteOff()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $option = Input::get('option');
+        $instanceId = Request::get('instanceId');
+        $id = Request::get('id');
+        $option = Request::get('option');
 
         if (Auth::guest() !== true) {
             XeDB::beginTransaction();
@@ -389,9 +389,9 @@ class UserController extends Controller
 
     public function votedUser()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $option = Input::get('option');
+        $instanceId = Request::get('instanceId');
+        $id = Request::get('id');
+        $option = Request::get('option');
 
         $model = $this->handler->createModel();
         $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
@@ -411,9 +411,9 @@ class UserController extends Controller
     
     public function votedModal()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $option = Input::get('option');
+        $instanceId = Request::get('instanceId');
+        $id = Request::get('id');
+        $option = Request::get('option');
 
         $model = $this->handler->createModel($instanceId);
         $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
@@ -431,11 +431,11 @@ class UserController extends Controller
     
     public function votedList()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $option = Input::get('option');
-        $startId = Input::get('startId');
-        $limit = Input::get('limit', 10);
+        $instanceId = Request::get('instanceId');
+        $id = Request::get('id');
+        $option = Request::get('option');
+        $startId = Request::get('startId');
+        $limit = Request::get('limit', 10);
 
         $model = $this->handler->createModel($instanceId);
         $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
@@ -470,7 +470,7 @@ class UserController extends Controller
 
     public function form()
     {
-        $mode = Input::get('mode');
+        $mode = Request::get('mode');
 
         $method = 'get' . ucfirst($mode) . 'Form';
 
@@ -479,9 +479,9 @@ class UserController extends Controller
 
     protected function getCreateForm()
     {
-        $targetId = Input::get('targetId');
-        $instanceId = Input::get('instanceId');
-        $targetAuthorId = Input::get('targetAuthorId');
+        $targetId = Request::get('targetId');
+        $instanceId = Request::get('instanceId');
+        $targetAuthorId = Request::get('targetAuthorId');
 
         if (Gate::allows('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             $config = $this->handler->getConfig($instanceId);
@@ -506,9 +506,9 @@ class UserController extends Controller
 
     protected function getEditForm()
     {
-        $targetId = Input::get('targetId');
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
+        $targetId = Request::get('targetId');
+        $instanceId = Request::get('instanceId');
+        $id = Request::get('id');
 
         $model = $this->handler->createModel($instanceId);
         if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
@@ -540,8 +540,8 @@ class UserController extends Controller
 
     protected function getReplyForm()
     {
-        $id = Input::get('id');
-        $instanceId = Input::get('instanceId');
+        $id = Request::get('id');
+        $instanceId = Request::get('instanceId');
 
         if (Gate::denies('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             throw new AccessDeniedHttpException;
@@ -577,7 +577,7 @@ class UserController extends Controller
 
     public function certify()
     {
-        $inputs = Input::except('_token');
+        $inputs = Request::except('_token');
 
         $rules = [
             'id' => 'Required',
@@ -610,9 +610,9 @@ class UserController extends Controller
 
         $this->handler->certified($comment);
 
-        if (Input::get('mode') == 'edit') {
+        if (Request::get('mode') == 'edit') {
             return $this->getEditForm();
-        } elseif (Input::get('mode') == 'destroy') {
+        } elseif (Request::get('mode') == 'destroy') {
             return $this->destroy();
         }
 

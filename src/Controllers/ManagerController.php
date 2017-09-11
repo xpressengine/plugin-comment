@@ -10,16 +10,11 @@
 namespace Xpressengine\Plugins\Comment\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Sections\DynamicFieldSection;
-use App\Http\Sections\EditorSection;
-use App\Http\Sections\SkinSection;
-use App\Http\Sections\ToggleMenuSection;
-use Input;
+use Request;
 use Validator;
 use XePresenter;
 use XeConfig;
 use XeDB;
-use Xpressengine\Http\Request;
 use Xpressengine\Menu\MenuHandler;
 use Xpressengine\Menu\Models\MenuItem;
 use Xpressengine\Permission\PermissionSupport;
@@ -57,14 +52,14 @@ class ManagerController extends Controller
 
     public function index(MenuHandler $menus)
     {
-        Input::flash();
+        Request::flash();
 
         $model = $this->handler->createModel();
         $query = $model->newQuery()
             ->whereIn('instanceId', $this->getInstances())
             ->where('status', '!=', Comment::STATUS_TRASH);
 
-        if ($options = Input::get('options')) {
+        if ($options = Request::get('options')) {
             list($searchField, $searchValue) = explode('|', $options);
 
             $query->where($searchField, $searchValue);
@@ -103,8 +98,8 @@ class ManagerController extends Controller
 
     public function approve()
     {
-        $approved = Input::get('approved');
-        $commentIds = Input::get('id');
+        $approved = Request::get('approved');
+        $commentIds = Request::get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
@@ -133,7 +128,7 @@ class ManagerController extends Controller
 
     public function toTrash()
     {
-        $commentIds = Input::get('id');
+        $commentIds = Request::get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
@@ -150,7 +145,7 @@ class ManagerController extends Controller
 
     public function trash(MenuHandler $menus)
     {
-        Input::flash();
+        Request::flash();
 
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
@@ -178,7 +173,7 @@ class ManagerController extends Controller
 
     public function destroy()
     {
-        $commentIds = Input::get('id');
+        $commentIds = Request::get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
@@ -193,7 +188,7 @@ class ManagerController extends Controller
 
     public function restore()
     {
-        $commentIds = Input::get('id');
+        $commentIds = Request::get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();

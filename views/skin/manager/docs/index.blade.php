@@ -14,7 +14,7 @@ use Xpressengine\Plugins\Comment\Models\Comment;
                     <div class="pull-left">
                         <form id="__xe_search_form">
                             <div id="__xe_btn_options" class="btn-group btn-fillter" role="group">
-                                <input type="hidden" name="options" value="{{ Input::old('options') }}">
+                                <input type="hidden" name="options" value="{{ Request::old('options') }}">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                     <span class="caret"></span>
                                 </button>
