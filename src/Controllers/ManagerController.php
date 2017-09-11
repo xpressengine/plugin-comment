@@ -56,7 +56,7 @@ class ManagerController extends Controller
 
         $model = $this->handler->createModel();
         $query = $model->newQuery()
-            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('instance_id', $this->getInstances())
             ->where('status', '!=', Comment::STATUS_TRASH);
 
         if ($options = Request::get('options')) {
@@ -73,7 +73,7 @@ class ManagerController extends Controller
         return XePresenter::make('docs.index', [
             'comments' => $comments,
             'menuItem' => function ($comment) use ($menuItems, $map) {
-                $index = array_search($comment->instanceId, $map);
+                $index = array_search($comment->instance_id, $map);
                 if (isset($menuItems[$index]) === false) {
                     $tmpMenuItem = new MenuItem;
                     $tmpMenuItem->title = $index;
@@ -85,7 +85,7 @@ class ManagerController extends Controller
             'urlMake' => function ($comment, $menuItem) use ($menus) {
                 if (isset($menuItem->type) == true) {
                     if ($module = $menus->getModuleHandler()->getModuleObject($menuItem->type)) {
-                        if ($item = $module->getTypeItem($comment->target->targetId)) {
+                        if ($item = $module->getTypeItem($comment->target->target_id)) {
                             return app('url')->to($item->getLink($menuItem->route) . '#comment-'.$comment->id);
                         }
                     }
@@ -104,7 +104,7 @@ class ManagerController extends Controller
 
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
-            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('instance_id', $this->getInstances())
             ->whereIn('id', $commentIds)->get();
 
         switch ($approved) {
@@ -133,7 +133,7 @@ class ManagerController extends Controller
 
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
-            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('instance_id', $this->getInstances())
             ->whereIn('id', $commentIds)->get();
 
         foreach ($comments as $comment) {
@@ -149,7 +149,7 @@ class ManagerController extends Controller
 
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
-            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('instance_id', $this->getInstances())
             ->where('status', Comment::STATUS_TRASH)
             ->orderBy(Comment::CREATED_AT)->paginate();
 
@@ -159,7 +159,7 @@ class ManagerController extends Controller
         return XePresenter::make('docs.trash', [
             'comments' => $comments,
             'menuItem' => function ($comment) use ($menuItems, $map) {
-                $index = array_search($comment->instanceId, $map);
+                $index = array_search($comment->instance_id, $map);
                 if (isset($menuItems[$index]) === false) {
                     $tmpMenuItem = new MenuItem;
                     $tmpMenuItem->title = $index;
@@ -193,7 +193,7 @@ class ManagerController extends Controller
 
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
-            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('instance_id', $this->getInstances())
             ->whereIn('id', $commentIds)->get();
 
         foreach ($comments as $comment) {

@@ -61,7 +61,7 @@ use Xpressengine\Plugins\Comment\Models\Comment;
                                 <td>
 
                                     <strong>[{{ xe_trans($menuItem($comment)->title) }}]</strong>
-                                    {{ str_limit($comment->pureContent, 100) }}
+                                    {{ str_limit($comment->pure_content, 100) }}
                                     @if($url = $urlMake($comment, $menuItem($comment)))
                                     <a href="{{ $url }}" target="_blank">
                                         <i class="xi-external-link"></i>
@@ -69,8 +69,8 @@ use Xpressengine\Plugins\Comment\Models\Comment;
                                     @endif
                                 </td>
                                 <td><a href="#">{{ $comment->writer }}</a></td>
-                                <td>{{ $comment->assentCount }} / {{ $comment->dissentCount }}</td>
-                                <td><a href="#">{{ str_replace('-', '.', substr($comment->createdAt, 0, 16)) }}</a></td>
+                                <td>{{ $comment->assent_count }} / {{ $comment->dissent_count }}</td>
+                                <td><a href="#">{{ str_replace('-', '.', substr($comment->created_at, 0, 16)) }}</a></td>
                                 <td><a href="#">{{ $comment->ipaddress }}</a></td>
                                 <td><span class="label label-green">{{ $comment->display }}</span></td>
                                 <td><span class="label label-grey">{{ $comment->approved }}</span></td>

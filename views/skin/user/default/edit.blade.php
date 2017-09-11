@@ -1,8 +1,8 @@
 <div class="comment_action_area modify">
     <form action="{{ route('comment::update') }}" class="comment_form">
         <!-- input hidden area start -->
-        <input type="hidden" name="targetId" value="{{ $targetId }}">
-        <input type="hidden" name="instanceId" value="{{ $instanceId }}">
+        <input type="hidden" name="target_id" value="{{ $targetId }}">
+        <input type="hidden" name="instance_id" value="{{ $instanceId }}">
         <input type="hidden" name="id" value="{{ $comment->id }}">
         <!-- input hidden area end -->
 
@@ -23,7 +23,7 @@
                 @if(Auth::guest())
                     <div class="comment_form_input">
                         <input type="text" class="bd_input" name="writer" placeholder="Name" value="{{ $comment->writer }}">
-                        <input type="password" class="bd_input" name="certifyKey" placeholder="Password">
+                        <input type="password" class="bd_input" name="certify_key" placeholder="Password">
                         <input type="email" class="bd_input v2" name="email" placeholder="E-mail" value="{{ $comment->email }}">
                     </div>
                 @endif

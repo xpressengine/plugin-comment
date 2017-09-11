@@ -59,9 +59,9 @@
             }
             this.loading = true;
             var data = {
-                targetId: $(this.container).data('target_id'),
-                instanceId: $(this.container).data('instance_id'),
-                targetAuthorId: $(this.container).data('target_author_id')
+                target_id: $(this.container).data('target_id'),
+                instance_id: $(this.container).data('instance_id'),
+                target_author_id: $(this.container).data('target_author_id')
             };
 
             if (this.items.length > 0) {
@@ -244,9 +244,9 @@
         getForm: function (mode, id, callback) {
             // mode is create, edit and reply
             var data = {
-                targetId: $(this.container).data('target_id'),
-                instanceId: $(this.container).data('instance_id'),
-                targetAuthorId: $(this.container).data('target_author_id')
+                target_id: $(this.container).data('target_id'),
+                instance_id: $(this.container).data('instance_id'),
+                target_author_id: $(this.container).data('target_author_id')
             };
             $.extend(data, {mode: mode, id: id});
 
@@ -424,7 +424,7 @@
                     url: $(self.container).data('urls').destroy,
                     type: 'post',
                     dataType: 'json',
-                    data: {instanceId: $(self.container).data('instance_id'), id: item.getId()},
+                    data: {instance_id: $(self.container).data('instance_id'), id: item.getId()},
                     success: function (json) {
                         if (json.mode && json.mode === 'certify') {
                             var dom = $.parseHTML(json.html);
@@ -456,7 +456,7 @@
                     url: $(self.container).data('urls')[urlSuffix],
                     type: 'post',
                     dataType: 'json',
-                    data: {instanceId: item.getInstanceId(), id: item.getId(), option: type.current},
+                    data: {instance_id: item.getInstanceId(), id: item.getId(), option: type.current},
                     success: function (json) {
                         if (json[type.current] || json[type.current] === 0) {
                             item.setVoteCnt(type.current, json[type.current]);
@@ -495,7 +495,7 @@
                     $('.__xe_comment_voters.__xe_' + type.current, context),
                     {
                         data: {
-                            instanceId: item.getInstanceId(),
+                            instance_id: item.getInstanceId(),
                             id: item.getId(),
                             option: type.current
                         }

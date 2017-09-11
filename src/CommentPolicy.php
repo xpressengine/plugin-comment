@@ -70,7 +70,7 @@ class CommentPolicy
             return true;
         }
 
-        if ($this->gate->allows('manage', new Instance($this->handler->getKeyForPerm($comment->instanceId)))) {
+        if ($this->gate->allows('manage', new Instance($this->handler->getKeyForPerm($comment->instance_id)))) {
             return true;
         }
 

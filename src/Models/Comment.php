@@ -32,18 +32,18 @@ class Comment extends Document
 
     public function author()
     {
-        return $this->belongsTo(User::class, 'userId');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function target()
     {
-        return $this->hasOne(Target::class, 'docId');
+        return $this->hasOne(Target::class, 'doc_id');
     }
 
     public function files()
     {
         $file = new File;
-        return $this->belongsToMany(File::class, $file->getFileableTable(), 'fileableId', 'fileId');
+        return $this->belongsToMany(File::class, $file->getFileableTable(), 'fileable_id', 'file_id');
     }
 
     /**
