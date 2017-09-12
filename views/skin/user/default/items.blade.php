@@ -3,7 +3,7 @@ use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\User\Rating;
 ?>
 @foreach($items as $item)
-    <div class="comment_entity depth{{ $item->getDepth() }} __xe_comment_list_item" id="#comment-{{ $item->id }}" data-instanceid="{{ $item->instance_id }}" data-id="{{ $item->id }}" data-head="{{ $item->head }}" data-reply="{{ $item->reply }}" data-parentid="{{ $item->parent_id }}" data-indent="{{ $item->getDepth() }}">
+    <div class="comment_entity depth{{ $item->getDepth() }} __xe_comment_list_item" id="#comment-{{ $item->id }}" data-instance_id="{{ $item->instance_id }}" data-id="{{ $item->id }}" data-head="{{ $item->head }}" data-reply="{{ $item->reply }}" data-parent_id="{{ $item->parent_id }}" data-indent="{{ $item->getDepth() }}">
         <div class="comment_entity_avatar">
             <img src="{{ $item->getAuthor()->getProfileImage() }}" alt="{{ $item->writer }}">
             <!-- [D] 소셜로그인시 클래스 kakao, google, facebook, github, naver, twitter -->

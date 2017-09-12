@@ -59,9 +59,9 @@ class UserController extends Controller
 
     public function index()
     {
-        $targetId = Request::get('targetId');
-        $instanceId = Request::get('instanceId');
-        $targetAuthorId = Request::get('targetAuthorId');
+        $targetId = Request::get('target_id');
+        $instanceId = Request::get('instance_id');
+        $targetAuthorId = Request::get('target_author_id');
 
         $offsetHead = !empty(Request::get('offsetHead')) ? Request::get('offsetHead') : null;
         $offsetReply = !empty(Request::get('offsetReply')) ? Request::get('offsetReply') : null;
@@ -135,7 +135,7 @@ class UserController extends Controller
 
     public function store()
     {
-        $instanceId = Request::get('instanceId');
+        $instanceId = Request::get('instance_id');
         $inputs = Request::except(['_token']);
 
         // purifier 에 의해 몇몇 태그 속성이 사라짐
@@ -205,10 +205,10 @@ class UserController extends Controller
 
     public function update()
     {
-        $instanceId = Request::get('instanceId');
+        $instanceId = Request::get('instance_id');
         $config = $this->handler->getConfig($instanceId);
         $id = Request::get('id');
-        $inputs = Request::except(['instanceId', 'id', '_token']);
+        $inputs = Request::except(['instance_id', 'id', '_token']);
 
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
@@ -284,7 +284,7 @@ class UserController extends Controller
 
     public function destroy()
     {
-        $instanceId = Request::get('instanceId');
+        $instanceId = Request::get('instance_id');
         $id = Request::get('id');
 
         $model = $this->handler->createModel($instanceId);
@@ -326,7 +326,7 @@ class UserController extends Controller
 
     public function voteOn()
     {
-        $instanceId = Request::get('instanceId');
+        $instanceId = Request::get('instance_id');
         $id = Request::get('id');
         $option = Request::get('option');
 
@@ -357,7 +357,7 @@ class UserController extends Controller
 
     public function voteOff()
     {
-        $instanceId = Request::get('instanceId');
+        $instanceId = Request::get('instance_id');
         $id = Request::get('id');
         $option = Request::get('option');
 
@@ -388,7 +388,7 @@ class UserController extends Controller
 
     public function votedUser()
     {
-        $instanceId = Request::get('instanceId');
+        $instanceId = Request::get('instance_id');
         $id = Request::get('id');
         $option = Request::get('option');
 
@@ -410,7 +410,7 @@ class UserController extends Controller
     
     public function votedModal()
     {
-        $instanceId = Request::get('instanceId');
+        $instanceId = Request::get('instance_id');
         $id = Request::get('id');
         $option = Request::get('option');
 
@@ -430,7 +430,7 @@ class UserController extends Controller
     
     public function votedList()
     {
-        $instanceId = Request::get('instanceId');
+        $instanceId = Request::get('instance_id');
         $id = Request::get('id');
         $option = Request::get('option');
         $startId = Request::get('startId');
@@ -478,9 +478,9 @@ class UserController extends Controller
 
     protected function getCreateForm()
     {
-        $targetId = Request::get('targetId');
-        $instanceId = Request::get('instanceId');
-        $targetAuthorId = Request::get('targetAuthorId');
+        $targetId = Request::get('target_id');
+        $instanceId = Request::get('instance_id');
+        $targetAuthorId = Request::get('target_author_id');
 
         if (Gate::allows('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             $config = $this->handler->getConfig($instanceId);
@@ -505,8 +505,8 @@ class UserController extends Controller
 
     protected function getEditForm()
     {
-        $targetId = Request::get('targetId');
-        $instanceId = Request::get('instanceId');
+        $targetId = Request::get('target_id');
+        $instanceId = Request::get('instance_id');
         $id = Request::get('id');
 
         $model = $this->handler->createModel($instanceId);
@@ -540,7 +540,7 @@ class UserController extends Controller
     protected function getReplyForm()
     {
         $id = Request::get('id');
-        $instanceId = Request::get('instanceId');
+        $instanceId = Request::get('instance_id');
 
         if (Gate::denies('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             throw new AccessDeniedHttpException;

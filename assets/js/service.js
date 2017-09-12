@@ -532,7 +532,7 @@
             return this.dom;
         },
         getInstanceId: function () {
-            return $(this.dom).data('instanceid');
+            return $(this.dom).data('instance_id');
         },
         getId: function () {
             return $(this.dom).data('id');
@@ -544,7 +544,7 @@
             return $(this.dom).data('reply');
         },
         getParentId: function () {
-            return $(this.dom).data('parentid');
+            return $(this.dom).data('parent_id');
         },
         getIndent: function () {
             return $(this.dom).data('indent');
