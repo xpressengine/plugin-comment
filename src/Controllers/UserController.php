@@ -398,7 +398,7 @@ class UserController extends Controller
 
         $users = new LengthAwarePaginator($users, count($users), 10);
 
-        return apiRender('voted', [
+        return api_render('voted', [
             'users' => $users,
             'data' => [
                 'instanceId' => $instanceId,
@@ -418,7 +418,7 @@ class UserController extends Controller
         $comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first();
         $count = $this->handler->voteUserCount($comment, $option);
 
-        return apiRender('votedModal', [
+        return api_render('votedModal', [
             'count' => $count,
             'data' => [
                 'instanceId' => $instanceId,
