@@ -476,7 +476,7 @@ class Handler
             $data = [];
         }
 
-        $this->session->set($key, array_merge($data, [$comment->id => time() + 600]));
+        $this->session->put($key, array_merge($data, [$comment->id => time() + 600]));
     }
 
     /**
