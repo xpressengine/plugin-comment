@@ -12,7 +12,7 @@ namespace Xpressengine\Plugins\Comment\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
-use Input;
+use Request;
 use XePresenter;
 use Validator;
 use Hash;
@@ -59,20 +59,20 @@ class UserController extends Controller
 
     public function index()
     {
-        $targetId = Input::get('targetId');
-        $instanceId = Input::get('instanceId');
-        $targetAuthorId = Input::get('targetAuthorId');
+        $targetId = Request::get('target_id');
+        $instanceId = Request::get('instance_id');
+        $targetAuthorId = Request::get('target_author_id');
 
-        $offsetHead = !empty(Input::get('offsetHead')) ? Input::get('offsetHead') : null;
-        $offsetReply = !empty(Input::get('offsetReply')) ? Input::get('offsetReply') : null;
+        $offsetHead = !empty(Request::get('offsetHead')) ? Request::get('offsetHead') : null;
+        $offsetReply = !empty(Request::get('offsetReply')) ? Request::get('offsetReply') : null;
 
         $config = $this->handler->getConfig($instanceId);
 
-        $take = Input::get('perPage', $config['perPage']);
+        $take = Request::get('perPage', $config['perPage']);
 
         $model = $this->handler->createModel($instanceId);
         $query = $model->newQuery()->whereHas('target', function ($query) use ($targetId) {
-            $query->where('targetId', $targetId);
+            $query->where('target_id', $targetId);
         })
 //            ->where('approved', Comment::APPROVED_APPROVED)
             ->where('display', '!=', Comment::DISPLAY_HIDDEN);
@@ -135,16 +135,15 @@ class UserController extends Controller
 
     public function store()
     {
-        $instanceId = Input::get('instanceId');
-
-        $inputs = Input::except(['_token']);
+        $instanceId = Request::get('instance_id');
+        $inputs = Request::except(['_token']);
 
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
         $purifier = new Purifier();
         $purifier->allowModule(EditorTool::class);
         $purifier->allowModule(HTML5::class);
-        $originInput = Input::originAll();
+        $originInput = Request::originAll();
         $inputs['content'] = $purifier->purify($originInput['content']);
 
         if (Gate::denies('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
@@ -152,7 +151,7 @@ class UserController extends Controller
         }
 
         $rules = [
-            'targetId' => 'Required',
+            'target_id' => 'Required',
             'content' => 'Required|Min:1',
         ];
 
@@ -160,7 +159,7 @@ class UserController extends Controller
             $rules = array_merge($rules, [
                 'email' => 'Required|Between:3,64|Email',
                 'writer' => 'Required|Between:3,32',
-                'certifyKey' => 'Required|AlphaNum|Between:4,8',
+                'certify_key' => 'Required|AlphaNum|Between:4,8',
             ]);
         }
 
@@ -173,8 +172,8 @@ class UserController extends Controller
             throw $e;
         }
 
-        if (isset($inputs['certifyKey']) === true) {
-            $inputs['certifyKey'] = Hash::make($inputs['certifyKey']);
+        if (isset($inputs['certify_key']) === true) {
+            $inputs['certify_key'] = Hash::make($inputs['certify_key']);
         }
 
         /** @var \Xpressengine\Editor\AbstractEditor $editor */
@@ -206,27 +205,27 @@ class UserController extends Controller
 
     public function update()
     {
-        $instanceId = Input::get('instanceId');
+        $instanceId = Request::get('instance_id');
         $config = $this->handler->getConfig($instanceId);
-        $id = Input::get('id');
-        $inputs = Input::except(['instanceId', 'id', '_token']);
+        $id = Request::get('id');
+        $inputs = Request::except(['instance_id', 'id', '_token']);
 
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
         $purifier = new Purifier();
         $purifier->allowModule(EditorTool::class);
         $purifier->allowModule(HTML5::class);
-        $originInput = Input::originAll();
+        $originInput = Request::originAll();
         $inputs['content'] = $purifier->purify($originInput['content']);
 
         $rules = [
-            'targetId' => 'Required',
+            'target_id' => 'Required',
             'content' => 'Required|Min:4',
         ];
 
         $model = $this->handler->createModel($instanceId);
         /** @var Comment $comment */
-        if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
+        if (!$comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first()) {
             throw new UnknownIdentifierException;
         }
 
@@ -234,7 +233,7 @@ class UserController extends Controller
             $rules = array_merge($rules, [
                 'email' => 'Between:3,64|Email',
                 'writer' => 'Required|Between:3,32',
-                'certifyKey' => 'AlphaNum|Between:4,8',
+                'certify_key' => 'AlphaNum|Between:4,8',
             ]);
         }
 
@@ -251,8 +250,8 @@ class UserController extends Controller
             throw new AccessDeniedHttpException;
         }
 
-        if (isset($inputs['certifyKey'])) {
-            $inputs['certifyKey'] = Hash::make($inputs['certifyKey']);
+        if (isset($inputs['certify_key'])) {
+            $inputs['certify_key'] = Hash::make($inputs['certify_key']);
         }
 
         /** @var \Xpressengine\Editor\AbstractEditor $editor */
@@ -285,11 +284,11 @@ class UserController extends Controller
 
     public function destroy()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
+        $instanceId = Request::get('instance_id');
+        $id = Request::get('id');
 
         $model = $this->handler->createModel($instanceId);
-        if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
+        if (!$comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first()) {
             throw new UnknownIdentifierException;
         }
 
@@ -327,16 +326,16 @@ class UserController extends Controller
 
     public function voteOn()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $option = Input::get('option');
+        $instanceId = Request::get('instance_id');
+        $id = Request::get('id');
+        $option = Request::get('option');
 
         if (Auth::guest() !== true) {
             XeDB::beginTransaction();
 
             try {
                 $model = $this->handler->createModel($instanceId);
-                $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
+                $comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first();
                 $comment = $this->handler->addVote($comment, $option);
             } catch (\Exception $e) {
                 XeDB::rollBack();
@@ -346,8 +345,8 @@ class UserController extends Controller
             XeDB::commit();
 
             $data = [
-                'assent' => $comment->assentCount,
-                'dissent' => $comment->dissentCount,
+                'assent' => $comment->assent_count,
+                'dissent' => $comment->dissent_count,
             ];
         } else {
             $data = [];
@@ -358,16 +357,16 @@ class UserController extends Controller
 
     public function voteOff()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $option = Input::get('option');
+        $instanceId = Request::get('instance_id');
+        $id = Request::get('id');
+        $option = Request::get('option');
 
         if (Auth::guest() !== true) {
             XeDB::beginTransaction();
 
             try {
                 $model = $this->handler->createModel($instanceId);
-                $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
+                $comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first();
                 $comment = $this->handler->removeVote($comment, $option);
             } catch (\Exception $e) {
                 XeDB::rollBack();
@@ -377,8 +376,8 @@ class UserController extends Controller
             XeDB::commit();
 
             $data = [
-                'assent' => $comment->assentCount,
-                'dissent' => $comment->dissentCount,
+                'assent' => $comment->assent_count,
+                'dissent' => $comment->dissent_count,
             ];
         } else {
             $data = [];
@@ -389,17 +388,17 @@ class UserController extends Controller
 
     public function votedUser()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $option = Input::get('option');
+        $instanceId = Request::get('instance_id');
+        $id = Request::get('id');
+        $option = Request::get('option');
 
         $model = $this->handler->createModel();
-        $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
+        $comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first();
         $users = $this->handler->voteUsers($comment, $option);
 
         $users = new LengthAwarePaginator($users, count($users), 10);
 
-        return apiRender('voted', [
+        return api_render('voted', [
             'users' => $users,
             'data' => [
                 'instanceId' => $instanceId,
@@ -411,15 +410,15 @@ class UserController extends Controller
     
     public function votedModal()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $option = Input::get('option');
+        $instanceId = Request::get('instance_id');
+        $id = Request::get('id');
+        $option = Request::get('option');
 
         $model = $this->handler->createModel($instanceId);
-        $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
+        $comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first();
         $count = $this->handler->voteUserCount($comment, $option);
 
-        return apiRender('votedModal', [
+        return api_render('votedModal', [
             'count' => $count,
             'data' => [
                 'instanceId' => $instanceId,
@@ -431,14 +430,14 @@ class UserController extends Controller
     
     public function votedList()
     {
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
-        $option = Input::get('option');
-        $startId = Input::get('startId');
-        $limit = Input::get('limit', 10);
+        $instanceId = Request::get('instance_id');
+        $id = Request::get('id');
+        $option = Request::get('option');
+        $startId = Request::get('startId');
+        $limit = Request::get('limit', 10);
 
         $model = $this->handler->createModel($instanceId);
-        $comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first();
+        $comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first();
         $logs = $this->handler->votedList($comment, $option, $startId, $limit);
 
         $list = [];
@@ -452,7 +451,7 @@ class UserController extends Controller
                 'id' => $user->getId(),
                 'displayName' => $user->getDisplayName(),
                 'profileImage' => $user->getProfileImage(),
-                'createdAt' => (string)$log->createdAt,
+                'createdAt' => (string)$log->created_at,
                 'profilePage' => $profilePage,
             ];
         }
@@ -470,7 +469,7 @@ class UserController extends Controller
 
     public function form()
     {
-        $mode = Input::get('mode');
+        $mode = Request::get('mode');
 
         $method = 'get' . ucfirst($mode) . 'Form';
 
@@ -479,9 +478,9 @@ class UserController extends Controller
 
     protected function getCreateForm()
     {
-        $targetId = Input::get('targetId');
-        $instanceId = Input::get('instanceId');
-        $targetAuthorId = Input::get('targetAuthorId');
+        $targetId = Request::get('target_id');
+        $instanceId = Request::get('instance_id');
+        $targetAuthorId = Request::get('target_author_id');
 
         if (Gate::allows('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             $config = $this->handler->getConfig($instanceId);
@@ -506,12 +505,12 @@ class UserController extends Controller
 
     protected function getEditForm()
     {
-        $targetId = Input::get('targetId');
-        $instanceId = Input::get('instanceId');
-        $id = Input::get('id');
+        $targetId = Request::get('target_id');
+        $instanceId = Request::get('instance_id');
+        $id = Request::get('id');
 
         $model = $this->handler->createModel($instanceId);
-        if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
+        if (!$comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first()) {
             throw new UnknownIdentifierException;
         }
 
@@ -540,15 +539,15 @@ class UserController extends Controller
 
     protected function getReplyForm()
     {
-        $id = Input::get('id');
-        $instanceId = Input::get('instanceId');
+        $id = Request::get('id');
+        $instanceId = Request::get('instance_id');
 
         if (Gate::denies('create', new Instance($this->handler->getKeyForPerm($instanceId)))) {
             throw new AccessDeniedHttpException;
         }
 
         $model = $this->handler->createModel($instanceId);
-        if (!$comment = $model->newQuery()->where('instanceId', $instanceId)->where('id', $id)->first()) {
+        if (!$comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first()) {
             throw new UnknownIdentifierException;
         }
 
@@ -577,13 +576,13 @@ class UserController extends Controller
 
     public function certify()
     {
-        $inputs = Input::except('_token');
+        $inputs = Request::except('_token');
 
         $rules = [
             'id' => 'Required',
             'instanceId' => 'Required',
             'email' => 'Required|Between:3,64|Email',
-            'certifyKey' => 'Required|AlphaNum|Between:4,8',
+            'certify_key' => 'Required|AlphaNum|Between:4,8',
         ];
 
         $validator = Validator::make($inputs, $rules);
@@ -596,23 +595,23 @@ class UserController extends Controller
             throw $e;
         }
 
-        $model = $this->handler->createModel($inputs['instanceId']);
-        if (!$comment = $model->newQuery()->where('instanceId', $inputs['instanceId'])->where('id', $inputs['id'])->first()) {
+        $model = $this->handler->createModel($inputs['instance_id']);
+        if (!$comment = $model->newQuery()->where('instance_id', $inputs['instanceId'])->where('id', $inputs['id'])->first()) {
             throw new UnknownIdentifierException;
         }
 
         if (
             $inputs['email'] !== $comment->email
-            || Hash::check($inputs['certifyKey'], $comment->certifyKey) === false
+            || Hash::check($inputs['certify_key'], $comment->certifyKey) === false
         ) {
             throw new NotMatchCertifyKeyException;
         }
 
         $this->handler->certified($comment);
 
-        if (Input::get('mode') == 'edit') {
+        if (Request::get('mode') == 'edit') {
             return $this->getEditForm();
-        } elseif (Input::get('mode') == 'destroy') {
+        } elseif (Request::get('mode') == 'destroy') {
             return $this->destroy();
         }
 

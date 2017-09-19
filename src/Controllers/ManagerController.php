@@ -10,16 +10,11 @@
 namespace Xpressengine\Plugins\Comment\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Sections\DynamicFieldSection;
-use App\Http\Sections\EditorSection;
-use App\Http\Sections\SkinSection;
-use App\Http\Sections\ToggleMenuSection;
-use Input;
+use Request;
 use Validator;
 use XePresenter;
 use XeConfig;
 use XeDB;
-use Xpressengine\Http\Request;
 use Xpressengine\Menu\MenuHandler;
 use Xpressengine\Menu\Models\MenuItem;
 use Xpressengine\Permission\PermissionSupport;
@@ -57,14 +52,14 @@ class ManagerController extends Controller
 
     public function index(MenuHandler $menus)
     {
-        Input::flash();
+        Request::flash();
 
         $model = $this->handler->createModel();
         $query = $model->newQuery()
-            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('instance_id', $this->getInstances())
             ->where('status', '!=', Comment::STATUS_TRASH);
 
-        if ($options = Input::get('options')) {
+        if ($options = Request::get('options')) {
             list($searchField, $searchValue) = explode('|', $options);
 
             $query->where($searchField, $searchValue);
@@ -78,7 +73,7 @@ class ManagerController extends Controller
         return XePresenter::make('docs.index', [
             'comments' => $comments,
             'menuItem' => function ($comment) use ($menuItems, $map) {
-                $index = array_search($comment->instanceId, $map);
+                $index = array_search($comment->instance_id, $map);
                 if (isset($menuItems[$index]) === false) {
                     $tmpMenuItem = new MenuItem;
                     $tmpMenuItem->title = $index;
@@ -90,7 +85,7 @@ class ManagerController extends Controller
             'urlMake' => function ($comment, $menuItem) use ($menus) {
                 if (isset($menuItem->type) == true) {
                     if ($module = $menus->getModuleHandler()->getModuleObject($menuItem->type)) {
-                        if ($item = $module->getTypeItem($comment->target->targetId)) {
+                        if ($item = $module->getTypeItem($comment->target->target_id)) {
                             return app('url')->to($item->getLink($menuItem->route) . '#comment-'.$comment->id);
                         }
                     }
@@ -103,13 +98,13 @@ class ManagerController extends Controller
 
     public function approve()
     {
-        $approved = Input::get('approved');
-        $commentIds = Input::get('id');
+        $approved = Request::get('approved');
+        $commentIds = Request::get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
-            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('instance_id', $this->getInstances())
             ->whereIn('id', $commentIds)->get();
 
         switch ($approved) {
@@ -133,12 +128,12 @@ class ManagerController extends Controller
 
     public function toTrash()
     {
-        $commentIds = Input::get('id');
+        $commentIds = Request::get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
-            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('instance_id', $this->getInstances())
             ->whereIn('id', $commentIds)->get();
 
         foreach ($comments as $comment) {
@@ -150,11 +145,11 @@ class ManagerController extends Controller
 
     public function trash(MenuHandler $menus)
     {
-        Input::flash();
+        Request::flash();
 
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
-            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('instance_id', $this->getInstances())
             ->where('status', Comment::STATUS_TRASH)
             ->orderBy(Comment::CREATED_AT)->paginate();
 
@@ -164,7 +159,7 @@ class ManagerController extends Controller
         return XePresenter::make('docs.trash', [
             'comments' => $comments,
             'menuItem' => function ($comment) use ($menuItems, $map) {
-                $index = array_search($comment->instanceId, $map);
+                $index = array_search($comment->instance_id, $map);
                 if (isset($menuItems[$index]) === false) {
                     $tmpMenuItem = new MenuItem;
                     $tmpMenuItem->title = $index;
@@ -178,7 +173,7 @@ class ManagerController extends Controller
 
     public function destroy()
     {
-        $commentIds = Input::get('id');
+        $commentIds = Request::get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
@@ -193,12 +188,12 @@ class ManagerController extends Controller
 
     public function restore()
     {
-        $commentIds = Input::get('id');
+        $commentIds = Request::get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
-            ->whereIn('instanceId', $this->getInstances())
+            ->whereIn('instance_id', $this->getInstances())
             ->whereIn('id', $commentIds)->get();
 
         foreach ($comments as $comment) {

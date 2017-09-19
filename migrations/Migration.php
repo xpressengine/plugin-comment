@@ -32,12 +32,12 @@ class Migration
             $table->engine = "InnoDB";
 
             $table->increments('id');
-            $table->string('docId', 36);
-            $table->string('targetId', 36);
-            $table->string('targetAuthorId', 36);
+            $table->string('doc_id', 36);
+            $table->string('target_id', 36);
+            $table->string('target_author_id', 36);
 
-            $table->unique('docId');
-            $table->index('targetId');
+            $table->unique('doc_id');
+            $table->index('target_id');
         });
     }
 

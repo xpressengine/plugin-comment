@@ -1,8 +1,8 @@
 <form action="{{ route('comment::store') }}" class="comment_form">
     <!-- input hidden file area start -->
-    <input type="hidden" name="targetId" value="{{ $targetId }}">
-    <input type="hidden" name="instanceId" value="{{ $instanceId }}">
-    <input type="hidden" name="targetAuthorId" value="{{ $targetAuthorId }}">
+    <input type="hidden" name="target_id" value="{{ $targetId }}">
+    <input type="hidden" name="instance_id" value="{{ $instanceId }}">
+    <input type="hidden" name="target_author_id" value="{{ $targetAuthorId }}">
     <!-- input hidden file area end -->
 
     <div class="comment_form_editor">
@@ -22,7 +22,7 @@
             @if(Auth::guest())
             <div class="comment_form_input">
                 <input type="text" class="bd_input" name="writer" placeholder="Name">
-                <input type="password" class="bd_input" name="certifyKey" placeholder="Password">
+                <input type="password" class="bd_input" name="certify_key" placeholder="Password">
                 <input type="email" class="bd_input v2" name="email" placeholder="E-mail">
             </div>
             @endif
