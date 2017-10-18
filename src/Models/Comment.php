@@ -54,7 +54,7 @@ class Comment extends Document
     public function getAuthor()
     {
         if (!$author = $this->getRelationValue('author')) {
-            if (!empty($this->userId)) {
+            if (!empty($this->user_id)) {
                 $author = new UnknownUser();
             } else {
                 $author = new Guest();
