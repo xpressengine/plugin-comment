@@ -179,6 +179,7 @@ class UserController extends Controller
         /** @var \Xpressengine\Editor\AbstractEditor $editor */
         $editor = XeEditor::get($instanceId);
         $inputs['format'] = $editor->htmlable() ? Comment::FORMAT_HTML : Comment::FORMAT_NONE;
+        $inputs['display'] = !!array_get($inputs, 'display') ? Comment::DISPLAY_SECRET : Comment::DISPLAY_VISIBLE;
 
         /** @var Comment $comment */
         $comment = $this->handler->create($inputs);
@@ -257,6 +258,14 @@ class UserController extends Controller
         /** @var \Xpressengine\Editor\AbstractEditor $editor */
         $editor = XeEditor::get($instanceId);
         $inputs['format'] = $editor->htmlable() ? Comment::FORMAT_HTML : Comment::FORMAT_NONE;
+        if ($comment->display !== Comment::DISPLAY_HIDDEN) {
+            $inputs['display'] = !!array_get($inputs, 'display') ?
+                Comment::DISPLAY_SECRET : Comment::DISPLAY_VISIBLE;
+        } else {
+            if (isset($inputs['display'])) {
+                unset($inputs['display']);
+            }
+        }
 
         $comment->fill(array_filter($inputs));
 
@@ -522,7 +531,7 @@ class UserController extends Controller
             throw new AccessDeniedHttpException;
         }
 
-        $config = $this->handler->getConfig($comment->instanceId);
+        $config = $this->handler->getConfig($comment->instance_id);
 
         $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
