@@ -78,6 +78,12 @@ class CommentUIObject extends AbstractUIObject
                 'customOptions' => $editor->getCustomOptions(),
                 'tools' => $editor->getTools(),
             ];
+
+            $editorConfig = XeEditor::getConfig($instanceId);
+            if ($editorConfig->getPure('height') == null)
+            {
+                $props['config']['editor']['options']['height'] = '160';
+            }
         }
 
         $skin = XeSkin::getAssigned($plugin->getId());
