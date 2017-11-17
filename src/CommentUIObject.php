@@ -86,7 +86,7 @@ class CommentUIObject extends AbstractUIObject
             }
         }
 
-        $skin = XeSkin::getAssigned($plugin->getId());
+        $skin = XeSkin::getAssigned([$plugin->getId(), $instanceId]);
         $view = $skin->setView('container')->setData(compact('config'))->render();
 
         return view(sprintf('%s::views.uio', $plugin->getId()), [

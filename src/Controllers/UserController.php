@@ -25,6 +25,7 @@ use XeEditor;
 use XeTag;
 use Xpressengine\Editor\PurifierModules\EditorTool;
 use Xpressengine\Permission\Instance;
+use Xpressengine\Plugins\Comment\Plugin;
 use Xpressengine\Support\Exceptions\AccessDeniedHttpException;
 use Xpressengine\Support\Purifier;
 use Xpressengine\Plugins\Comment\Exceptions\BadRequestException;
@@ -43,18 +44,11 @@ class UserController extends Controller
      * @var Handler
      */
     protected $handler;
-    /**
-     * @var \Xpressengine\Skin\AbstractSkin
-     */
-    protected $skin;
 
     public function __construct()
     {
         $plugin = app('xe.plugin.comment');
         $this->handler = $plugin->getHandler();
-        $this->skin = XeSkin::getAssigned($plugin->getId());
-
-        XePresenter::setSkinTargetId($plugin->getId());
     }
 
     public function index()
@@ -109,7 +103,8 @@ class UserController extends Controller
 
         $instance = new Instance($this->handler->getKeyForPerm($instanceId));
 
-        $content = $this->skin->setView('items')->setData([
+        $skin = XeSkin::getAssigned([Plugin::getId(), $instanceId]);
+        $content = $skin->setView('items')->setData([
             'items' => $comments,
             'config' => $config,
             'instance' => $instance,
@@ -192,7 +187,8 @@ class UserController extends Controller
         $config = $this->handler->getConfig($instanceId);
         $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
-        $content = $this->skin->setView('items')->setData([
+        $skin = XeSkin::getAssigned([Plugin::getId(), $instanceId]);
+        $content = $skin->setView('items')->setData([
             'items' => [$comment],
             'config' => $config,
             'instance' => new Instance($this->handler->getKeyForPerm($instanceId)),
@@ -279,7 +275,8 @@ class UserController extends Controller
 
         $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
-        $content = $this->skin->setView('items')->setData([
+        $skin = XeSkin::getAssigned([Plugin::getId(), $instanceId]);
+        $content = $skin->setView('items')->setData([
             'items' => [$comment],
             'config' => $config,
             'instance' => new Instance($this->handler->getKeyForPerm($instanceId)),
@@ -314,7 +311,8 @@ class UserController extends Controller
         }
 
         if ($comment->display == Comment::DISPLAY_VISIBLE) {
-            $content = $this->skin->setView('items')->setData([
+            $skin = XeSkin::getAssigned([Plugin::getId(), $instanceId]);
+            $content = $skin->setView('items')->setData([
                 'items' => [$comment],
                 'config' => $this->handler->getConfig($instanceId),
                 'instance' => new Instance($this->handler->getKeyForPerm($instanceId)),
@@ -496,7 +494,8 @@ class UserController extends Controller
 
             $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
-            $content = $this->skin->setView('create')->setData([
+            $skin = XeSkin::getAssigned([Plugin::getId(), $instanceId]);
+            $content = $skin->setView('create')->setData([
                 'targetId' => $targetId,
                 'instanceId' => $instanceId,
                 'targetAuthorId' => $targetAuthorId,
@@ -535,7 +534,8 @@ class UserController extends Controller
 
         $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
-        $content = $this->skin->setView('edit')->setData([
+        $skin = XeSkin::getAssigned([Plugin::getId(), $instanceId]);
+        $content = $skin->setView('edit')->setData([
             'targetId' => $targetId,
             'instanceId' => $instanceId,
             'config' => $config,
@@ -564,7 +564,8 @@ class UserController extends Controller
 
         $fieldTypes = XeDynamicField::gets(sprintf('documents_%s', $instanceId));
 
-        $content = $this->skin->setView('reply')->setData([
+        $skin = XeSkin::getAssigned([Plugin::getId(), $instanceId]);
+        $content = $skin->setView('reply')->setData([
             'config' => $config,
             'comment' => $comment,
             'fieldTypes' => $fieldTypes,
@@ -575,7 +576,8 @@ class UserController extends Controller
 
     protected function getCertifyForm($mode, $comment)
     {
-        $content = $this->skin->setView('certify')->setData([
+        $skin = XeSkin::getAssigned([Plugin::getId(), $comment->instanceId]);
+        $content = $skin->setView('certify')->setData([
             'mode' => $mode,
             'comment' => $comment
         ])->render();
