@@ -35,6 +35,10 @@ class CommentPolicy
             return false;
         }
 
+        if ($comment->display === Comment::DISPLAY_SECRET && $user instanceof Guest) {
+            return false;
+        }
+
         if ($comment->display === Comment::DISPLAY_SECRET
             && !$user->isManager()
             && $user->getId() != $comment->getAuthor()->getId()
