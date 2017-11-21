@@ -1,3 +1,5 @@
+{{ XeFrontend::css('plugins/comment/assets/css/comment.css')->load() }}
+
 <div class="comment_header">
     <p class="total_count"><span class="total_count_num __xe_comment_cnt">0</span>{{ xe_trans('xe::ea') }} {{ xe_trans('xe::comment') }}</p>
 </div>
