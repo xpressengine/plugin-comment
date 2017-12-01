@@ -32,10 +32,6 @@
             </div>
             @endif
             <div class="comment_form_btn">
-                @if (Auth::guest() !== true)
-                {{--<a href="#" class="bd_btn btn_default __xe_temp_btn_load">{{ xe_trans('comment::tempLoad') }}</a>--}}
-                {{--<a href="#" class="bd_btn btn_default __xe_temp_btn_save">{{ xe_trans('comment::tempSave') }}</a>--}}
-                @endif
                 <a href="#" class="bd_btn btn_submit __xe_comment_btn_submit">{{ xe_trans('comment::save') }}</a>
             </div>
         </div>

@@ -244,11 +244,6 @@ return [
         'en' => 'Temp Load',
     ],
 
-    'tempSave' => [
-        'ko' => '임시저장',
-        'en' => 'Temp Save',
-    ],
-
     'trash' => [
         'ko' => '휴지통',
         'en' => 'Trash',

@@ -109,6 +109,6 @@ class CommentUIObject extends AbstractUIObject
     {
         XeFrontend::js('plugins/comment/assets/js/service.js')->appendTo('head')->load();
 
-        XeFrontend::translation(['xe::autoSave', 'xe::tempSave', 'comment::msgRemoveUnable']);
+        XeFrontend::translation(['xe::autoSave', 'xe::confirmDelete', 'comment::msgRemoveUnable']);
     }
 }

@@ -3,13 +3,46 @@
 (function (window, $) {
     'use strict'
 
-    var comment = {};
+    var comment = {},
+        listeners = {};
 
     comment.init = function (container) {
         var obj = new Comment(container);
 
         obj.run();
     };
+
+    comment.listen = function (eventName, callback) {
+        if (typeof eventName === 'object') {
+            for (var i in eventName) {
+                addListener(i, eventName[i]);
+            }
+        } else {
+            addListener(eventName, callback);
+        }
+    };
+
+    // for develop
+    comment.listeners = listeners;
+
+    function addListener(eventName, callback)
+    {
+        if (typeof callback !== 'function') {
+            return;
+        }
+
+        listeners[eventName] = listeners[eventName] || [];
+
+        listeners[eventName].push(callback);
+    }
+
+    function fire(eventName, instance, args)
+    {
+        var list = listeners[eventName] || [];
+        for (var i = 0; i < list.length; i++) {
+            list[i].apply(instance, args);
+        }
+    }
 
     function Comment(container)
     {
@@ -45,9 +78,11 @@
                         this.renderItems();
 
                         this.setTotalCnt(this.getTotalCnt() + 1);
+
+                        fire('created', self, [item]);
                     }.bind(this), self.props.config.editor);
 
-                form.render(this._getFormBox());
+                form.render(this.getFormBox());
 
             }.bind(this));
 
@@ -78,6 +113,7 @@
                     this._assetLoad(json.XE_ASSET_LOAD);
 
                     var items = this.makeItems($.parseHTML(json.items, document, true));
+
                     for (var i in items) {
                         if (this.props.config.reverse === true) {
                             this.append(items[i]);
@@ -95,6 +131,8 @@
                     } else {
                         $('.__xe_comment_btn_more', this.container).hide();
                     }
+
+                    fire('loaded', this, [items]);
                 }.bind(this)
             }).always(function () {
                 this.loading = false;
@@ -165,7 +203,7 @@
             }
         },
         renderItems: function () {
-            //this._getListBox().empty();
+            //this.getListBox().empty();
 
             var prev = null;
             $.each(this.items, function (i, item) {
@@ -175,10 +213,10 @@
                     if (prev !== null) {
                         $(prev.getDom()).after(dom);
                     } else {
-                        this._getListBox().prepend(dom);
+                        this.getListBox().prepend(dom);
                     }
                 } else if (item.isChanged()) {
-                    var old = this._getListBox().find('[data-id="' + item.getId() + '"]')[0];
+                    var old = this.getListBox().find('[data-id="' + item.getId() + '"]')[0];
                     $(old).before(dom);
                     $(old).remove();
                     item.unsetChanged();
@@ -224,7 +262,7 @@
             });
         },
         rendered: function (item) {
-            return this._getListBox().find('[data-id="' + item.getId() + '"]').length > 0;
+            return this.getListBox().find('[data-id="' + item.getId() + '"]').length > 0;
         },
         setTotalCnt: function (cnt) {
             $(this.container).data('total-cnt', cnt);
@@ -333,6 +371,8 @@
                         self.renderItems();
 
                         self.setTotalCnt(self.getTotalCnt() + 1);
+
+                        fire('replied', self, [child, item]);
                     }, self.props.config.editor));
 
                     self.state.ing = false;
@@ -371,6 +411,8 @@
                             item.setChanged();
                             self.replace(item);
                             self.renderItems();
+
+                            fire('updated', self, [item]);
                         }, editor);
 
                         item.setForm(form);
@@ -394,6 +436,11 @@
                 if (self.state.ing === true) {
                     return false;
                 }
+
+                if (!confirm(XE.Lang.trans('xe::confirmDelete'))) {
+                    return false;
+                }
+
                 self.state.ing = true;
 
                 var context = $(this).closest('.__xe_comment_list_item'),
@@ -404,9 +451,14 @@
                 var callback = function (json) {
                     if (!json.success) {
                         XE.toast('warning', XE.Lang.trans('comment::msgRemoveUnable'));
-                    } else if (json.items) {
-                        var items = self.makeItems($.parseHTML(json.items)),
-                            nitem = items[0];
+                        return;
+                    }
+
+                    var nitem = null;
+                    if (json.items) {
+                        var items = self.makeItems($.parseHTML(json.items));
+                        nitem = items[0];
+
                         self.replace(nitem);
                         self.renderItems();
                     } else {
@@ -418,7 +470,11 @@
                         //     self.setTotalCnt(self.getTotalCnt() - 1);
                         // });
                     }
+
+                    fire('deleted', self, [item, nitem]);
                 };
+
+                fire('deleting', self, [item]);
 
                 XE.ajax({
                     url: $(self.container).data('urls').destroy,
@@ -512,10 +568,10 @@
                 $(this).toggleClass('on');
             });
         },
-        _getListBox: function () {
+        getListBox: function () {
             return $('.__xe_comment_list', this.container);
         },
-        _getFormBox: function () {
+        getFormBox: function () {
             return $('.__xe_comment_form', this.container);
         }
     };
