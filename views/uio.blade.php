@@ -21,7 +21,7 @@
 </div>
 
 <script type="text/javascript">
-    $(function () {
+    jQuery(function ($) {
         comment.init($('#comment-area-{{ $target->getUid() }}')[0]);
     });
 </script>

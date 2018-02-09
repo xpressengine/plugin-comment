@@ -1,921 +1,903 @@
+(function ($) {
+  'use strict'
 
+  var comment = {}
+  var listeners = {}
 
-(function (window, $) {
-    'use strict'
+  comment.init = function (container) {
+    var obj = new Comment(container)
 
-    var comment = {},
-        listeners = {};
+    obj.run()
+  }
 
-    comment.init = function (container) {
-        var obj = new Comment(container);
+  comment.listen = function (eventName, callback) {
+    if (typeof eventName === 'object') {
+      for (var i in eventName) {
+        addListener(i, eventName[i])
+      }
+    } else {
+      addListener(eventName, callback)
+    }
+  }
 
-        obj.run();
-    };
+  // for develop
+  comment.listeners = listeners
 
-    comment.listen = function (eventName, callback) {
-        if (typeof eventName === 'object') {
-            for (var i in eventName) {
-                addListener(i, eventName[i]);
+  function addListener (eventName, callback) {
+    if (typeof callback !== 'function') {
+      return
+    }
+
+    listeners[eventName] = listeners[eventName] || []
+    listeners[eventName].push(callback)
+  }
+
+  function fire (eventName, instance, args) {
+    var list = listeners[eventName] || []
+    for (var i = 0; i < list.length; i++) {
+      list[i].apply(instance, args)
+    }
+  }
+
+  function Comment (container) {
+    var defaultProps = {
+      config: {}
+    }
+
+    this.container = container
+    this.props = $.extend({}, defaultProps, $(container).data('props'))
+    this.state = {ing: false}
+  }
+
+  Comment.prototype = {
+    loading: false,
+    items: [],
+    run: function () {
+      this.getListMore()
+
+      this.getForm('create', null, function (json) {
+        if (!json.html) {
+          return false
+        }
+
+        var self = this
+        var dom = $.parseHTML(json.html)
+        var form = new Form(dom, 'create', function (json) {
+          this._assetLoad(json.XE_ASSET_LOAD)
+
+          var items = this.makeItems($.parseHTML(json.items, document, true)),
+            item = items[0]
+          this.lastIn(item)
+          this.renderItems()
+
+          this.setTotalCnt(this.getTotalCnt() + 1)
+
+          fire('created', self, [item])
+        }.bind(this), self.props.config.editor)
+
+        form.render(this.getFormBox())
+      }.bind(this))
+
+      this.eventBind()
+    },
+    getListMore: function () {
+      if (this.loading === true) {
+        return false
+      }
+      this.loading = true
+      var data = {
+        target_id: $(this.container).data('target_id'),
+        instance_id: $(this.container).data('instance_id'),
+        target_author_id: $(this.container).data('target_author_id')
+      }
+
+      if (this.items.length > 0) {
+        var item = this.getLast()
+        $.extend(data, {offsetHead: item.getHead(), offsetReply: item.getReply()})
+      }
+
+      window.XE.ajax({
+        url: $(this.container).data('urls').index,
+        type: 'get',
+        dataType: 'json',
+        data: data,
+        success: function (json) {
+          this._assetLoad(json.XE_ASSET_LOAD)
+
+          var items = this.makeItems($.parseHTML(json.items, document, true))
+
+          for (var i in items) {
+            if (this.props.config.reverse === true) {
+              this.append(items[i])
+            } else {
+              this.prepend(items[i])
             }
+          }
+          this.renderItems()
+
+          this.setTotalCnt(json.totalCount)
+
+          if (json.hasMore === true) {
+            $('.__xe_comment_btn_more', this.container).show()
+            $('.__xe_comment_remain_cnt', this.container).text(json.totalCount - this.items.length)
+          } else {
+            $('.__xe_comment_btn_more', this.container).hide()
+          }
+
+          fire('loaded', this, [items])
+        }.bind(this)
+      }).always(function () {
+        this.loading = false
+      }.bind(this))
+    },
+    _assetLoad: function (assets) {
+      var cssList = assets.css || {}
+      var jsList = assets.js || {}
+
+      $.each(cssList, function (i, css) {
+        DynamicLoadManager.cssLoad(css)
+      })
+      $.each(jsList, function (i, js) {
+        DynamicLoadManager.jsLoad(js)
+      })
+    },
+    makeItems: function (doms) {
+      var items = []
+      for (var i in doms) {
+        if ($(doms[i]).is('.__xe_comment_list_item')) {
+          items.push(new Item(doms[i]))
+        }
+      }
+
+      return items
+    },
+    prepend: function (item) {
+      this.items.splice(0, 0, item)
+    },
+    append: function (item) {
+      this.items.push(item)
+    },
+    replace: function (item) {
+      var self = this
+      $.each(this.items, function (i, o) {
+        if (o.getId() == item.getId()) {
+          self.items.splice(i, 1, item)
+          return false
+        }
+      })
+    },
+    spotIn: function (item) {
+      if (!item.getParentId()) {
+        this.lastIn(item)
+        return
+      }
+
+      var items = this.items
+      var len = items.length
+      var parentIndent = -1
+
+      for (var i in items) {
+        if (parentIndent > -1 && items[i].getIndent() <= parentIndent) {
+          items.splice(i, 0, item)
+          return
+        }
+
+        if (items[i].getId() == item.getParentId()) {
+          parentIndent = items[i].getIndent()
+        }
+      }
+
+      this.lastIn(item)
+    },
+    lastIn: function (item) {
+      if (this.props.config.reverse === true) {
+        this.prepend(item)
+      } else {
+        this.append(item)
+      }
+    },
+    renderItems: function () {
+      // this.getListBox().empty();
+
+      var prev = null
+      $.each(this.items, function (i, item) {
+        var dom = item.getDom()
+
+        if (!this.rendered(item)) {
+          if (prev !== null) {
+            $(prev.getDom()).after(dom)
+          } else {
+            this.getListBox().prepend(dom)
+          }
+        } else if (item.isChanged()) {
+          var old = this.getListBox().find('[data-id="' + item.getId() + '"]')[0]
+          $(old).before(dom)
+          $(old).remove()
+          item.unsetChanged()
+        }
+
+        prev = item
+      }.bind(this))
+
+      window.XE.Component.timeago()
+    },
+    removeItem: function (item) {
+      var ing = false
+      var targets = []
+      var self = this
+
+      $.each(this.items, function (i, o) {
+        if (o.getId() == item.getId()) {
+          ing = true
+        } else if (ing === true && o.getIndent() <= item.getIndent()) {
+          return false
+        }
+
+        if (ing === true) {
+          targets.push(o)
+        }
+      })
+
+      var $targets = null
+      $.each(targets, function (i, o) {
+        if ($targets === null) {
+          $targets = $(o.getDom())
         } else {
-            addListener(eventName, callback);
+          $targets.add(o)
         }
-    };
+      })
 
-    // for develop
-    comment.listeners = listeners;
+      $targets.fadeOut('slow', function () {
+        $.each(targets, function (i, o) {
+          self.remove(o)
+        })
 
-    function addListener(eventName, callback)
-    {
-        if (typeof callback !== 'function') {
-            return;
+        self.renderItems()
+
+        self.setTotalCnt(self.getTotalCnt() - targets.length)
+      })
+    },
+    rendered: function (item) {
+      return this.getListBox().find('[data-id="' + item.getId() + '"]').length > 0
+    },
+    setTotalCnt: function (cnt) {
+      $(this.container).data('total-cnt', cnt)
+
+      $('.__xe_comment_cnt', this.container).text(cnt)
+    },
+    getTotalCnt: function () {
+      return parseInt($(this.container).data('total-cnt') ? $(this.container).data('total-cnt') : 0)
+    },
+    getLast: function () {
+      if (this.props.config.reverse === true) {
+        return this.items[this.items.length - 1]
+      } else {
+        return this.items[0]
+      }
+    },
+    getForm: function (mode, id, callback) {
+      // mode is create, edit and reply
+      var data = {
+        target_id: $(this.container).data('target_id'),
+        instance_id: $(this.container).data('instance_id'),
+        target_author_id: $(this.container).data('target_author_id')
+      }
+      $.extend(data, {mode: mode, id: id})
+
+      window.XE.ajax({
+        url: $(this.container).data('urls').form,
+        type: 'get',
+        dataType: 'json',
+        data: data,
+        success: function (json) {
+          callback(json)
+        }
+      })
+    },
+
+    find: function (id) {
+      var item = null
+      $.each(this.items, function (i, o) {
+        if (o.getId() == id) {
+          item = o
+          return false
+        }
+      })
+
+      return item
+    },
+    remove: function (item) {
+      $.each(this.items, function (i, o) {
+        if (o.getId() == item.getId()) {
+          this.items.splice(i, 1)
+          item.remove()
+          return false
+        }
+      }.bind(this))
+    },
+    reset: function () {
+      $.each(this.items, function (i, o) {
+        o.removeForm()
+      })
+    },
+    eventBind: function () {
+      var self = this
+      // button list more
+      $('.__xe_comment_btn_more', this.container).click(function (e) {
+        e.preventDefault()
+
+        self.getListMore()
+      })
+
+      // button submit
+      $(this.container).on('click', '.__xe_comment_btn_submit', function (e) {
+        e.preventDefault()
+
+        $(this).closest('form').trigger('submit')
+      })
+
+      // button item reply
+      $(this.container).on('click', '.__xe_comment_btn_reply', function (e) {
+        e.preventDefault()
+
+        var context = $(this).closest('.__xe_comment_list_item')
+        var item = self.find(context.data('id'))
+        var existsForm = item.getForm()
+
+        if (existsForm !== null && existsForm.getMode() == 'reply') {
+          item.removeForm()
+          return false
         }
 
-        listeners[eventName] = listeners[eventName] || [];
-
-        listeners[eventName].push(callback);
-    }
-
-    function fire(eventName, instance, args)
-    {
-        var list = listeners[eventName] || [];
-        for (var i = 0; i < list.length; i++) {
-            list[i].apply(instance, args);
+        if (self.state.ing === true) {
+          return false
         }
-    }
+        self.state.ing = true
 
-    function Comment(container)
-    {
-        var defaultProps = {
-            config: {}
-        };
+        self.reset()
 
-        this.container = container;
-        this.props = $.extend({}, defaultProps, $(container).data('props'));
-        this.state = {ing: false};
+        self.getForm('reply', item.getId(), function (json) {
+          item.setForm(new Form($.parseHTML(json.html), 'reply', function (json) {
+            self._assetLoad(json.XE_ASSET_LOAD)
 
-    }
+            var items = self.makeItems($.parseHTML(json.items, document, true))
+            var child = items[0]
+            self.spotIn(child)
+            item.removeForm()
+            self.renderItems()
 
-    Comment.prototype = {
-        loading: false,
-        items: [],
-        run: function () {
-            this.getListMore();
+            self.setTotalCnt(self.getTotalCnt() + 1)
 
-            this.getForm('create', null, function (json) {
-                if (!json.html) {
-                    return false;
-                }
+            fire('replied', self, [child, item])
+          }, self.props.config.editor))
 
-                var self = this,
-                    dom = $.parseHTML(json.html),
-                    form = new Form(dom, 'create', function (json) {
-                        this._assetLoad(json.XE_ASSET_LOAD);
+          self.state.ing = false
+        })
+      })
 
-                        var items = this.makeItems($.parseHTML(json.items, document, true)),
-                            item = items[0];
-                        this.lastIn(item);
-                        this.renderItems();
+      // button item edit
+      $(this.container).on('click', '.__xe_comment_btn_edit', function (e) {
+        e.preventDefault()
 
-                        this.setTotalCnt(this.getTotalCnt() + 1);
+        var context = $(this).closest('.__xe_comment_list_item')
+        var item = self.find(context.data('id'))
+        var oldForm = item.getForm()
 
-                        fire('created', self, [item]);
-                    }.bind(this), self.props.config.editor);
+        if (oldForm && oldForm.getMode() == 'edit') {
+          item.removeForm()
+          return false
+        }
 
-                form.render(this.getFormBox());
+        if (self.state.ing === true) {
+          return false
+        }
+        self.state.ing = true
 
-            }.bind(this));
+        self.reset()
 
-            this.eventBind();
-        },
-        getListMore: function () {
-            if (this.loading === true) {
-                return false;
-            }
-            this.loading = true;
-            var data = {
-                target_id: $(this.container).data('target_id'),
-                instance_id: $(this.container).data('instance_id'),
-                target_author_id: $(this.container).data('target_author_id')
-            };
+        var mode = 'edit'
+        var callback = function (json) {
+          var editor = $.extend(true, {}, self.props.config.editor)
+          $.extend(editor.options, json.etc)
+          var form = new Form($.parseHTML(json.html), mode, function (json) {
+            self._assetLoad(json.XE_ASSET_LOAD)
 
-            if (this.items.length > 0) {
-                var item = this.getLast();
-                $.extend(data, {offsetHead: item.getHead(), offsetReply: item.getReply()});
-            }
+            var items = self.makeItems($.parseHTML(json.items, document, true))
+            item = items[0]
+            item.setChanged()
+            self.replace(item)
+            self.renderItems()
 
-            XE.ajax({
-                url: $(this.container).data('urls').index,
-                type: 'get',
-                dataType: 'json',
-                data: data,
-                success: function (json) {
-                    this._assetLoad(json.XE_ASSET_LOAD);
+            fire('updated', self, [item])
+          }, editor)
 
-                    var items = this.makeItems($.parseHTML(json.items, document, true));
+          item.setForm(form)
+        }
+        self.getForm(mode, item.getId(), function (json) {
+          if (json.mode === 'certify') {
+            var form = new Certify($.parseHTML(json.html), callback)
+            item.setForm(form)
+          } else {
+            callback(json)
+          }
 
-                    for (var i in items) {
-                        if (this.props.config.reverse === true) {
-                            this.append(items[i]);
-                        } else {
-                            this.prepend(items[i]);
-                        }
-                    }
-                    this.renderItems();
+          self.state.ing = false
+        })
+      })
 
-                    this.setTotalCnt(json.totalCount);
+      // button item destroy
+      $(this.container).on('click', '.__xe_comment_btn_destroy', function (e) {
+        e.preventDefault()
 
-                    if (json.hasMore === true) {
-                        $('.__xe_comment_btn_more', this.container).show();
-                        $('.__xe_comment_remain_cnt', this.container).text(json.totalCount - this.items.length);
-                    } else {
-                        $('.__xe_comment_btn_more', this.container).hide();
-                    }
+        if (self.state.ing === true) {
+          return false
+        }
 
-                    fire('loaded', this, [items]);
-                }.bind(this)
-            }).always(function () {
-                this.loading = false;
-            }.bind(this));
-        },
-        _assetLoad: function (assets) {
-            var cssList = assets.css || {},
-                jsList = assets.js || {};
+        if (!window.confirm(window.XE.Lang.trans('xe::confirmDelete'))) {
+          return false
+        }
 
-            $.each(cssList, function (i, css) {
-                DynamicLoadManager.cssLoad(css);
-            });
-            $.each(jsList, function (i, js) {
-                DynamicLoadManager.jsLoad(js);
-            });
-        },
-        makeItems: function (doms) {
-            var items = [];
-            for (var i in doms) {
-                if ($(doms[i]).is('.__xe_comment_list_item')) {
-                    items.push(new Item(doms[i]));
-                }
-            }
+        self.state.ing = true
 
-            return items;
-        },
-        prepend: function (item) {
-            this.items.splice(0, 0, item);
-        },
-        append: function (item) {
-            this.items.push(item);
-        },
-        replace: function (item) {
-            var self = this;
-            $.each(this.items, function (i, o) {
-                if (o.getId() == item.getId()) {
-                    self.items.splice(i, 1, item);
-                    return false;
-                }
-            });
-        },
-        spotIn: function (item) {
-            if (!item.getParentId()) {
-                this.lastIn(item);
-                return;
-            }
+        var context = $(this).closest('.__xe_comment_list_item')
+        var item = self.find(context.data('id'))
 
-            var items = this.items, len = items.length, parentIndent = -1;
+        self.reset()
 
-            for (var i in items) {
-                if (parentIndent > -1 && items[i].getIndent() <= parentIndent) {
-                    items.splice(i, 0, item);
-                    return;
-                }
+        var callback = function (json) {
+          if (!json.success) {
+            window.XE.toast('warning', window.XE.Lang.trans('comment::msgRemoveUnable'))
+            return
+          }
 
-                if (items[i].getId() == item.getParentId()) {
-                    parentIndent = items[i].getIndent();
-                }
-            }
+          var nitem = null
+          if (json.items) {
+            var items = self.makeItems($.parseHTML(json.items))
+            nitem = items[0]
 
-            this.lastIn(item);
-        },
-        lastIn: function (item) {
-            if (this.props.config.reverse === true) {
-                this.prepend(item);
+            self.replace(nitem)
+            self.renderItems()
+          } else {
+            self.removeItem(item)
+            // item.fadeOut(function () {
+            //     self.remove(item);
+            //     self.renderItems();
+            //
+            //     self.setTotalCnt(self.getTotalCnt() - 1);
+            // });
+          }
+
+          fire('deleted', self, [item, nitem])
+        }
+
+        fire('deleting', self, [item])
+
+        window.XE.ajax({
+          url: $(self.container).data('urls').destroy,
+          type: 'post',
+          dataType: 'json',
+          data: {instance_id: $(self.container).data('instance_id'), id: item.getId()},
+          success: function (json) {
+            if (json.mode && json.mode === 'certify') {
+              var dom = $.parseHTML(json.html)
+              item.setForm(new Certify(dom, callback))
             } else {
-                this.append(item);
+              callback(json)
             }
-        },
-        renderItems: function () {
-            //this.getListBox().empty();
+          }
+        }).always(function () {
+          self.state.ing = false
+        })
+      })
 
-            var prev = null;
-            $.each(this.items, function (i, item) {
-                var dom = item.getDom();
+      $(this.container).on('click', '.__xe_comment_btn_vote', function (e) {
+        e.preventDefault()
 
-                if (!this.rendered(item)) {
-                    if (prev !== null) {
-                        $(prev.getDom()).after(dom);
-                    } else {
-                        this.getListBox().prepend(dom);
-                    }
-                } else if (item.isChanged()) {
-                    var old = this.getListBox().find('[data-id="' + item.getId() + '"]')[0];
-                    $(old).before(dom);
-                    $(old).remove();
-                    item.unsetChanged();
-                }
-
-                prev = item;
-
-            }.bind(this));
-
-            XE.Component.timeago();
-        },
-        removeItem: function (item) {
-            var ing = false, targets = [], self = this;
-            $.each(this.items, function (i, o) {
-                if (o.getId() == item.getId()) {
-                    ing = true;
-                } else if (ing === true && o.getIndent() <= item.getIndent()) {
-                    return false;
-                }
-
-                if (ing === true) {
-                    targets.push(o);
-                }
-            });
-
-            var $targets = null;
-            $.each(targets, function (i, o) {
-                if ($targets === null) {
-                    $targets = $(o.getDom());
-                } else {
-                    $targets.add(o);
-                }
-            });
-
-            $targets.fadeOut('slow', function () {
-                $.each(targets, function (i, o) {
-                    self.remove(o);
-                });
-
-                self.renderItems();
-
-                self.setTotalCnt(self.getTotalCnt() - targets.length);
-            });
-        },
-        rendered: function (item) {
-            return this.getListBox().find('[data-id="' + item.getId() + '"]').length > 0;
-        },
-        setTotalCnt: function (cnt) {
-            $(this.container).data('total-cnt', cnt);
-
-            $('.__xe_comment_cnt', this.container).text(cnt);
-        },
-        getTotalCnt: function () {
-            return parseInt($(this.container).data('total-cnt') ? $(this.container).data('total-cnt') : 0);
-        },
-        getLast: function () {
-            if (this.props.config.reverse === true) {
-                return this.items[this.items.length - 1];
-            } else {
-                return this.items[0];
-            }
-        },
-        getForm: function (mode, id, callback) {
-            // mode is create, edit and reply
-            var data = {
-                target_id: $(this.container).data('target_id'),
-                instance_id: $(this.container).data('instance_id'),
-                target_author_id: $(this.container).data('target_author_id')
-            };
-            $.extend(data, {mode: mode, id: id});
-
-            XE.ajax({
-                url: $(this.container).data('urls').form,
-                type: 'get',
-                dataType: 'json',
-                data: data,
-                success: function (json) {
-                    callback(json);
-                }.bind(this)
-            });
-        },
-
-        find: function (id) {
-            var item = null;
-            $.each(this.items, function (i, o) {
-                if (o.getId() == id) {
-                    item = o;
-                    return false;
-                }
-            });
-
-            return item;
-        },
-        remove: function (item) {
-            $.each(this.items, function (i, o) {
-                if (o.getId() == item.getId()) {
-                    this.items.splice(i, 1);
-                    item.remove();
-                    return false;
-                }
-            }.bind(this));
-        },
-        reset: function () {
-            $.each(this.items, function (i, o) {
-                o.removeForm();
-            });
-        },
-        eventBind: function () {
-            var self = this;
-            // button list more
-            $('.__xe_comment_btn_more', this.container).click(function (e) {
-                e.preventDefault();
-
-                self.getListMore();
-            });
-
-            // button submit
-            $(this.container).on('click', '.__xe_comment_btn_submit', function (e) {
-                e.preventDefault();
-
-                $(this).closest('form').trigger('submit');
-            });
-
-            // button item reply
-            $(this.container).on('click', '.__xe_comment_btn_reply', function (e) {
-                e.preventDefault();
-
-                var context = $(this).closest('.__xe_comment_list_item'),
-                    item = self.find(context.data('id')),
-                    existsForm = item.getForm();
-
-                if (existsForm !== null && existsForm.getMode() == 'reply') {
-                    item.removeForm();
-                    return false;
-                }
-
-                if (self.state.ing === true) {
-                    return false;
-                }
-                self.state.ing = true;
-
-                self.reset();
-
-                self.getForm('reply', item.getId(), function (json) {
-                    item.setForm(new Form($.parseHTML(json.html), 'reply', function (json) {
-                        self._assetLoad(json.XE_ASSET_LOAD);
-
-                        var items = self.makeItems($.parseHTML(json.items, document, true)),
-                            child = items[0];
-                        self.spotIn(child);
-                        item.removeForm();
-                        self.renderItems();
-
-                        self.setTotalCnt(self.getTotalCnt() + 1);
-
-                        fire('replied', self, [child, item]);
-                    }, self.props.config.editor));
-
-                    self.state.ing = false;
-                });
-            });
-
-            // button item edit
-            $(this.container).on('click', '.__xe_comment_btn_edit', function (e) {
-                e.preventDefault();
-
-                var context = $(this).closest('.__xe_comment_list_item'),
-                    item = self.find(context.data('id'));
-
-                var oldForm = item.getForm();
-                if (oldForm && oldForm.getMode() == 'edit') {
-                    item.removeForm();
-                    return false;
-                }
-
-                if (self.state.ing === true) {
-                    return false;
-                }
-                self.state.ing = true;
-
-                self.reset();
-
-                var mode = 'edit',
-                    callback = function (json) {
-                        var editor = $.extend(true, {}, self.props.config.editor);
-                        $.extend(editor.options, json.etc);
-                        var form = new Form($.parseHTML(json.html), mode, function (json) {
-                            self._assetLoad(json.XE_ASSET_LOAD);
-
-                            var items = self.makeItems($.parseHTML(json.items, document, true)),
-                                item = items[0];
-                            item.setChanged();
-                            self.replace(item);
-                            self.renderItems();
-
-                            fire('updated', self, [item]);
-                        }, editor);
-
-                        item.setForm(form);
-                    };
-                self.getForm(mode, item.getId(), function (json) {
-                    if (json.mode === 'certify') {
-                        var form = new Certify($.parseHTML(json.html), callback);
-                        item.setForm(form);
-                    } else {
-                        callback(json);
-                    }
-
-                    self.state.ing = false;
-                });
-            });
-
-            // button item destroy
-            $(this.container).on('click', '.__xe_comment_btn_destroy', function (e) {
-                e.preventDefault();
-
-                if (self.state.ing === true) {
-                    return false;
-                }
-
-                if (!confirm(XE.Lang.trans('xe::confirmDelete'))) {
-                    return false;
-                }
-
-                self.state.ing = true;
-
-                var context = $(this).closest('.__xe_comment_list_item'),
-                    item = self.find(context.data('id'));
-
-                self.reset();
-
-                var callback = function (json) {
-                    if (!json.success) {
-                        XE.toast('warning', XE.Lang.trans('comment::msgRemoveUnable'));
-                        return;
-                    }
-
-                    var nitem = null;
-                    if (json.items) {
-                        var items = self.makeItems($.parseHTML(json.items));
-                        nitem = items[0];
-
-                        self.replace(nitem);
-                        self.renderItems();
-                    } else {
-                        self.removeItem(item);
-                        // item.fadeOut(function () {
-                        //     self.remove(item);
-                        //     self.renderItems();
-                        //
-                        //     self.setTotalCnt(self.getTotalCnt() - 1);
-                        // });
-                    }
-
-                    fire('deleted', self, [item, nitem]);
-                };
-
-                fire('deleting', self, [item]);
-
-                XE.ajax({
-                    url: $(self.container).data('urls').destroy,
-                    type: 'post',
-                    dataType: 'json',
-                    data: {instance_id: $(self.container).data('instance_id'), id: item.getId()},
-                    success: function (json) {
-                        if (json.mode && json.mode === 'certify') {
-                            var dom = $.parseHTML(json.html);
-                            item.setForm(new Certify(dom, callback));
-                        } else {
-                            callback(json);
-                        }
-                    }
-                }).always(function () {
-                    self.state.ing = false;
-                });
-            });
-
-            $(this.container).on('click', '.__xe_comment_btn_vote', function (e) {
-                e.preventDefault();
-
-                if (self.state.ing === true) {
-                    return false;
-                }
-                self.state.ing = true;
-
-                var context = $(this).closest('.__xe_comment_list_item'),
-                    item = self.find(context.data('id'));
-
-                var type = item.currentVoteType(this),
-                    urlSuffix = $(this).hasClass('on') ? 'voteOff' : 'voteOn';
-
-                XE.ajax({
-                    url: $(self.container).data('urls')[urlSuffix],
-                    type: 'post',
-                    dataType: 'json',
-                    data: {instance_id: item.getInstanceId(), id: item.getId(), option: type.current},
-                    success: function (json) {
-                        if (json[type.current] || json[type.current] === 0) {
-                            item.setVoteCnt(type.current, json[type.current]);
-                            $(this).toggleClass('on');
-                            $('.__xe_comment_count.__xe_' + type.current, context).trigger('click', [true]);
-                        }
-                    }.bind(this)
-                }).always(function () {
-                    self.state.ing = false;
-                    $(this).blur();
-                }.bind(this));
-            });
-
-            $(this.container).on('click', '.__xe_comment_count', function (e, noToggle) {
-                e.preventDefault();
-
-                var context = $(this).closest('.__xe_comment_list_item'),
-                    item = self.find(context.data('id'));
-
-                var type = item.currentVoteType(this);
-
-                if (!noToggle) {
-                    $('.__xe_comment_count.__xe_' + type.opposite, context).removeClass('on');
-                    $('.__xe_comment_voters.__xe_' + type.opposite, context).hide();
-
-                    $(this).toggleClass('on');
-                }
-
-                if (!$(this).hasClass('on')) {
-                    $('.__xe_comment_voters.__xe_' + type.current, context).hide();
-                    return;
-                }
-
-                XE.page(
-                    $(self.container).data('urls').votedUser,
-                    $('.__xe_comment_voters.__xe_' + type.current, context),
-                    {
-                        data: {
-                            instance_id: item.getInstanceId(),
-                            id: item.getId(),
-                            option: type.current
-                        }
-                    },
-                    function () {
-                        $('.__xe_comment_voters.__xe_' + type.current, context).show();
-                    }
-                );
-            });
-
-            $(this.container).on('click', '.__xe_comment_btn_toggle_file', function (e) {
-                e.preventDefault();
-
-                $(this).toggleClass('on');
-            });
-        },
-        getListBox: function () {
-            return $('.__xe_comment_list', this.container);
-        },
-        getFormBox: function () {
-            return $('.__xe_comment_form', this.container);
+        if (self.state.ing === true) {
+          return false
         }
-    };
+        self.state.ing = true
 
-    function Item(dom)
-    {
-        this.dom = dom;
-        this.form = null;
-        this.state = {changed: false};
-    }
+        var context = $(this).closest('.__xe_comment_list_item')
+        var item = self.find(context.data('id'))
+        var type = item.currentVoteType(this)
+        var urlSuffix = $(this).hasClass('on') ? 'voteOff' : 'voteOn'
 
-    Item.prototype = {
-        getDom: function () {
-            return this.dom;
-        },
-        getInstanceId: function () {
-            return $(this.dom).data('instance_id');
-        },
-        getId: function () {
-            return $(this.dom).data('id');
-        },
-        getHead: function () {
-            return $(this.dom).data('head');
-        },
-        getReply: function () {
-            return $(this.dom).data('reply');
-        },
-        getParentId: function () {
-            return $(this.dom).data('parent_id');
-        },
-        getIndent: function () {
-            return $(this.dom).data('indent');
-        },
-        setForm: function (form) {
-            this.removeForm();
-
-            this.form = form;
-            this.renderForm();
-        },
-        getForm: function () {
-            return this.form;
-        },
-        renderForm: function () {
-            if (this.form.getMode() == 'certify' && $('.__xe_comment_certify', this.dom).length > 0) {
-                this.form.render($('.__xe_comment_certify', this.dom));
-                return;
+        window.XE.ajax({
+          url: $(self.container).data('urls')[urlSuffix],
+          type: 'post',
+          dataType: 'json',
+          data: {instance_id: item.getInstanceId(), id: item.getId(), option: type.current},
+          success: function (json) {
+            if (json[type.current] || json[type.current] === 0) {
+              item.setVoteCnt(type.current, json[type.current])
+              $(this).toggleClass('on')
+              $('.__xe_comment_count.__xe_' + type.current, context).trigger('click', [true])
             }
+          }.bind(this)
+        }).always(function () {
+          self.state.ing = false
+          $(this).blur()
+        }.bind(this))
+      })
 
-            if (this.form.getMode() == 'edit') {
-                $('.__xe_comment_edit_toggle', this.dom).hide();
-                if ($('.__xe_comment_edit_form', this.dom).length > 0) {
-                    this.form.render($('.__xe_comment_edit_form', this.dom));
-                    return;
-                }
-            }
+      $(this.container).on('click', '.__xe_comment_count', function (e, noToggle) {
+        e.preventDefault()
 
-            if (this.form.getMode() == 'reply' && $('.__xe_comment_reply_form', this.dom).length > 0) {
-                this.form.render($('.__xe_comment_reply_form', this.dom));
-                return;
-            }
+        var context = $(this).closest('.__xe_comment_list_item')
+        var item = self.find(context.data('id'))
 
-            this.form.render(this.dom, true);
-        },
-        removeForm: function() {
-            if (this.form) {
-                this.form.remove();
-                this.form = null;
-            }
+        var type = item.currentVoteType(this)
 
-            $('.__xe_comment_edit_toggle', this.dom).show();
-        },
-        // fadeOut: function (callback) {
-        //     $(this.dom).fadeOut('slow', callback);
-        // },
-        setVoteCnt: function (type, cnt){
-            $('.__xe_comment_count.__xe_' + type, this.dom).text(cnt);
-        },
-        currentVoteType: function (elem) {
-            if ($(elem).hasClass('__xe_assent')) {
-                return {current: 'assent', opposite: 'dissent'};
-            } else if ($(elem).hasClass('__xe_dissent')) {
-                return {current: 'dissent', opposite: 'assent'};
-            }
+        if (!noToggle) {
+          $('.__xe_comment_count.__xe_' + type.opposite, context).removeClass('on')
+          $('.__xe_comment_voters.__xe_' + type.opposite, context).hide()
 
-            console.error('unknown vote type');
-        },
-        remove: function () {
-            $(this.dom).remove();
-        },
-        isChanged: function () {
-            return this.state.changed;
-        },
-        setChanged: function () {
-            this.state.changed = true;
-        },
-        unsetChanged: function () {
-            this.state.changed = false;
+          $(this).toggleClass('on')
         }
-    };
 
-    function Form(dom, mode, callback, editorData)
-    {
-        this.dom = dom;
-        this.mode = mode;
-        this.callback = callback;
-        this.editorData = editorData;
-        this.editor = null;
-        this.container = null;
-    }
-
-    Form.prototype = {
-        render: function (container, noReplace) {
-            if (noReplace === true) {
-                $(container).append(this.dom);
-            } else {
-                $(container).html(this.dom);
-            }
-
-            this.container = container;
-
-            if (this.editorData !== null) {
-                this.initEditor();
-            }
-
-            this._eventBind();
-        },
-        initEditor: function () {
-            if (typeof(XEeditor) == 'undefined') {
-                return ;
-            }
-
-            var id = 'comment_textarea_' + (new Date().getTime());
-            $('textarea', this.dom).attr('id', id).css('width', '100%');
-            var editor = XEeditor.getEditor(this.editorData.name).create(id, this.editorData.options, this.editorData.customOptions, this.editorData.tools);
-
-            editor.on('focus', function () {
-                $(id).triggerHandler('focus');
-            });
-            editor.on('change', function () {
-                $(id).triggerHandler('input');
-            });
-
-            this.editor = editor;
-        },
-        editorSync: function () {
-            if (this.editor) {
-                this.editor.setContents($('textarea', this.dom).val());
-            }
-        },
-        getDom: function () {
-            return this.dom;
-        },
-        getMode: function () {
-            return this.mode;
-        },
-        _getForm: function () {
-            return $(this.dom).is('form') ? this.dom : $('form', this.dom);
-        },
-        remove: function () {
-            $(this.container).off('submit', 'form');
-            $(this.dom).remove();
-        },
-        _eventBind: function () {
-            var self = this;
-            var submitting = false;
-
-            $(this.container).on('submit', 'form', function (e) {
-                e.preventDefault();
-
-                if(submitting) {
-                    return false;
-                }
-
-                $('button', self.dom)
-                    .add('input[type=submit]', self.dom)
-                    .add('input[type=button]', self.dom)
-                    .prop('disabled', true);
-
-                if(!submitting) {
-                    submitting = true;
-                }
-
-                XE.ajax({
-                    url: $(this).attr('action'),
-                    type: 'post',
-                    dataType: 'json',
-                    data: $(this).serialize(),
-                    success: function (json) {
-                        self.callback(json);
-                        $(self._getForm()).trigger('reset');
-                        if (self.editor && self.getMode() == 'create') {
-                            self.editor.reset();
-                        }
-                    }
-                }).always(function () {
-                    $('button', self.dom)
-                        .add('input[type=submit]', self.dom)
-                        .add('input[type=button]', self.dom)
-                        .prop('disabled', false);
-
-                    submitting = false;
-                });
-            });
+        if (!$(this).hasClass('on')) {
+          $('.__xe_comment_voters.__xe_' + type.current, context).hide()
+          return
         }
-    };
 
-    function Certify(dom, callback)
-    {
-        this.dom = dom;
-        this.mode = 'certify';
-        this.callback = callback;
-        this.editorData = null;
-        this.editor = null;
-        this.container = null;
-    }
-
-    Certify.prototype = Form.prototype;
-
-
-    window.comment = comment;
-
-    return comment;
-})(typeof window !== "undefined" ? window : this, jQuery);
-
-
-var CommentVotedVirtualGrid = (function() {
-
-    var self, grid, dataView;
-
-    var ajaxRunning = false;    //ajax중인지
-
-    var startId,
-        limit,
-        isLastRow = false;      //마지막 row인지
-
-    return {
-        init: function() {
-
-            var self = CommentVotedVirtualGrid;
-            var columns = [{
-                //selectable: false,
-                formatter: function(row, cell, value, columnDef, dataContext) {
-                    var tmpl = [
-                        '<!--[D] 링크가 아닌 경우 div 로 교체 -->',
-                        '<a href="__profilePage__" class="list-inner-item">',
-                        '<!--[D] 실제 이미지 사이즈는 모바일 대응 위해 일대일 비율로 96*96 이상-->',
-                        '<div class="img-thumbnail"><img src="__src__" width="48" height="48" alt="__alt__" /></div>',
-                        '<div class="list-text">',
-                        '<p>__alt__</p>',
-                        '</div>',
-                        '</a>',
-                    ].join("\n");
-
-                    return tmpl.replace(/__src__/g, dataContext.profileImage).replace(/__alt__/g, dataContext.displayName).replace(/__profilePage__/g, dataContext.profilePage);
-                }
-            }];
-
-            var options = {
-                editable: false,
-                enableAddRow: true,
-                enableColumnReorder: false,
-                enableCellNavigation: false,
-                // asyncEditorLoading: false,
-                // autoEdit: false,
-                rowHeight: 80,
-                headerHeight: 0,
-                showHeaderRow: false
-            };
-
-            // var data = [];
-            $(".xe-list-group").css("height", "365px");
-            dataView = new Slick.Data.DataView();
-            grid = new Slick.Grid(".xe-list-group", dataView, columns, options);
-            grid.setHeaderRowVisibility(false);
-
-            $(".slick-header").hide();
-
-
-            id= 0;
-            ajaxRunning = false;
-            isLastRow = false;
-            startId = 0;
-            limit = 10;
-
-            self.getRows();
-            self.bindEvent();
-
-            return self;
-        },
-        bindEvent: function() {
-            grid.onScroll.subscribe(function(e, args) {
-
-                var $viewport = $(".xe-modal").find(".slick-viewport"),
-                    loadBlockCnt = 3;   //3 page 정도 남으면 reload함, 1page - modal body height 기준.
-
-                if(!ajaxRunning && !isLastRow && ($viewport[0].scrollHeight - $viewport.scrollTop()) < ($viewport.outerHeight() * loadBlockCnt)) {
-                    CommentVotedVirtualGrid.getRows();
-                }
-
-            });
-
-            dataView.onRowCountChanged.subscribe(function (e, args) {
-                grid.updateRowCount();
-                grid.render();
-            });
-
-            dataView.onRowsChanged.subscribe(function (e, args) {
-                grid.invalidateRows(args.rows);
-                grid.render();
-            });
-        },
-        getRows: function() {
-
-            ajaxRunning = true;
-            
-            var data = $(".xe-list-group").data('data');
-            data = data ? (typeof(data) !== 'object' ? JSON.parse(data) : data) : {};
-            data['limit'] = limit;
-
-            if(startId !== 0) {
-                data['startId'] = startId;
+        window.XE.page(
+          $(self.container).data('urls').votedUser,
+          $('.__xe_comment_voters.__xe_' + type.current, context),
+          {
+            data: {
+              instance_id: item.getInstanceId(),
+              id: item.getId(),
+              option: type.current
             }
+          },
+          function () {
+            $('.__xe_comment_voters.__xe_' + type.current, context).show()
+          }
+        )
+      })
 
-            XE.ajax({
-                url: $(".xe-list-group").data('url'),
-                type: 'get',
-                dataType: 'json',
-                data: data,
-                success: function(data) {
+      $(this.container).on('click', '.__xe_comment_btn_toggle_file', function (e) {
+        e.preventDefault()
 
-                    if(data.nextStartId === 0) {
-                        isLastRow = true;
-                    }
-
-                    startId = data.nextStartId;
-
-                    for(var k = 0, max = data.list.length; k < max; k += 1) {
-                        dataView.addItem(data.list[k]);
-                    }
-
-                }
-            }).done(function() {
-                ajaxRunning = false;
-            });
-        }
+        $(this).toggleClass('on')
+      })
+    },
+    getListBox: function () {
+      return $('.__xe_comment_list', this.container)
+    },
+    getFormBox: function () {
+      return $('.__xe_comment_form', this.container)
     }
-})();
+  }
+
+  function Item (dom) {
+    this.dom = dom
+    this.form = null
+    this.state = {changed: false}
+  }
+
+  Item.prototype = {
+    getDom: function () {
+      return this.dom
+    },
+    getInstanceId: function () {
+      return $(this.dom).data('instance_id')
+    },
+    getId: function () {
+      return $(this.dom).data('id')
+    },
+    getHead: function () {
+      return $(this.dom).data('head')
+    },
+    getReply: function () {
+      return $(this.dom).data('reply')
+    },
+    getParentId: function () {
+      return $(this.dom).data('parent_id')
+    },
+    getIndent: function () {
+      return $(this.dom).data('indent')
+    },
+    setForm: function (form) {
+      this.removeForm()
+
+      this.form = form
+      this.renderForm()
+    },
+    getForm: function () {
+      return this.form
+    },
+    renderForm: function () {
+      if (this.form.getMode() == 'certify' && $('.__xe_comment_certify', this.dom).length > 0) {
+        this.form.render($('.__xe_comment_certify', this.dom))
+        return
+      }
+
+      if (this.form.getMode() == 'edit') {
+        $('.__xe_comment_edit_toggle', this.dom).hide()
+        if ($('.__xe_comment_edit_form', this.dom).length > 0) {
+          this.form.render($('.__xe_comment_edit_form', this.dom))
+          return
+        }
+      }
+
+      if (this.form.getMode() == 'reply' && $('.__xe_comment_reply_form', this.dom).length > 0) {
+        this.form.render($('.__xe_comment_reply_form', this.dom))
+        return
+      }
+
+      this.form.render(this.dom, true)
+    },
+    removeForm: function () {
+      if (this.form) {
+        this.form.remove()
+        this.form = null
+      }
+
+      $('.__xe_comment_edit_toggle', this.dom).show()
+    },
+    // fadeOut: function (callback) {
+    //     $(this.dom).fadeOut('slow', callback);
+    // },
+    setVoteCnt: function (type, cnt) {
+      $('.__xe_comment_count.__xe_' + type, this.dom).text(cnt)
+    },
+    currentVoteType: function (elem) {
+      if ($(elem).hasClass('__xe_assent')) {
+        return {current: 'assent', opposite: 'dissent'}
+      } else if ($(elem).hasClass('__xe_dissent')) {
+        return {current: 'dissent', opposite: 'assent'}
+      }
+
+      console.error('unknown vote type')
+    },
+    remove: function () {
+      $(this.dom).remove()
+    },
+    isChanged: function () {
+      return this.state.changed
+    },
+    setChanged: function () {
+      this.state.changed = true
+    },
+    unsetChanged: function () {
+      this.state.changed = false
+    }
+  }
+
+  function Form (dom, mode, callback, editorData) {
+    this.dom = dom
+    this.mode = mode
+    this.callback = callback
+    this.editorData = editorData
+    this.editor = null
+    this.container = null
+  }
+
+  Form.prototype = {
+    render: function (container, noReplace) {
+      if (noReplace === true) {
+        $(container).append(this.dom)
+      } else {
+        $(container).html(this.dom)
+      }
+
+      this.container = container
+
+      if (this.editorData !== null) {
+        this.initEditor()
+      }
+
+      this._eventBind()
+    },
+    initEditor: function () {
+      if (typeof (XEeditor) === 'undefined') {
+        return
+      }
+
+      var id = 'comment_textarea_' + (new Date().getTime())
+      $('textarea', this.dom).attr('id', id).css('width', '100%')
+      var editor = window.XEeditor.getEditor(this.editorData.name).create(id, this.editorData.options, this.editorData.customOptions, this.editorData.tools)
+
+      editor.on('focus', function () {
+        $(id).triggerHandler('focus')
+      })
+      editor.on('change', function () {
+        $(id).triggerHandler('input')
+      })
+
+      this.editor = editor
+    },
+    editorSync: function () {
+      if (this.editor) {
+        this.editor.setContents($('textarea', this.dom).val())
+      }
+    },
+    getDom: function () {
+      return this.dom
+    },
+    getMode: function () {
+      return this.mode
+    },
+    _getForm: function () {
+      return $(this.dom).is('form') ? this.dom : $('form', this.dom)
+    },
+    remove: function () {
+      $(this.container).off('submit', 'form')
+      $(this.dom).remove()
+    },
+    _eventBind: function () {
+      var self = this
+      var submitting = false
+
+      $(this.container).on('submit', 'form', function (e) {
+        e.preventDefault()
+
+        if (submitting) {
+          return false
+        }
+
+        $('button', self.dom)
+          .add('input[type=submit]', self.dom)
+          .add('input[type=button]', self.dom)
+          .prop('disabled', true)
+
+        if (!submitting) {
+          submitting = true
+        }
+
+        window.XE.ajax({
+          url: $(this).attr('action'),
+          type: 'post',
+          dataType: 'json',
+          data: $(this).serialize(),
+          success: function (json) {
+            self.callback(json)
+            $(self._getForm()).trigger('reset')
+            if (self.editor && self.getMode() == 'create') {
+              self.editor.reset()
+            }
+          }
+        }).always(function () {
+          $('button', self.dom)
+            .add('input[type=submit]', self.dom)
+            .add('input[type=button]', self.dom)
+            .prop('disabled', false)
+
+          submitting = false
+        })
+      })
+    }
+  }
+
+  function Certify (dom, callback) {
+    this.dom = dom
+    this.mode = 'certify'
+    this.callback = callback
+    this.editorData = null
+    this.editor = null
+    this.container = null
+  }
+
+  Certify.prototype = Form.prototype
+
+  window.comment = comment
+
+  return comment
+})(window.jQuery)
+
+var CommentVotedVirtualGrid = (function ($) {
+  var self
+  var grid
+  var dataView
+  var ajaxRunning = false // ajax중인지
+  var startId
+  var limit
+  var isLastRow = false // 마지막 row인지
+
+  return {
+    init: function () {
+      var self = CommentVotedVirtualGrid
+      var columns = [{
+        // selectable: false,
+        formatter: function (row, cell, value, columnDef, dataContext) {
+          var tmpl = [
+            '<!--[D] 링크가 아닌 경우 div 로 교체 -->',
+            '<a href="__profilePage__" class="list-inner-item">',
+            '<!--[D] 실제 이미지 사이즈는 모바일 대응 위해 일대일 비율로 96*96 이상-->',
+            '<div class="img-thumbnail"><img src="__src__" width="48" height="48" alt="__alt__" /></div>',
+            '<div class="list-text">',
+            '<p>__alt__</p>',
+            '</div>',
+            '</a>'
+          ].join('\n')
+
+          return tmpl.replace(/__src__/g, dataContext.profileImage).replace(/__alt__/g, dataContext.displayName).replace(/__profilePage__/g, dataContext.profilePage)
+        }
+      }]
+
+      var options = {
+        editable: false,
+        enableAddRow: true,
+        enableColumnReorder: false,
+        enableCellNavigation: false,
+        // asyncEditorLoading: false,
+        // autoEdit: false,
+        rowHeight: 80,
+        headerHeight: 0,
+        showHeaderRow: false
+      }
+
+      // var data = [];
+      $('.xe-list-group').css('height', '365px')
+      dataView = new Slick.Data.DataView()
+      grid = new Slick.Grid('.xe-list-group', dataView, columns, options)
+      grid.setHeaderRowVisibility(false)
+
+      $('.slick-header').hide()
+
+      id = 0
+      ajaxRunning = false
+      isLastRow = false
+      startId = 0
+      limit = 10
+
+      self.getRows()
+      self.bindEvent()
+
+      return self
+    },
+    bindEvent: function () {
+      grid.onScroll.subscribe(function (e, args) {
+        var $viewport = $('.xe-modal').find('.slick-viewport')
+        var loadBlockCnt = 3 // 3 page 정도 남으면 reload함, 1page - modal body height 기준.
+
+        if (!ajaxRunning && !isLastRow && ($viewport[0].scrollHeight - $viewport.scrollTop()) < ($viewport.outerHeight() * loadBlockCnt)) {
+          CommentVotedVirtualGrid.getRows()
+        }
+      })
+
+      dataView.onRowCountChanged.subscribe(function (e, args) {
+        grid.updateRowCount()
+        grid.render()
+      })
+
+      dataView.onRowsChanged.subscribe(function (e, args) {
+        grid.invalidateRows(args.rows)
+        grid.render()
+      })
+    },
+    getRows: function () {
+      ajaxRunning = true
+
+      var data = $('.xe-list-group').data('data')
+      data = data ? (typeof (data) !== 'object' ? JSON.parse(data) : data) : {}
+      data['limit'] = limit
+
+      if (startId !== 0) {
+        data['startId'] = startId
+      }
+
+      window.XE.ajax({
+        url: $('.xe-list-group').data('url'),
+        type: 'get',
+        dataType: 'json',
+        data: data,
+        success: function (data) {
+          if (data.nextStartId === 0) {
+            isLastRow = true
+          }
+
+          startId = data.nextStartId
+
+          for (var k = 0, max = data.list.length; k < max; k += 1) {
+            dataView.addItem(data.list[k])
+          }
+        }
+      }).done(function () {
+        ajaxRunning = false
+      })
+    }
+  }
+})(window.jQuery)
