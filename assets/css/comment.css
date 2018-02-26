@@ -384,6 +384,9 @@
     margin-bottom: 11px;
     line-height: 20px;
 }
+.comment_entity_body_meta .mb_author {
+    display: inline-block;
+}
 .comment_entity_body_meta .author {
     color: #546673;
     font-size: 14px;
