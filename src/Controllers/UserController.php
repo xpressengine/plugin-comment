@@ -23,7 +23,7 @@ use XeSkin;
 use XeStorage;
 use XeEditor;
 use XeTag;
-use Xpressengine\Editor\PurifierModules\EditorTool;
+use Xpressengine\Editor\PurifierModules\EditorContent;
 use Xpressengine\Permission\Instance;
 use Xpressengine\Plugins\Comment\Plugin;
 use Xpressengine\Support\Exceptions\AccessDeniedHttpException;
@@ -136,7 +136,7 @@ class UserController extends Controller
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
         $purifier = new Purifier();
-        $purifier->allowModule(EditorTool::class);
+        $purifier->allowModule(EditorContent::class);
         $purifier->allowModule(HTML5::class);
         $originInput = Request::originAll();
         $inputs['content'] = $purifier->purify($originInput['content']);
@@ -210,7 +210,7 @@ class UserController extends Controller
         // purifier 에 의해 몇몇 태그 속성이 사라짐
         // 정상적인 처리를 위해 원본 내용을 사용하도록 처리
         $purifier = new Purifier();
-        $purifier->allowModule(EditorTool::class);
+        $purifier->allowModule(EditorContent::class);
         $purifier->allowModule(HTML5::class);
         $originInput = Request::originAll();
         $inputs['content'] = $purifier->purify($originInput['content']);
