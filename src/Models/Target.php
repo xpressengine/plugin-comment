@@ -33,7 +33,7 @@ class Target extends DynamicModel
      *
      * @var array
      */
-    protected $fillable = ['doc_id', 'target_id', 'target_author_id'];
+    protected $fillable = ['doc_id', 'target_id', 'target_author_id', 'target_type'];
 
     /**
      * Indicates if the model should be timestamped.
@@ -47,6 +47,10 @@ class Target extends DynamicModel
         return $this->belongsTo(Comment::class, 'doc_id');
     }
 
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @deprecated since 0.9.18
+     */
     public function author()
     {
         return $this->belongsTo(User::class, 'target_author_id');
@@ -56,6 +60,7 @@ class Target extends DynamicModel
      * Returns the author
      *
      * @return UserInterface
+     * @deprecated since 0.9.18
      */
     public function getAuthor()
     {
@@ -64,5 +69,13 @@ class Target extends DynamicModel
         }
 
         return $author;
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     */
+    public function commentable()
+    {
+        return $this->morphTo('target');
     }
 }

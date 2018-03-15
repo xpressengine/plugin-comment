@@ -10,11 +10,10 @@
 namespace Xpressengine\Plugins\Comment\Controllers;
 
 use App\Http\Controllers\Controller;
-use Request;
-use Validator;
 use XePresenter;
 use XeConfig;
 use XeDB;
+use Xpressengine\Http\Request;
 use Xpressengine\Menu\MenuHandler;
 use Xpressengine\Menu\Models\MenuItem;
 use Xpressengine\Permission\PermissionSupport;
@@ -50,16 +49,16 @@ class ManagerController extends Controller
         return $instanceIds;
     }
 
-    public function index(MenuHandler $menus)
+    public function index(Request $request, MenuHandler $menus)
     {
-        Request::flash();
+        $request->flash();
 
         $model = $this->handler->createModel();
         $query = $model->newQuery()
             ->whereIn('instance_id', $this->getInstances())
             ->where('status', '!=', Comment::STATUS_TRASH);
 
-        if ($options = Request::get('options')) {
+        if ($options = $request->get('options')) {
             list($searchField, $searchValue) = explode('|', $options);
 
             $query->where($searchField, $searchValue);
@@ -96,10 +95,10 @@ class ManagerController extends Controller
         ]);
     }
 
-    public function approve()
+    public function approve(Request $request)
     {
-        $approved = Request::get('approved');
-        $commentIds = Request::get('id');
+        $approved = $request->get('approved');
+        $commentIds = $request->get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
@@ -126,9 +125,9 @@ class ManagerController extends Controller
         return redirect()->back();
     }
 
-    public function toTrash()
+    public function toTrash(Request $request)
     {
-        $commentIds = Request::get('id');
+        $commentIds = $request->get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
@@ -143,9 +142,9 @@ class ManagerController extends Controller
         return redirect()->back();
     }
 
-    public function trash(MenuHandler $menus)
+    public function trash(Request $request, MenuHandler $menus)
     {
-        Request::flash();
+        $request->flash();
 
         $model = $this->handler->createModel();
         $comments = $model->newQuery()
@@ -171,9 +170,9 @@ class ManagerController extends Controller
         ]);
     }
 
-    public function destroy()
+    public function destroy(Request $request)
     {
-        $commentIds = Request::get('id');
+        $commentIds = $request->get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();
@@ -186,9 +185,9 @@ class ManagerController extends Controller
         return redirect()->back();
     }
 
-    public function restore()
+    public function restore(Request $request)
     {
-        $commentIds = Request::get('id');
+        $commentIds = $request->get('id');
         $commentIds = is_array($commentIds) ? $commentIds : [$commentIds];
 
         $model = $this->handler->createModel();

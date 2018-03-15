@@ -39,10 +39,12 @@ class CommentPolicy
             return false;
         }
 
-        if ($comment->display === Comment::DISPLAY_SECRET
+        if (
+            $comment->display === Comment::DISPLAY_SECRET
             && !$user->isManager()
-            && $user->getId() != $comment->getAuthor()->getId()
-            && $user->getId() != $comment->target->getAuthor()->getId()) {
+            && $user->getId() !== $comment->getAuthor()->getId()
+            && $user->getId() !== $comment->getTarget()->getAuthor()->getId()
+        ) {
             return false;
         }
 
@@ -66,7 +68,7 @@ class CommentPolicy
         }
 
         if (!$comment->getAuthor() instanceof Guest
-            && $comment->getAuthor()->getId() == $user->getId()) {
+            && $comment->getAuthor()->getId() === $user->getId()) {
             return true;
         }
 

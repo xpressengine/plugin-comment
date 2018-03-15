@@ -35,6 +35,7 @@ class Migration
             $table->string('doc_id', 36);
             $table->string('target_id', 36);
             $table->string('target_author_id', 36)->nullable();
+            $table->string('target_type')->nullable();
 
             $table->unique('doc_id');
             $table->index('target_id');

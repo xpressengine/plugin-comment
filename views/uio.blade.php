@@ -6,7 +6,7 @@
         id="comment-area-{{ $target->getUid() }}"
         data-target_id="{{ $target->getUid() }}"
         data-instance_id="{{ $instanceId }}"
-        data-target_author_id="{{ $target->getAuthor()->getId() }}"
+        data-target_type="{{ method_exists($target, 'getMorphType') ? $target->getMorphType() : get_class($target) }}"
         data-urls="{{ json_enc([
             'index' => route('comment::index'),
             'form' => route('comment::form'),

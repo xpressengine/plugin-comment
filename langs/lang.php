@@ -313,4 +313,8 @@ return [
         'ko' => '삭제할 수 없습니다.',
         'en' => 'Unable to remove',
     ],
+    'unknownTargetObject' => [
+        'ko' => '대상을 알 수 없습니다.',
+        'en' => 'Unknown target object.',
+    ]
 ];

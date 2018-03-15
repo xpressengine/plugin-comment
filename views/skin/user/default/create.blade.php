@@ -2,7 +2,8 @@
     <!-- input hidden file area start -->
     <input type="hidden" name="target_id" value="{{ $targetId }}">
     <input type="hidden" name="instance_id" value="{{ $instanceId }}">
-    <input type="hidden" name="target_author_id" value="{{ $targetAuthorId }}">
+    <input type="hidden" name="target_type" value="{{ $targetType }}">
+
     <!-- input hidden file area end -->
 
     <div class="comment_form_editor">

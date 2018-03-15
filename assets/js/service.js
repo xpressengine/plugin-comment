@@ -87,8 +87,7 @@
       this.loading = true
       var data = {
         target_id: $(this.container).data('target_id'),
-        instance_id: $(this.container).data('instance_id'),
-        target_author_id: $(this.container).data('target_author_id')
+        instance_id: $(this.container).data('instance_id')
       }
 
       if (this.items.length > 0) {
@@ -280,7 +279,7 @@
       var data = {
         target_id: $(this.container).data('target_id'),
         instance_id: $(this.container).data('instance_id'),
-        target_author_id: $(this.container).data('target_author_id')
+        target_type: $(this.container).data('target_type')
       }
       $.extend(data, {mode: mode, id: id})
 

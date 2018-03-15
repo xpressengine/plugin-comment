@@ -8,7 +8,7 @@
         <input type="hidden" name="instance_id" value="{{ $comment->instance_id }}">
         <input type="hidden" name="target_id" value="{{ $comment->target->target_id }}">
         <input type="hidden" name="parent_id" value="{{ $comment->id }}">
-        <input type="hidden" name="target_author_id" value="{{ $comment->target->target_author_id }}">
+        <input type="hidden" name="target_type" value="{{ $targetType }}">
         <!-- input hidden area end -->
 
         <div class="comment_form_editor">

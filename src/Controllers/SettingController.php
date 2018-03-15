@@ -19,7 +19,6 @@ use App\Http\Sections\DynamicFieldSection;
 use App\Http\Sections\EditorSection;
 use App\Http\Sections\SkinSection;
 use App\Http\Sections\ToggleMenuSection;
-use Validator;
 use XeDB;
 use XeMenu;
 use XePresenter;
@@ -53,11 +52,7 @@ class SettingController extends Controller
 
     public function postConfig(Request $request, $targetInstanceId)
     {
-        $validator = Validator::make($request->all(), ['perPage' => 'Numeric']);
-
-        if ($validator->fails()) {
-            return redirect()->back()->with('alert', ['type' => 'danger', 'message' => $validator->errors()]);
-        }
+        $this->validate($request, ['perPage' => 'Numeric']);
 
         $this->handler->configure($this->handler->getInstanceId($targetInstanceId), $request->except(['_token']));
 
@@ -128,12 +123,7 @@ class SettingController extends Controller
 
     public function postGlobalConfig(Request $request)
     {
-        /** @var \Illuminate\Validation\Validator $validator */
-        $validator = Validator::make($request->all(), ['perPage' => 'Numeric']);
-
-        if ($validator->fails()) {
-            return redirect()->back()->with('alert', ['type' => 'danger', 'message' => $validator->errors()]);
-        }
+        $this->validate($request, ['perPage' => 'Numeric']);
 
         $this->handler->configure(null, $request->except(['_token']));
 

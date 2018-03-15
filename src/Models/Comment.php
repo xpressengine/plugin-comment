@@ -54,11 +54,7 @@ class Comment extends Document
     public function getAuthor()
     {
         if (!$author = $this->getRelationValue('author')) {
-            if (!empty($this->user_id)) {
-                $author = new UnknownUser();
-            } else {
-                $author = new Guest();
-            }
+            return !empty($this->user_id) ? new UnknownUser() : new Guest();
         }
 
         return $author;
@@ -86,5 +82,14 @@ class Comment extends Document
     public function setVoteType($type)
     {
         $this->voteType = $type;
+    }
+
+    public function getTarget()
+    {
+        if ($target = $this->getRelationValue('target')) {
+            return $target->commentable ?: $target;
+        }
+
+        return null;
     }
 }

@@ -46,4 +46,22 @@ interface CommentUsable
      * @return string
      */
     public function getLink(InstanceRoute $route);
+
+//    /**
+//     * Get morph type for relation
+//     *
+//     * class name or alias of morph map
+//     *
+//     * ```
+//     * use Illuminate\Database\Eloquent\Relations\Relation;
+//     *
+//     * Relation::morphMap([
+//     *  'posts' => 'App\Post',
+//     *  'videos' => 'App\Video',
+//     * ]);
+//     * ```
+//     *
+//     * @return string
+//     */
+//    public function getMorphType();
 }

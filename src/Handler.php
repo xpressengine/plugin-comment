@@ -275,15 +275,9 @@ class Handler
     public function create(array $inputs, UserInterface $user = null)
     {
         $inputs['type'] = CommentPlugin::getId();
-        if (isset($inputs['title']) === false) {
-            $inputs['title'] = '';
-        }
-        if (isset($inputs['head']) === false) {
-            $inputs['head'] = '';
-        }
-        if (isset($inputs['certify_key']) === false) {
-            $inputs['certify_key'] = '';
-        }
+        $inputs['title'] = $inputs['title'] ?? '';
+        $inputs['head'] = $inputs['head'] ?? '';
+        $inputs['certify_key'] = $inputs['certify_key'] ?? '';
 
         $user = $user ?: $this->auth->user();
         if (!$user instanceof Guest) {
@@ -298,7 +292,8 @@ class Handler
         $comment = $this->createModel($inputs['instance_id'])->newQuery()->find($doc->getKey());
         $comment->target()->create([
             'target_id' => $inputs['target_id'],
-            'target_author_id' => $inputs['target_author_id']
+            'target_author_id' => $inputs['target_author_id'],
+            'target_type' => $inputs['target_type']
         ]);
 
         if ($user instanceof Guest) {

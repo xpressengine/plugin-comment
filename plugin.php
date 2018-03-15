@@ -259,6 +259,13 @@ class Plugin extends AbstractPlugin
             app('xe.permission')->register($handler->getKeyForPerm(), $grant);
         }
 
+        // after v0.9.18
+        if (!Schema::hasColumn('comment_target', 'target_type')) {
+            Schema::table('comment_target', function ($table) {
+                $table->string('target_type')->nullable();
+            });
+        }
+
         XeLang::putFromLangDataSource('comment', base_path('plugins/comment/langs/lang.php'));
     }
 
@@ -276,6 +283,11 @@ class Plugin extends AbstractPlugin
         $handler = $this->getHandler();
         $permission = app('xe.permission')->getOrNew($handler->getKeyForPerm());
         if (!$permission['manage']) {
+            return false;
+        }
+
+        // after v0.9.18
+        if (!Schema::hasColumn('comment_target', 'target_type')) {
             return false;
         }
 
