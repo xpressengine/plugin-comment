@@ -2,7 +2,7 @@
   "name": "xpressengine-plugin/comment",
   "description": "XpressEngine's plugin for bundle (XE)",
   "keywords": ["xpressengine bundle", "comment", "comment service"],
-  "version": "0.9.17",
+  "version": "0.9.19",
   "support": {
     "email": "developers@xpressengine.com",
     "issues": "http://xpressengine.com/issues",
@@ -19,7 +19,7 @@
       "role": "Developer"
     }
   ],
-  "license": "LGPL-2.1",
+  "license": "LGPL-2.1-or-later",
   "type": "xpressengine-plugin",
   "extra": {
     "xpressengine": {
