@@ -143,4 +143,20 @@ class SettingController extends Controller
 
         return redirect()->back();
     }
+
+    /**
+     * config 설정 페이지로 redirection
+     */
+    public function redirectToConfig($targetInstanceId)
+    {
+        return redirect()->route('comment::setting.config', $targetInstanceId);
+    }
+
+    /**
+     * global 페이지로 redirection
+     */
+    public function redirectToGlobal()
+    {
+        return redirect()->route('comment::setting.global.config');
+    }
 }

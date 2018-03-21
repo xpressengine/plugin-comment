@@ -13,13 +13,9 @@ Route::settings('comment', function () {
 
     Route::group(['prefix' => 'setting/{targetInstanceId}'], function () {
         /* @deprecated since 0.9.15 */
-        Route::get('/', ['as' => 'manage.comment.setting', 'uses' => function ($targetInstanceId) {
-            return redirect()->route('comment::setting.config', $targetInstanceId);
-        }]);
+        Route::get('/', ['as' => 'manage.comment.setting', 'uses' => 'SettingController@redirectToConfig']);
+        Route::get('/', ['as' => 'comment::setting', 'uses' => 'SettingController@redirectToConfig']);
 
-        Route::get('/', ['as' => 'comment::setting', 'uses' => function ($targetInstanceId) {
-            return redirect()->route('comment::setting.config', $targetInstanceId);
-        }]);
         Route::group(['as' => 'comment::setting.'], function () {
             Route::get('config', ['as' => 'config', 'uses' => 'SettingController@getConfig']);
             Route::post('config', ['as' => 'config', 'uses' => 'SettingController@postConfig']);
@@ -34,9 +30,7 @@ Route::settings('comment', function () {
         });
     });
 
-    Route::get('global', ['as' => 'comment::setting.global', function () {
-        return redirect()->route('comment::setting.global.config');
-    }]);
+    Route::get('global', ['as' => 'comment::setting.global', 'uses' => 'SettingController@redirectToGlobal']);
     Route::group(['prefix' => 'global', 'as' => 'comment::setting.global.'], function () {
         Route::get('config', ['as' => 'config', 'uses' => 'SettingController@getGlobalConfig']);
         Route::post('config', ['as' => 'config', 'uses' => 'SettingController@postGlobalConfig']);
