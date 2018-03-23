@@ -92,4 +92,40 @@ class Comment extends Document
 
         return null;
     }
+
+    /**
+     * get display status name
+     *
+     * @param int $displayCode
+     *
+     * @return string
+     */
+    public function getDisplayStatusName($displayCode)
+    {
+        $displayName = [
+            self::DISPLAY_HIDDEN => 'comment::displayStatusHidden',
+            self::DISPLAY_SECRET => 'comment::displayStatusSecret',
+            self::DISPLAY_VISIBLE => 'comment::displayStatusVisible'
+        ];
+
+        return $displayName[$displayCode];
+    }
+
+    /**
+     * get approve status name
+     *
+     * @param int $approveCode
+     *
+     * @return string
+     */
+    public function getApproveStatusName($approveCode)
+    {
+        $approveName = [
+            self::APPROVED_REJECTED => 'comment::approveStatusRejected',
+            self::APPROVED_WAITING => 'comment::approveStatusWaiting',
+            self::APPROVED_APPROVED => 'comment::approveStatusApproved'
+        ];
+
+        return $approveName[$approveCode];
+    }
 }

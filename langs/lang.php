@@ -316,5 +316,29 @@ return [
     'unknownTargetObject' => [
         'ko' => '대상을 알 수 없습니다.',
         'en' => 'Unknown target object.',
+    ],
+    'approveStatusRejected' => [
+        'ko' => '거절',
+        'en' => 'rejected'
+    ],
+    'approveStatusWaiting' => [
+        'ko' => '대기',
+        'en' => 'waiting'
+    ],
+    'approveStatusApproved' => [
+        'ko' => '승인',
+        'en' => 'approved'
+    ],
+    'displayStatusHidden' => [
+        'ko' => '숨김',
+        'en' => 'hidden'
+    ],
+    'displayStatusSecret' => [
+        'ko' => '비밀',
+        'en' => 'secret'
+    ],
+    'displayStatusVisible' => [
+        'ko' => '표시',
+        'en' => 'visible'
     ]
 ];

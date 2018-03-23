@@ -72,8 +72,8 @@ use Xpressengine\Plugins\Comment\Models\Comment;
                                 <td>{{ $comment->assent_count }} / {{ $comment->dissent_count }}</td>
                                 <td><a href="#">{{ str_replace('-', '.', substr($comment->created_at, 0, 16)) }}</a></td>
                                 <td><a href="#">{{ $comment->ipaddress }}</a></td>
-                                <td><span class="label label-green">{{ $comment->display }}</span></td>
-                                <td><span class="label label-grey">{{ $comment->approved }}</span></td>
+                                <td><span class="label label-green">{{ xe_trans($comment->getDisplayStatusName($comment->display)) }}</span></td>
+                                <td><span class="label label-grey">{{ xe_trans($comment->getApproveStatusName($comment->approved)) }}</span></td>
                             </tr>
                             @endforeach
                             </tbody>
