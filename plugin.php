@@ -192,19 +192,19 @@ class Plugin extends AbstractPlugin
             'contents.comment' => [
                 'title' => 'comment::comment',
                 'display' => true,
-                'description' => 'blur blur~',
+                'description' => '',
                 'ordering' => 3000
             ],
             'contents.comment.content' => [
                 'title' => 'comment::commentMange',
                 'display' => true,
-                'description' => 'blur blur~',
+                'description' => '',
                 'ordering' => 3010
             ],
             'contents.comment.trash' => [
                 'title' => 'comment::trash',
                 'display' => true,
-                'description' => 'blur blur~',
+                'description' => '',
                 'ordering' => 3020
             ],
         ];
