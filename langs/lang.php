@@ -318,7 +318,7 @@ return [
         'en' => 'Unknown target object.',
     ],
     'approveStatusRejected' => [
-        'ko' => '거절',
+        'ko' => '반려',
         'en' => 'rejected'
     ],
     'approveStatusWaiting' => [
