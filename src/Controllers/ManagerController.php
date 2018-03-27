@@ -58,6 +58,8 @@ class ManagerController extends Controller
             ->whereIn('instance_id', $this->getInstances())
             ->where('status', '!=', Comment::STATUS_TRASH);
 
+        $totalCount = count($query->get());
+
         $statusMessage = xe_trans('comment::status');
 
         if ($options = $request->get('options')) {
@@ -136,6 +138,7 @@ class ManagerController extends Controller
             },
             'searchTargetWord' => $searchTargetWord,
             'statusMessage' => $statusMessage,
+            'totalCount' => $totalCount,
         ]);
     }
 

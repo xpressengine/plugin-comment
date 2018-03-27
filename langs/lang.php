@@ -349,4 +349,12 @@ return [
         'ko' => '상태',
         'en' => 'Status'
     ],
+    'totalCommentCount' => [
+        'ko' => '전체 댓글 수',
+        'en' => 'Number of total comments'
+    ],
+    'searchCommentCount' => [
+        'ko' => '검색된 댓글 수',
+        'en' => 'Number of searched comments'
+    ],
 ];

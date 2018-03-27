@@ -7,7 +7,8 @@ use Xpressengine\Plugins\Comment\Models\Comment;
             <div class="panel">
                 <div class="panel-heading">
                     <div class="pull-left">
-                        <h3 class="panel-title">{{ xe_trans('xe::comment') }} {{ xe_trans('xe::management') }}</h3>
+                        <h3 class="panel-title">{{ xe_trans('xe::comment') }} {{ xe_trans('xe::management') }} </h3>
+                            ( {{xe_trans('comment::searchCommentCount') }} : {{$comments->total()}} / {{xe_trans('comment::totalCommentCount')}}  : {{$totalCount}} )
                     </div>
                 </div>
                 <div class="panel-heading">
