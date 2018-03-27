@@ -16,15 +16,15 @@ use Xpressengine\Plugins\Comment\Models\Comment;
                             <div id="__xe_btn_options" class="btn-group btn-fillter" role="group">
                                 <input type="hidden" name="options" value="{{ Request::old('options') }}">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <span class="caret"></span>
+                                    <span class="__xe_text"> {{ $statusMessage }} </span> <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu" role="menu">
-                                    <li><strong>필터</strong></li>
                                     <li class="active"><a href="#" value="">{{ xe_trans('comment::manage.all') }}</a></li>
                                     <li><a href="#" value="display|{{ Comment::DISPLAY_VISIBLE }}">{{ xe_trans('comment::manage.public') }}</a></li>
                                     <li><a href="#" value="display|{{ Comment::DISPLAY_SECRET }}">{{ xe_trans('comment::manage.secret') }}</a></li>
                                     <li><a href="#" value="approved|{{ Comment::APPROVED_APPROVED }}">{{ xe_trans('comment::manage.approved.approved') }}</a></li>
                                     <li><a href="#" value="approved|{{ Comment::APPROVED_WAITING }}">{{ xe_trans('comment::manage.approved.waiting') }}</a></li>
+                                    <li><a href="#" value="approved|{{ Comment::APPROVED_REJECTED }}">{{ xe_trans('comment::manage.approved.reject') }}</a></li>
                                 </ul>
                             </div>
                         </form>

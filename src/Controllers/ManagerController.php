@@ -58,10 +58,46 @@ class ManagerController extends Controller
             ->whereIn('instance_id', $this->getInstances())
             ->where('status', '!=', Comment::STATUS_TRASH);
 
+        $statusMessage = xe_trans('comment::status');
+
         if ($options = $request->get('options')) {
             list($searchField, $searchValue) = explode('|', $options);
 
             $query->where($searchField, $searchValue);
+
+            $messageType = '';
+
+            if ($searchField == 'display') {
+                switch ($searchValue) {
+                    case Comment::DISPLAY_VISIBLE:
+                        $messageType = 'public';
+                        break;
+
+                    case Comment::DISPLAY_SECRET:
+                        $messageType = 'secret';
+                        break;
+                }
+            } elseif ($searchField == 'approved') {
+                $messageType = 'approved.';
+
+                switch ($searchValue) {
+                    case Comment::APPROVED_APPROVED:
+                        $messageType .= 'approved';
+                        break;
+
+                    case Comment::APPROVED_WAITING:
+                        $messageType .= 'waiting';
+                        break;
+
+                    case Comment::APPROVED_REJECTED:
+                        $messageType .= 'reject';
+                        break;
+                }
+            }
+
+            if ($messageType) {
+                $statusMessage = xe_trans('comment::manage.' . $messageType);
+            }
         }
 
         $comments = $query->orderBy(Comment::CREATED_AT)->with('target')->paginate();
@@ -92,6 +128,7 @@ class ManagerController extends Controller
 
                 return null;
             },
+            'statusMessage' => $statusMessage,
         ]);
     }
 
