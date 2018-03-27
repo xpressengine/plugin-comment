@@ -13,7 +13,7 @@ use Xpressengine\User\Rating;
             <div class="comment_entity_body_meta">
                 <!-- [D] 클릭시 클래스 on 적용 -->
                 <span class="mb_author xe-dropdown">
-                    <a href="{{ sprintf('/@%s', $item->user_id) }}" class="author {{ $item->getAuthor()->getRating() !== Rating::GUEST ? '__xe_member' : '' }}"
+                    <a href="{{ sprintf('/@%s', $item->user_id) }}" class="author {{ $item->getAuthor()->getRating() !== Rating::GUEST ? '__xe_user' : '' }}"
                        data-toggle="xe-page-toggle-menu"
                        data-url="{{ route('toggleMenuPage') }}"
                        data-data='{!! json_encode(['id'=>$item->user_id, 'type'=>'user']) !!}'>{{ $item->writer }}</a>
