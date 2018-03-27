@@ -357,4 +357,8 @@ return [
         'ko' => '검색된 댓글 수',
         'en' => 'Number of searched comments'
     ],
+    'deletedBoardName' => [
+        'ko' => '삭제된 게시물',
+        'en' => 'Deleted Board'
+    ],
 ];
