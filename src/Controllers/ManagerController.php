@@ -100,6 +100,12 @@ class ManagerController extends Controller
             }
         }
 
+        $searchTargetWord = $request->get('search_target');
+
+        if ($request->has('search_target')) {
+            $query = $this->makeWhere($query, $request);
+        }
+
         $comments = $query->orderBy(Comment::CREATED_AT)->with('target')->paginate();
 
         $map = $this->handler->getInstanceMap();
@@ -128,6 +134,7 @@ class ManagerController extends Controller
 
                 return null;
             },
+            'searchTargetWord' => $searchTargetWord,
             'statusMessage' => $statusMessage,
         ]);
     }
@@ -237,5 +244,20 @@ class ManagerController extends Controller
         }
 
         return redirect()->back();
+    }
+
+    protected function makeWhere($query, $request)
+    {
+        if ($request->get('search_target') == 'content') {
+            $query = $query->where('pure_content', 'like', sprintf('%%%s%%', implode('%', explode(' ', $request->get('search_keyword')))));
+        }
+        if ($request->get('search_target') == 'author') {
+            $query = $query->where('writer', 'like', sprintf('%%%s%%', $request->get('search_keyword')));
+        }
+        if ($request->get('search_target') == 'ip') {
+            $query = $query->where('ipaddress', 'like', sprintf('%%%s%%', implode('%', explode(' ', $request->get('search_keyword')))));
+        }
+
+        return $query;
     }
 }

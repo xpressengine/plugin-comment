@@ -340,5 +340,13 @@ return [
     'displayStatusVisible' => [
         'ko' => '표시',
         'en' => 'visible'
-    ]
+    ],
+    'select' => [
+        'ko' => '선택',
+        'en' => 'Select'
+    ],
+    'status' => [
+        'ko' => '상태',
+        'en' => 'Status'
+    ],
 ];
