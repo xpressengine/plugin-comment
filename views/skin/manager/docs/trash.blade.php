@@ -37,7 +37,13 @@
                                 <tr>
                                     <td><input type="checkbox" name="id[]" class="__xe_checkbox" value="{{ $comment->id }}"></td>
                                     <td>
-                                        <strong>[{{ xe_trans($menuItem($comment)->title) }}]</strong>
+                                        <strong>[{{ xe_trans($menuItem($comment)->title) }} -
+                                            @if ($comment->getTarget()->title != null)
+                                                {{ $comment->getTarget()->title }}]
+                                            @else
+                                                {{ xe_trans('comment::deletedBoardName') }}]
+                                            @endif
+                                        </strong>
                                         {{ str_limit($comment->pure_content, 100) }}
                                     </td>
                                     <td><a href="#">{{ $comment->writer }}</a></td>
