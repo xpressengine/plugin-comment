@@ -19,6 +19,11 @@ use Xpressengine\User\Rating;
                        data-data='{!! json_encode(['id'=>$item->user_id, 'type'=>'user']) !!}'>{{ $item->writer }}</a>
                </span>
                 <span class="date" data-xe-timeago="{{ $item->created_at }}" title="{{ $item->created_at }}">{{ $item->created_at }}</span>
+
+                @if($item->display == Comment::DISPLAY_SECRET)
+                    <span class="bd_ico_lock"><i class="xi-lock"></i><span class="xe-sr-only">secret</span></span>
+                @endif
+
                 <div class="ly_popup">
                     <ul>
                         <li><a href="#">신고</a></li>
