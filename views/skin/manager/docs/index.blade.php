@@ -15,8 +15,8 @@ use Xpressengine\Plugins\Comment\Models\Comment;
                     <div class="pull-left">
                         <div class="btn-group __xe_tools" role="group" aria-label="...">
                             <button type="button" class="btn btn-default" data-mode="trash">{{ xe_trans('comment::trash') }}</button>
-                            <button type="button" class="btn btn-default" data-mode="reject">{{ xe_trans('comment::manage.approved.reject') }}</button>
                             <button type="button" class="btn btn-default" data-mode="approve">{{ xe_trans('comment::manage.approved.approve') }}</button>
+                            <button type="button" class="btn btn-default" data-mode="reject">{{ xe_trans('comment::manage.approved.reject') }}</button>
                         </div>
                     </div>
                     <div class="pull-right">
