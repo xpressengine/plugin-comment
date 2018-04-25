@@ -168,14 +168,14 @@
     </div>
 </div>
 
-<script type="text/javascript">
-    $(function () {
-        $('.__xe_inherit', '#fCommentSetting').click(function (e) {
-            var $group = $(this).closest('.form-group');
-            $('input,select,textarea', $group).not(this).prop('disabled', $(this).is(':checked'));
-        }).each(function () {
-            $(this).triggerHandler('click');
-        });
-
+<script>
+window.jQuery(function ($) {
+    $('.__xe_inherit', '#fCommentSetting').click(function (e) {
+        var $group = $(this).closest('.form-group');
+        $('input,select,textarea', $group).not(this).prop('disabled', $(this).is(':checked'));
+    }).each(function () {
+        $(this).triggerHandler('click');
     });
+
+});
 </script>

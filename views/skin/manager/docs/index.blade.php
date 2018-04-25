@@ -119,79 +119,79 @@ use Xpressengine\Plugins\Comment\Models\Comment;
     </div>
 </div>
 
-
-<script type="text/javascript">
-    $(function () {
-        $('#__xe_check-all').change(function () {
-            if ($(this).is(':checked')) {
-                $('input.__xe_checkbox').prop('checked', true);
-            } else {
-                $('input.__xe_checkbox').prop('checked', false);
-            }
-        });
-
-        $('.__xe_tools button').click(function () {
-            var mode = $(this).attr('data-mode'), flag = false;
-
-            $('input.__xe_checkbox').each(function () {
-                if ($(this).is(':checked')) {
-                    flag = true;
-                }
-            });
-
-            if (flag !== true) {
-                return;
-            }
-
-            var $f = $('#__xe_form_list');
-            eval('actions.' + mode + '($f)');
-        });
-
-
-        $('#__xe_btn_options li > a').click(function (e, flag) {
-            e.preventDefault();
-
-            $('#__xe_btn_options input').val($(this).attr('value'));
-
-            $('#__xe_btn_options li').removeClass('active');
-            $(this).closest('li').addClass('active');
-
-            if (flag !== true) {
-                $(this).closest('form').submit();
-            }
-        }).each(function () {
-            if ($(this).attr('value') == $('#__xe_btn_options input').val()) {
-                $(this).triggerHandler('click', [true]);
-            }
-        });
-
-        $('.__xe_btn_search_target .dropdown-menu a').click(function (e) {
-            e.preventDefault();
-
-            $('[name="search_target"]').val($(this).attr('value'));
-            $('.__xe_btn_search_target .__xe_text').text($(this).text());
-
-            $(this).closest('.dropdown-menu').find('li').removeClass('active');
-            $(this).closest('li').addClass('active');
-        });
-
-        var actions = {
-            approve: function ($f) {
-                $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Comment::APPROVED_APPROVED }}).appendTo($f);
-
-                $f.attr('action', '{{ route('comment::manage.approve') }}');
-                $f.submit();
-            },
-            reject: function ($f) {
-                $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Comment::APPROVED_REJECTED }}).appendTo($f);
-
-                $f.attr('action', '{{ route('comment::manage.approve') }}');
-                $f.submit();
-            },
-            trash: function ($f) {
-                $f.attr('action', '{{ route('comment::manage.totrash') }}');
-                $f.submit();
-            }
-        };
+<script>
+// @FIXME 파일 분리
+window.jQuery(function ($) {
+    $('#__xe_check-all').change(function () {
+        if ($(this).is(':checked')) {
+            $('input.__xe_checkbox').prop('checked', true);
+        } else {
+            $('input.__xe_checkbox').prop('checked', false);
+        }
     });
+
+    $('.__xe_tools button').click(function () {
+        var mode = $(this).attr('data-mode'), flag = false;
+
+        $('input.__xe_checkbox').each(function () {
+            if ($(this).is(':checked')) {
+                flag = true;
+            }
+        });
+
+        if (flag !== true) {
+            return;
+        }
+
+        var $f = $('#__xe_form_list');
+        eval('actions.' + mode + '($f)');
+    });
+
+
+    $('#__xe_btn_options li > a').click(function (e, flag) {
+        e.preventDefault();
+
+        $('#__xe_btn_options input').val($(this).attr('value'));
+
+        $('#__xe_btn_options li').removeClass('active');
+        $(this).closest('li').addClass('active');
+
+        if (flag !== true) {
+            $(this).closest('form').submit();
+        }
+    }).each(function () {
+        if ($(this).attr('value') == $('#__xe_btn_options input').val()) {
+            $(this).triggerHandler('click', [true]);
+        }
+    });
+
+    $('.__xe_btn_search_target .dropdown-menu a').click(function (e) {
+        e.preventDefault();
+
+        $('[name="search_target"]').val($(this).attr('value'));
+        $('.__xe_btn_search_target .__xe_text').text($(this).text());
+
+        $(this).closest('.dropdown-menu').find('li').removeClass('active');
+        $(this).closest('li').addClass('active');
+    });
+
+    var actions = {
+        approve: function ($f) {
+            $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Comment::APPROVED_APPROVED }}).appendTo($f);
+
+            $f.attr('action', '{{ route('comment::manage.approve') }}');
+            $f.submit();
+        },
+        reject: function ($f) {
+            $('<input>').attr('type', 'hidden').attr('name', 'approved').val({{ Comment::APPROVED_REJECTED }}).appendTo($f);
+
+            $f.attr('action', '{{ route('comment::manage.approve') }}');
+            $f.submit();
+        },
+        trash: function ($f) {
+            $f.attr('action', '{{ route('comment::manage.totrash') }}');
+            $f.submit();
+        }
+    };
+});
 </script>

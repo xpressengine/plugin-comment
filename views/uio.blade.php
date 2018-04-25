@@ -20,8 +20,8 @@
     {!! $inner !!}
 </div>
 
-<script type="text/javascript">
-    jQuery(function ($) {
-        comment.init($('#comment-area-{{ $target->getUid() }}')[0]);
-    });
+<script>
+jQuery(function ($) {
+    window.comment.init($('#comment-area-{{ $target->getUid() }}')[0]);
+});
 </script>

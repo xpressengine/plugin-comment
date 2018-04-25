@@ -70,42 +70,44 @@
     </div>
 </div>
 
-<script type="text/javascript">
-    window.onload = function () {
-        $('#__xe_check-all').change(function () {
+<script>
+// @FIXME 파일 분리
+window.onload = function () {
+    var $ = window.jQuery;
+    $('#__xe_check-all').change(function () {
+        if ($(this).is(':checked')) {
+            $('input.__xe_checkbox').prop('checked', true);
+        } else {
+            $('input.__xe_checkbox').prop('checked', false);
+        }
+    });
+
+    $('.__xe_tools button').click(function () {
+        var mode = $(this).attr('data-mode'), flag = false;
+
+        $('input.__xe_checkbox').each(function () {
             if ($(this).is(':checked')) {
-                $('input.__xe_checkbox').prop('checked', true);
-            } else {
-                $('input.__xe_checkbox').prop('checked', false);
+                flag = true;
             }
         });
 
-        $('.__xe_tools button').click(function () {
-            var mode = $(this).attr('data-mode'), flag = false;
+        if (flag !== true) {
+            return;
+        }
 
-            $('input.__xe_checkbox').each(function () {
-                if ($(this).is(':checked')) {
-                    flag = true;
-                }
-            });
+        var $f = $('#__xe_form_list');
+        eval('actions.' + mode + '($f)');
+    });
 
-            if (flag !== true) {
-                return;
-            }
-
-            var $f = $('#__xe_form_list');
-            eval('actions.' + mode + '($f)');
-        });
-
-        var actions = {
-            restore: function ($f) {
-                $f.attr('action', '{{ route('comment::manage.restore') }}');
-                $f.submit();
-            },
-            destroy: function ($f) {
-                $f.attr('action', '{{ route('comment::manage.destroy') }}');
-                $f.submit();
-            }
-        };
+    var actions = {
+        restore: function ($f) {
+            $f.attr('action', '{{ route('comment::manage.restore') }}');
+            $f.submit();
+        },
+        destroy: function ($f) {
+            $f.attr('action', '{{ route('comment::manage.destroy') }}');
+            $f.submit();
+        }
     };
+};
 </script>
