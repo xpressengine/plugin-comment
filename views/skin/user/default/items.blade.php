@@ -43,7 +43,8 @@ use Xpressengine\User\Rating;
                     <a href="#" class="comment_more_view" data-toggle="xe-page-toggle-menu" data-url="{{route('toggleMenuPage')}}" data-data='{!! json_encode(['id'=>$item->id,'type'=>'comment', 'instanceId'=>$item->instance_id]) !!}' data-side="dropdown-menu-right"><i class="xi-ellipsis-h"></i><span class="xe-sr-only">{{ xe_trans('xe::more') }}</span></a>
                 </div>
             </div>
-            <div class="xe_content __xe_comment_edit_toggle">
+            {{-- @DEPRECATED .xe_content --}}
+            <div class="xe-content xe_content __xe_comment_edit_toggle">
                 @can('read', $item)
                 {!! compile($item->instance_id, $item->getContent(), $item->format === Comment::FORMAT_HTML) !!}
                 @else
