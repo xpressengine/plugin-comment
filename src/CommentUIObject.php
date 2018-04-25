@@ -58,6 +58,26 @@ class CommentUIObject extends AbstractUIObject
 
         $config = $handler->getConfig($instanceId);
 
+        // 콘텐츠 폰트 설정 적용
+        $editorConfig = XeEditor::getConfig($instanceId);
+        $fontSize = $editorConfig->get('fontSize');
+        $fontFamily = $editorConfig->get('fontFamily');
+
+        $contentStyle = [];
+        if ($fontSize) {
+            $contentStyle[] = 'font-size: ' . $fontSize . ';';
+        }
+        if ($fontFamily) {
+            $contentStyle[] = 'font-family: ' . $fontFamily . ';';
+        }
+        if ($contentStyle) {
+            app('xe.frontend')->html('xe.content.style.' . $instanceId)->content('
+                <style>
+                    .xe-content-' . $instanceId . ' {' . implode($contentStyle) . '}
+                </style>
+            ')->appendTo('head')->load();
+        }
+
         $this->loadDependencies();
         $this->initAssets();
 

@@ -44,7 +44,7 @@ use Xpressengine\User\Rating;
                 </div>
             </div>
             {{-- @DEPRECATED .xe_content --}}
-            <div class="xe-content xe_content __xe_comment_edit_toggle">
+            <div class="xe_content xe-content xe-content-{{ $item->instance_id }} __xe_comment_edit_toggle">
                 @can('read', $item)
                 {!! compile($item->instance_id, $item->getContent(), $item->format === Comment::FORMAT_HTML) !!}
                 @else
