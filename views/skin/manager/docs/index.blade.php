@@ -80,10 +80,10 @@ use Xpressengine\Plugins\Comment\Models\Comment;
                                 <td><input type="checkbox" name="id[]" class="__xe_checkbox" value="{{ $comment->id }}"></td>
                                 <td>
                                     <strong>[{{ xe_trans($menuItem($comment)->title) }} -
-                                        @if ($comment->getTarget()->title != null)
+                                        @if ($comment->getTarget() && $comment->getTarget()->title != null)
                                             {{ $comment->getTarget()->title }}]
                                         @else
-                                            {{ xe_trans('comment::deletedBoardName') }}]
+                                            {{ xe_trans('comment::deletedPost') }}]
                                         @endif
                                     </strong>
 

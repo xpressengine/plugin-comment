@@ -128,7 +128,7 @@ class ManagerController extends Controller
             'urlMake' => function ($comment, $menuItem) use ($menus) {
                 if (isset($menuItem->type) == true) {
                     if ($module = $menus->getModuleHandler()->getModuleObject($menuItem->type)) {
-                        if ($item = $module->getTypeItem($comment->target->target_id)) {
+                        if ($comment->getTarget() && $item = $module->getTypeItem($comment->getTarget()->target_id)) {
                             return app('url')->to($item->getLink($menuItem->route) . '#comment-'.$comment->id);
                         }
                     }
