@@ -89,15 +89,15 @@ use Xpressengine\Plugins\Comment\Models\Comment;
 
                                     {{ str_limit($comment->pure_content, 100) }}
                                     @if($url = $urlMake($comment, $menuItem($comment)))
-                                    <a href="{{ $url }}" target="_blank">
-                                        <i class="xi-external-link"></i>
-                                    </a>
+                                        <a href="{{ $url }}" target="_blank">
+                                            <i class="xi-external-link"></i>
+                                        </a>
                                     @endif
                                 </td>
-                                <td><a href="#">{{ $comment->writer }}</a></td>
+                                <td>{{ $comment->writer }}</td>
                                 <td>{{ $comment->assent_count }} / {{ $comment->dissent_count }}</td>
-                                <td><a href="#">{{ str_replace('-', '.', substr($comment->created_at, 0, 16)) }}</a></td>
-                                <td><a href="#">{{ $comment->ipaddress }}</a></td>
+                                <td>{{ str_replace('-', '.', substr($comment->created_at, 0, 16)) }}</td>
+                                <td>{{ $comment->ipaddress }}</td>
                                 <td><span class="label label-green">{{ xe_trans($comment->getDisplayStatusName($comment->display)) }}</span></td>
                                 <td><span class="label label-grey">{{ xe_trans($comment->getApproveStatusName($comment->approved)) }}</span></td>
                             </tr>
