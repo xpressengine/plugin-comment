@@ -26,8 +26,6 @@ class Target extends DynamicModel
 {
     protected $table = 'comment_target';
 
-    protected $connection = 'document';
-
     /**
      * The attributes that are mass assignable.
      *
