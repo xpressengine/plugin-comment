@@ -28,7 +28,7 @@ class Migration
      */
     public function up()
     {
-        $this->schema()->create($this->table, function (Blueprint $table) {
+        Schema::create($this->table, function (Blueprint $table) {
             $table->engine = "InnoDB";
 
             $table->increments('id');
@@ -47,19 +47,11 @@ class Migration
      */
     public function down()
     {
-        $this->schema()->dropIfExists($this->table);
-    }
-
-    /**
-     * @return \Illuminate\Database\Schema\Builder
-     */
-    private function schema()
-    {
-        return Schema::setConnection(XeDB::connection('document')->master());
+        Schema::dropIfExists($this->table);
     }
 
     public function tableExists()
     {
-        return $this->schema()->hasTable($this->table);
+        return Schema::hasTable($this->table);
     }
 }
