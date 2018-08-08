@@ -134,10 +134,10 @@
       var jsList = assets.js || {}
 
       $.each(cssList, function (i, css) {
-        DynamicLoadManager.cssLoad(css)
+        window.XE.DynamicLoadManager.cssLoad(css)
       })
       $.each(jsList, function (i, js) {
-        DynamicLoadManager.jsLoad(js)
+        window.XE.DynamicLoadManager.jsLoad(js)
       })
     },
     makeItems: function (doms) {
