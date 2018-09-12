@@ -676,6 +676,8 @@
 
   Form.prototype = {
     render: function (container, noReplace) {
+      var that = this
+
       if (noReplace === true) {
         $(container).append(this.dom)
       } else {
@@ -684,29 +686,37 @@
 
       this.container = container
 
-      if (this.editorData !== null) {
-        this.initEditor()
-      }
+      window.XE.app('Editor').then(function initEditor (appEditor) {
+        if (that.editorData !== null) {
+          that.initEditor()
+        }
 
-      this._eventBind()
+        that._eventBind()
+      })
     },
     initEditor: function () {
       if (typeof (XEeditor) === 'undefined') {
         return
       }
 
+      var that = this
       var id = 'comment_textarea_' + (new Date().getTime())
       $('textarea', this.dom).attr('id', id).css('width', '100%')
-      var editor = window.XEeditor.getEditor(this.editorData.name).create(id, this.editorData.options, this.editorData.customOptions, this.editorData.tools)
 
-      editor.on('focus', function () {
-        $(id).triggerHandler('focus')
-      })
-      editor.on('change', function () {
-        $(id).triggerHandler('input')
-      })
+      window.XE.app('Editor').then(function renderEditor (appEditor) {
+        appEditor.getEditor(that.editorData.name).then(function createEditor (editor) {
+          editor.create(id, that.editorData.options, that.editorData.customOptions, that.editorData.tools)
 
-      this.editor = editor
+          editor.on('focus', function () {
+            $(id).triggerHandler('focus')
+          }.bind(that))
+          editor.on('change', function () {
+            $(id).triggerHandler('input')
+          }.bind(that))
+
+          that.editor = editor
+        })
+      })
     },
     editorSync: function () {
       if (this.editor) {
