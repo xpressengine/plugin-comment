@@ -705,16 +705,14 @@
 
       window.XE.app('Editor').then(function renderEditor (appEditor) {
         appEditor.getEditor(that.editorData.name).then(function createEditor (editor) {
-          editor.create(id, that.editorData.options, that.editorData.customOptions, that.editorData.tools)
+          that.editor = editor.create(id, that.editorData.options, that.editorData.customOptions, that.editorData.tools)
 
-          editor.on('focus', function () {
+          that.editor.on('focus', function focusCallback () {
             $(id).triggerHandler('focus')
-          }.bind(that))
-          editor.on('change', function () {
+          })
+          that.editor.on('change', function changeCallback () {
             $(id).triggerHandler('input')
-          }.bind(that))
-
-          that.editor = editor
+          })
         })
       })
     },
