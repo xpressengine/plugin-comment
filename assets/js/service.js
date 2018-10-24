@@ -215,7 +215,7 @@
           item.unsetChanged()
         }
 
-        window.XE.$$emit('content.render', $(dom).find('xe-content')[0])
+        window.XE.$$emit('content.render', { element: $(dom).find('xe-content')[0] })
 
         prev = item
       }.bind(this))
