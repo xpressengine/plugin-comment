@@ -397,7 +397,7 @@ class UserController extends Controller
 
         $users = new LengthAwarePaginator($users, count($users), 10);
 
-        return api_render('voted', [
+        return api_render(Plugin::getId() . '::views.skin.user.default.voted', [
             'users' => $users,
             'data' => [
                 'instanceId' => $instanceId,
@@ -406,7 +406,7 @@ class UserController extends Controller
             ]
         ]);
     }
-    
+
     public function votedModal(Request $request)
     {
         $instanceId = $request->get('instance_id');
@@ -417,7 +417,8 @@ class UserController extends Controller
         $comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first();
         $count = $this->handler->voteUserCount($comment, $option);
 
-        return api_render('votedModal', [
+
+        return api_render(Plugin::getId() . '::views.skin.user.default.votedModal', [
             'count' => $count,
             'data' => [
                 'instanceId' => $instanceId,
@@ -426,7 +427,7 @@ class UserController extends Controller
             ]
         ]);
     }
-    
+
     public function votedList(Request $request)
     {
         $instanceId = $request->get('instance_id');
