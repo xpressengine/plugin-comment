@@ -1,8 +1,11 @@
+/* global Slick */
+/* ES5 */
 (function ($) {
   'use strict'
-
   var comment = {}
   var listeners = {}
+
+  window.XE.Utils.eventify(comment)
 
   comment.init = function (container) {
     var obj = new Comment(container)
@@ -10,6 +13,7 @@
     obj.run()
   }
 
+  /* @deprecated */
   comment.listen = function (eventName, callback) {
     if (typeof eventName === 'object') {
       for (var i in eventName) {
@@ -20,9 +24,10 @@
     }
   }
 
-  // for develop
+  /* @deprecated */
   comment.listeners = listeners
 
+  /* @deprecated */
   function addListener (eventName, callback) {
     if (typeof callback !== 'function') {
       return
@@ -32,6 +37,7 @@
     listeners[eventName].push(callback)
   }
 
+  /* @deprecated */
   function fire (eventName, instance, args) {
     var list = listeners[eventName] || []
     for (var i = 0; i < list.length; i++) {
@@ -53,38 +59,44 @@
     loading: false,
     items: [],
     run: function () {
+      var that = this
       this.getListMore()
 
-      this.getForm('create', null, function (json) {
-        if (!json.html) {
+      this.getForm('create', null).then(function (data) {
+        if (!data.html) {
           return false
         }
 
-        var self = this
-        var dom = $.parseHTML(json.html)
-        var form = new Form(dom, 'create', function (json) {
-          this._assetLoad(json.XE_ASSET_LOAD)
+        var dom = $.parseHTML(data.html)
+        var form = new CommentForm(dom, 'create', function (data) {
+          that._assetLoad(data.XE_ASSET_LOAD)
 
-          var items = this.makeItems($.parseHTML(json.items, document, true)),
-            item = items[0]
-          this.lastIn(item)
-          this.renderItems()
+          var items = that.makeItems($.parseHTML(data.items, document, true))
+          var item = items[0]
+          that.lastIn(item)
+          that.renderItems()
 
-          this.setTotalCnt(this.getTotalCnt() + 1)
+          that.setTotalCnt(that.getTotalCnt() + 1)
 
-          fire('created', self, [item])
-        }.bind(this), self.props.config.editor)
+          fire('created', that, [item])
+          comment.$$emit('item.add', { item: item })
+        }, that.props.config.editor)
 
-        form.render(this.getFormBox())
-      }.bind(this))
+        form.render(that.getFormBox())
+      })
 
       this.eventBind()
     },
+    /**
+     * 댓글 추가 로드
+     */
     getListMore: function () {
       if (this.loading === true) {
         return false
       }
+
       this.loading = true
+      var that = this
       var data = {
         target_id: $(this.container).data('target_id'),
         instance_id: $(this.container).data('instance_id')
@@ -95,39 +107,33 @@
         $.extend(data, {offsetHead: item.getHead(), offsetReply: item.getReply()})
       }
 
-      window.XE.ajax({
-        url: $(this.container).data('urls').index,
-        type: 'get',
-        dataType: 'json',
-        data: data,
-        success: function (json) {
-          this._assetLoad(json.XE_ASSET_LOAD)
+      window.XE.get($(this.container).data('urls').index, data).then(function (response) {
+        that._assetLoad(response.data.XE_ASSET_LOAD)
 
-          var items = this.makeItems($.parseHTML(json.items, document, true))
+        var items = that.makeItems($.parseHTML(response.data.items, document, true))
 
-          for (var i in items) {
-            if (this.props.config.reverse === true) {
-              this.append(items[i])
-            } else {
-              this.prepend(items[i])
-            }
-          }
-          this.renderItems()
-
-          this.setTotalCnt(json.totalCount)
-
-          if (json.hasMore === true) {
-            $('.__xe_comment_btn_more', this.container).show()
-            $('.__xe_comment_remain_cnt', this.container).text(json.totalCount - this.items.length)
+        for (var i in items) {
+          if (that.props.config.reverse === true) {
+            that.append(items[i])
           } else {
-            $('.__xe_comment_btn_more', this.container).hide()
+            that.prepend(items[i])
           }
+        }
+        that.renderItems()
 
-          fire('loaded', this, [items])
-        }.bind(this)
-      }).always(function () {
-        this.loading = false
-      }.bind(this))
+        that.setTotalCnt(response.data.totalCount)
+
+        if (response.data.hasMore === true) {
+          $('.__xe_comment_btn_more', that.container).show()
+          $('.__xe_comment_remain_cnt', that.container).text(response.data.totalCount - that.items.length)
+        } else {
+          $('.__xe_comment_btn_more', that.container).hide()
+        }
+
+        that.loading = false
+        fire('loaded', that, [items])
+        comment.$$emit('loaded', { items: items })
+      })
     },
     _assetLoad: function (assets) {
       var cssList = assets.css || {}
@@ -144,7 +150,7 @@
       var items = []
       for (var i in doms) {
         if ($(doms[i]).is('.__xe_comment_list_item')) {
-          items.push(new Item(doms[i]))
+          items.push(new CommentItem(doms[i]))
         }
       }
 
@@ -172,7 +178,6 @@
       }
 
       var items = this.items
-      var len = items.length
       var parentIndent = -1
 
       for (var i in items) {
@@ -196,8 +201,6 @@
       }
     },
     renderItems: function () {
-      // this.getListBox().empty();
-
       var prev = null
       $.each(this.items, function (i, item) {
         var dom = item.getDom()
@@ -276,6 +279,13 @@
         return this.items[0]
       }
     },
+    /**
+     *
+     * @param {string} mode
+     * @param {*} id
+     * @param {*} callback
+     * @returns {Promise}
+     */
     getForm: function (mode, id, callback) {
       // mode is create, edit and reply
       var data = {
@@ -283,16 +293,17 @@
         instance_id: $(this.container).data('instance_id'),
         target_type: $(this.container).data('target_type')
       }
+      var url = $(this.container).data('urls').form
       $.extend(data, {mode: mode, id: id})
 
-      window.XE.ajax({
-        url: $(this.container).data('urls').form,
-        type: 'get',
-        dataType: 'json',
-        data: data,
-        success: function (json) {
-          callback(json)
-        }
+      return new Promise(function (resolve) {
+        var editorForm = window.XE.get(url, data)
+        editorForm.then(function (response) {
+          if (callback) {
+            callback(response.data)
+          }
+          resolve(response.data)
+        })
       })
     },
 
@@ -358,7 +369,7 @@
         self.reset()
 
         self.getForm('reply', item.getId(), function (json) {
-          item.setForm(new Form($.parseHTML(json.html), 'reply', function (json) {
+          item.setForm(new CommentForm($.parseHTML(json.html), 'reply', function (json) {
             self._assetLoad(json.XE_ASSET_LOAD)
 
             var items = self.makeItems($.parseHTML(json.items, document, true))
@@ -370,6 +381,7 @@
             self.setTotalCnt(self.getTotalCnt() + 1)
 
             fire('replied', self, [child, item])
+            self.$$emit('item.reply.add', { child: child, item: item })
           }, self.props.config.editor))
 
           self.state.ing = false
@@ -400,7 +412,7 @@
         var callback = function (json) {
           var editor = $.extend(true, {}, self.props.config.editor)
           $.extend(editor.options, json.etc)
-          var form = new Form($.parseHTML(json.html), mode, function (json) {
+          var form = new CommentForm($.parseHTML(json.html), mode, function (json) {
             self._assetLoad(json.XE_ASSET_LOAD)
 
             var items = self.makeItems($.parseHTML(json.items, document, true))
@@ -410,6 +422,7 @@
             self.renderItems()
 
             fire('updated', self, [item])
+            self.$$emit('item.updated', { item: item })
           }, editor)
 
           item.setForm(form)
@@ -451,42 +464,23 @@
             return
           }
 
-          var nitem = null
-          if (json.items) {
-            var items = self.makeItems($.parseHTML(json.items))
-            nitem = items[0]
-
-            self.replace(nitem)
-            self.renderItems()
-          } else {
-            self.removeItem(item)
-            // item.fadeOut(function () {
-            //     self.remove(item);
-            //     self.renderItems();
-            //
-            //     self.setTotalCnt(self.getTotalCnt() - 1);
-            // });
-          }
-
-          fire('deleted', self, [item, nitem])
+          fire('deleted', self, [item, null])
+          self.$$emit('item.deleted', { item: item })
         }
 
         fire('deleting', self, [item])
 
-        window.XE.ajax({
-          url: $(self.container).data('urls').destroy,
-          type: 'post',
-          dataType: 'json',
-          data: {instance_id: $(self.container).data('instance_id'), id: item.getId()},
-          success: function (json) {
-            if (json.mode && json.mode === 'certify') {
-              var dom = $.parseHTML(json.html)
-              item.setForm(new Certify(dom, callback))
-            } else {
-              callback(json)
-            }
+        window.XE.post($(self.container).data('urls').destroy, {
+          instance_id: $(self.container).data('instance_id'),
+          id: item.getId()
+        }).then(function (response) {
+          if (response.data.mode && response.data.mode === 'certify') {
+            var dom = $.parseHTML(response.data.html)
+            item.setForm(new Certify(dom, callback))
+          } else {
+            callback(response.data)
           }
-        }).always(function () {
+
           self.state.ing = false
         })
       })
@@ -499,27 +493,26 @@
         }
         self.state.ing = true
 
+        var el = this
         var context = $(this).closest('.__xe_comment_list_item')
         var item = self.find(context.data('id'))
         var type = item.currentVoteType(this)
         var urlSuffix = $(this).hasClass('on') ? 'voteOff' : 'voteOn'
 
-        window.XE.ajax({
-          url: $(self.container).data('urls')[urlSuffix],
-          type: 'post',
-          dataType: 'json',
-          data: {instance_id: item.getInstanceId(), id: item.getId(), option: type.current},
-          success: function (json) {
-            if (json[type.current] || json[type.current] === 0) {
-              item.setVoteCnt(type.current, json[type.current])
-              $(this).toggleClass('on')
-              $('.__xe_comment_count.__xe_' + type.current, context).trigger('click', [true])
-            }
-          }.bind(this)
-        }).always(function () {
+        window.XE.post($(self.container).data('urls')[urlSuffix], {
+          instance_id: item.getInstanceId(),
+          id: item.getId(),
+          option: type.current
+        }).then(function (response) {
+          if (response.data[type.current] || response.data[type.current] === 0) {
+            item.setVoteCnt(type.current, response.data[type.current])
+            $(el).toggleClass('on')
+            $('.__xe_comment_count.__xe_' + type.current, context).trigger('click', [true])
+          }
+
           self.state.ing = false
-          $(this).blur()
-        }.bind(this))
+          $(el).blur()
+        })
       })
 
       $(this.container).on('click', '.__xe_comment_count', function (e, noToggle) {
@@ -572,13 +565,13 @@
     }
   }
 
-  function Item (dom) {
+  function CommentItem (dom) {
     this.dom = dom
     this.form = null
     this.state = {changed: false}
   }
 
-  Item.prototype = {
+  CommentItem.prototype = {
     getDom: function () {
       return this.dom
     },
@@ -667,7 +660,7 @@
     }
   }
 
-  function Form (dom, mode, callback, editorData) {
+  function CommentForm (dom, mode, callback, editorData) {
     this.dom = dom
     this.mode = mode
     this.callback = callback
@@ -676,7 +669,7 @@
     this.container = null
   }
 
-  Form.prototype = {
+  CommentForm.prototype = {
     render: function (container, noReplace) {
       var that = this
 
@@ -747,32 +740,21 @@
           return false
         }
 
-        $('button', self.dom)
-          .add('input[type=submit]', self.dom)
-          .add('input[type=button]', self.dom)
-          .prop('disabled', true)
+        $('button, input[type=submit], input[type=button]', self.dom).prop('disabled', true)
 
         if (!submitting) {
           submitting = true
         }
 
-        window.XE.ajax({
-          url: $(this).attr('action'),
-          type: 'post',
-          dataType: 'json',
-          data: $(this).serialize(),
-          success: function (json) {
-            self.callback(json)
-            $(self._getForm()).trigger('reset')
-            if (self.editor && self.getMode() == 'create') {
-              self.editor.reset()
-            }
+        window.XE.post($(this).attr('action'), $(this).serialize()).then(function (response) {
+          self.callback(response.data)
+
+          $(self._getForm()).trigger('reset')
+          if (self.editor && self.getMode() == 'create') {
+            self.editor.reset()
           }
-        }).always(function () {
-          $('button', self.dom)
-            .add('input[type=submit]', self.dom)
-            .add('input[type=button]', self.dom)
-            .prop('disabled', false)
+
+          $('button, input[type=submit], input[type=button]', self.dom).prop('disabled', false)
 
           submitting = false
         })
@@ -789,7 +771,7 @@
     this.container = null
   }
 
-  Certify.prototype = Form.prototype
+  Certify.prototype = CommentForm.prototype
 
   window.comment = comment
 
@@ -807,7 +789,7 @@ var CommentVotedVirtualGrid = (function ($) {
 
   return {
     init: function () {
-      var self = CommentVotedVirtualGrid
+      self = CommentVotedVirtualGrid
       var columns = [{
         // selectable: false,
         formatter: function (row, cell, value, columnDef, dataContext) {
@@ -888,23 +870,16 @@ var CommentVotedVirtualGrid = (function ($) {
         data['startId'] = startId
       }
 
-      window.XE.ajax({
-        url: $('.xe-list-group').data('url'),
-        type: 'get',
-        dataType: 'json',
-        data: data,
-        success: function (data) {
-          if (data.nextStartId === 0) {
-            isLastRow = true
-          }
-
-          startId = data.nextStartId
-
-          for (var k = 0, max = data.list.length; k < max; k += 1) {
-            dataView.addItem(data.list[k])
-          }
+      window.XE.get($('.xe-list-group').data('url'), data).then(function (response) {
+        if (response.data.nextStartId === 0) {
+          isLastRow = true
         }
-      }).done(function () {
+
+        startId = response.data.nextStartId
+
+        for (var k = 0, max = response.data.list.length; k < max; k += 1) {
+          dataView.addItem(response.data.list[k])
+        }
         ajaxRunning = false
       })
     }
