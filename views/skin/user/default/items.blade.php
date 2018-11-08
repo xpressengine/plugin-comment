@@ -91,8 +91,8 @@ use Xpressengine\User\Rating;
                 @if($config->get('useDissent') === true)
                 <div class="vote">
                     <!-- [D] 클릭시 클래스 on 적용 -->
-                    <a href="#" class="btn_share like __xe_comment_btn_vote __xe_dissent @if($item->isDissented()) on @endif">
-                        <i class="xi-heart rotate-180"></i>
+                    <a href="#" class="btn_share dissent __xe_comment_btn_vote __xe_dissent @if($item->isDissented()) on @endif">
+                        <i class="xi-emoticon-sad"></i>
                         <span class="bd_hidden">좋아요</span>
                     </a>
                     <!-- [D] 클릭시 클래스 on 적용 및 vote_list 영역 활성화 -->

@@ -583,6 +583,12 @@
 .comment_action .vote .like.on {
     color: #ff6464;
 }
+.comment_action .vote .btn_share.dissent:active,
+.comment_action .vote .btn_share.dissent:focus,
+.comment_action .vote .btn_share.dissent:hover,
+.comment_action .vote .dissent.on {
+    color: #696e7a;
+}
 .comment_action .vote .btn_share.like {
     margin-right: 0;
 }
