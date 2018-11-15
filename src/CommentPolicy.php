@@ -13,6 +13,7 @@ use Illuminate\Contracts\Auth\Access\Gate;
 use Xpressengine\Permission\Instance;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\User\Models\Guest;
+use Xpressengine\User\Models\UnknownUser;
 use Xpressengine\User\UserInterface;
 
 class CommentPolicy
@@ -63,12 +64,12 @@ class CommentPolicy
 
     private function checkUpdateOrDelete(UserInterface $user, Comment $comment)
     {
-        if ($user instanceof Guest && $comment->getAuthor()->getId() === null && $this->isCertified($comment) === true) {
+        if ($user instanceof Guest && $comment->getAuthor() instanceof Guest && $this->isCertified($comment) === true) {
             return true;
         }
 
-        if (!$comment->getAuthor() instanceof Guest
-            && $comment->getAuthor()->getId() === $user->getId()) {
+        if ($comment->getAuthor()->getId() !== null &&
+            $comment->getAuthor()->getId() === $user->getId()) {
             return true;
         }
 
