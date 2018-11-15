@@ -335,7 +335,7 @@ class UserController extends Controller
             try {
                 $model = $this->handler->createModel($instanceId);
                 $comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first();
-                $comment = $this->handler->addVote($comment, $option);
+                $result = $this->handler->addVote($comment, $option);
             } catch (\Exception $e) {
                 XeDB::rollBack();
                 throw $e;
@@ -344,11 +344,12 @@ class UserController extends Controller
             XeDB::commit();
 
             $data = [
+                'result' => $result,
                 'assent' => $comment->assent_count,
                 'dissent' => $comment->dissent_count,
             ];
         } else {
-            $data = [];
+            $data = ['result' => false];
         }
 
         return XePresenter::makeApi($data);
@@ -366,7 +367,7 @@ class UserController extends Controller
             try {
                 $model = $this->handler->createModel($instanceId);
                 $comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first();
-                $comment = $this->handler->removeVote($comment, $option);
+                $result = $this->handler->removeVote($comment, $option);
             } catch (\Exception $e) {
                 XeDB::rollBack();
                 throw $e;
@@ -375,11 +376,12 @@ class UserController extends Controller
             XeDB::commit();
 
             $data = [
+                'result' => $result,
                 'assent' => $comment->assent_count,
                 'dissent' => $comment->dissent_count,
             ];
         } else {
-            $data = [];
+            $data = ['result' => false];
         }
 
         return XePresenter::makeApi($data);

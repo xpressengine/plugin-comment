@@ -493,18 +493,36 @@ class Handler
      * @param Comment            $comment comment entity
      * @param string             $option 'assent' or 'dissent'
      * @param UserInterface|null $author user instance
-     * @return Comment
+     * @return bool
      */
     public function addVote(Comment $comment, $option, UserInterface $author = null)
     {
         $author = $author ?: $this->auth->user();
 
-        $this->counter->add($comment->id, $author, $option);
+        if ($this->isVoteable($comment, $author)) {
+            $this->counter->add($comment->id, $author, $option);
 
-        $column = $this->voteOptToColumn($option);
-        $comment->{$column} = $comment->{$column} + 1;
+            $column = $this->voteOptToColumn($option);
+            $comment->{$column} = $comment->{$column} + 1;
 
-        return $this->documents->put($comment);
+            $this->documents->put($comment);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 투표 가능 여부 확인
+     *
+     * @param Comment       $comment comment object
+     * @param UserInterface $author  user
+     * @return bool
+     */
+    private function isVoteable(Comment $comment, UserInterface $author)
+    {
+        return !$this->counter->getByName($comment->id, $author);
     }
 
     /**
@@ -513,18 +531,24 @@ class Handler
      * @param Comment            $comment comment entity
      * @param string             $option 'assent' or 'dissent'
      * @param UserInterface|null $author user instance
-     * @return Comment
+     * @return bool
      */
     public function removeVote(Comment $comment, $option, UserInterface $author = null)
     {
         $author = $author ?: $this->auth->user();
 
-        $this->counter->remove($comment->id, $author, $option);
+        if ($this->counter->has($comment->id, $author, $option)) {
+            $this->counter->remove($comment->id, $author, $option);
 
-        $column = $this->voteOptToColumn($option);
-        $comment->{$column} = $comment->{$column} - 1;
+            $column = $this->voteOptToColumn($option);
+            $comment->{$column} = $comment->{$column} - 1;
 
-        return $this->documents->put($comment);
+            $this->documents->put($comment);
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
