@@ -381,7 +381,7 @@
             self.setTotalCnt(self.getTotalCnt() + 1)
 
             fire('replied', self, [child, item])
-            self.$$emit('item.reply.add', { child: child, item: item })
+            comment.$$emit('item.reply.add', { child: child, item: item })
           }, self.props.config.editor))
 
           self.state.ing = false
@@ -422,7 +422,7 @@
             self.renderItems()
 
             fire('updated', self, [item])
-            self.$$emit('item.updated', { item: item })
+            comment.$$emit('item.updated', { item: item })
           }, editor)
 
           item.setForm(form)
@@ -465,7 +465,7 @@
           }
 
           fire('deleted', self, [item, null])
-          self.$$emit('item.deleted', { item: item })
+          comment.$$emit('item.deleted', { item: item })
         }
 
         fire('deleting', self, [item])
