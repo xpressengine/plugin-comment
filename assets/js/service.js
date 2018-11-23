@@ -464,6 +464,8 @@
             return
           }
 
+          self.removeItem(item)
+
           fire('deleted', self, [item, null])
           comment.$$emit('item.deleted', { item: item })
         }
