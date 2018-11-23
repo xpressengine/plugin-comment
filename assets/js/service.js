@@ -504,7 +504,7 @@
           id: item.getId(),
           option: type.current
         }).then(function (response) {
-          if (response.data[type.current] || response.data[type.current] === 0) {
+          if (response.data.result === true) {
             item.setVoteCnt(type.current, response.data[type.current])
             $(el).toggleClass('on')
             $('.__xe_comment_count.__xe_' + type.current, context).trigger('click', [true])
