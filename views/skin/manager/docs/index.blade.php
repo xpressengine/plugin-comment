@@ -98,8 +98,30 @@ use Xpressengine\Plugins\Comment\Models\Comment;
                                 <td>{{ $comment->assent_count }} / {{ $comment->dissent_count }}</td>
                                 <td>{{ str_replace('-', '.', substr($comment->created_at, 0, 16)) }}</td>
                                 <td>{{ $comment->ipaddress }}</td>
-                                <td><span class="label label-green">{{ xe_trans($comment->getDisplayStatusName($comment->display)) }}</span></td>
-                                <td><span class="label label-grey">{{ xe_trans($comment->getApproveStatusName($comment->approved)) }}</span></td>
+                                <td>
+                                    <span class="label
+                                        @if ($comment->display == Comment::DISPLAY_VISIBLE)
+                                            label-green
+                                        @elseif ($comment->display == Comment::DISPLAY_SECRET)
+                                            label-blue
+                                        @else
+                                            label-grey
+                                        @endif
+                                    ">
+                                        {{ xe_trans($comment->getDisplayStatusName($comment->display)) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="label
+                                        @if ($comment->approved == Comment::APPROVED_APPROVED)
+                                            label-green
+                                        @else
+                                            label-grey
+                                        @endif
+                                    ">
+                                        {{ xe_trans($comment->getApproveStatusName($comment->approved)) }}
+                                    </span>
+                                </td>
                             </tr>
                             @endforeach
                             </tbody>
