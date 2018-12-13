@@ -77,28 +77,29 @@ use Xpressengine\User\Rating;
                         </ul>
                     </div>
                 @endif
-                @if($config->get('useAssent') === true)
-                <div class="vote">
-                    <!-- [D] 클릭시 클래스 on 적용 -->
-                    <a href="#" class="btn_share like __xe_comment_btn_vote __xe_assent @if($item->isAssented()) on @endif">
-                        <i class="xi-heart"></i>
-                        <span class="bd_hidden">좋아요</span>
-                    </a>
-                    <!-- [D] 클릭시 클래스 on 적용 및 vote_list 영역 활성화 -->
-                    <a href="#" class="btn_share like_num __xe_comment_count __xe_assent">{{ $item->assent_count }}</a>
-                </div>
-                @endif
-                @if($config->get('useDissent') === true)
-                <div class="vote">
-                    <!-- [D] 클릭시 클래스 on 적용 -->
-                    <a href="#" class="btn_share dissent __xe_comment_btn_vote __xe_dissent @if($item->isDissented()) on @endif">
-                        <i class="xi-emoticon-sad"></i>
-                        <span class="bd_hidden">좋아요</span>
-                    </a>
-                    <!-- [D] 클릭시 클래스 on 적용 및 vote_list 영역 활성화 -->
-                    <a href="#" class="btn_share like_num __xe_comment_count __xe_dissent">{{ $item->dissent_count }}</a>
 
-                </div>
+                @if($config->get('useAssent') === true)
+                    <div class="vote">
+                        <!-- [D] 클릭시 클래스 on 적용 -->
+                        <a href="#" class="btn_share like __xe_comment_btn_vote __xe_assent @if($item->isAssented()) on @endif">
+                            <i class="xi-thumbs-up"></i>
+                            <span class="bd_hidden">좋아요</span>
+                        </a>
+                        <!-- [D] 클릭시 클래스 on 적용 및 vote_list 영역 활성화 -->
+                        <a href="#" class="btn_share like_num __xe_comment_count __xe_assent">{{ $item->assent_count }}</a>
+                    </div>
+                @endif
+
+                @if($config->get('useDissent') === true)
+                    <div class="vote">
+                        <!-- [D] 클릭시 클래스 on 적용 -->
+                        <a href="#" class="btn_share dissent __xe_comment_btn_vote __xe_dissent @if($item->isDissented()) on @endif">
+                            <i class="xi-thumbs-down"></i>
+                            <span class="bd_hidden">싫어요</span>
+                        </a>
+                        <!-- [D] 클릭시 클래스 on 적용 및 vote_list 영역 활성화 -->
+                        <a href="#" class="btn_share dissent_num __xe_comment_count __xe_dissent">{{ $item->dissent_count }}</a>
+                    </div>
                 @endif
                 @can('create', $instance)
                         <!-- [D] 클릭시 클래스 on 적용 및 comment_action_area 활성화 -->

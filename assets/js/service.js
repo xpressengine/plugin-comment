@@ -507,7 +507,7 @@
           option: type.current
         }).then(function (response) {
           if (response.data.result === true) {
-            item.setVoteCnt(type.current, response.data[type.current])
+            item.setVoteCnt(response.data)
             $(el).toggleClass('on')
             $('.__xe_comment_count.__xe_' + type.current, context).trigger('click', [true])
           }
@@ -636,8 +636,9 @@
     // fadeOut: function (callback) {
     //     $(this.dom).fadeOut('slow', callback);
     // },
-    setVoteCnt: function (type, cnt) {
-      $('.__xe_comment_count.__xe_' + type, this.dom).text(cnt)
+    setVoteCnt: function (data) {
+      $('.__xe_comment_count.__xe_assent', this.dom).text(data.assent);
+      $('.__xe_comment_count.__xe_dissent', this.dom).text(data.dissent);
     },
     currentVoteType: function (elem) {
       if ($(elem).hasClass('__xe_assent')) {

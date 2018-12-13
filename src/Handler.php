@@ -491,15 +491,15 @@ class Handler
      * 찬성 or 추천 or 좋아요
      *
      * @param Comment            $comment comment entity
-     * @param string             $option 'assent' or 'dissent'
-     * @param UserInterface|null $author user instance
+     * @param string             $option  'assent' or 'dissent'
+     * @param UserInterface|null $author  user instance
      * @return bool
      */
     public function addVote(Comment $comment, $option, UserInterface $author = null)
     {
         $author = $author ?: $this->auth->user();
 
-        if ($this->isVoteable($comment, $author)) {
+        if ($this->isVoteable($comment, $author, $option)) {
             $this->counter->add($comment->id, $author, $option);
 
             $column = $this->voteOptToColumn($option);
@@ -518,11 +518,13 @@ class Handler
      *
      * @param Comment       $comment comment object
      * @param UserInterface $author  user
+     * @param String        $option  option (assent or dissent)
+     *
      * @return bool
      */
-    private function isVoteable(Comment $comment, UserInterface $author)
+    private function isVoteable(Comment $comment, UserInterface $author, $option)
     {
-        return !$this->counter->getByName($comment->id, $author);
+        return !$this->counter->has($comment->id, $author, $option);
     }
 
     /**

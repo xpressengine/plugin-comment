@@ -683,22 +683,21 @@
 .comment_action .vote .btn_share.like:active,
 .comment_action .vote .btn_share.like:focus,
 .comment_action .vote .btn_share.like:hover,
-.comment_action .vote .like.on {
-  color: #ff6464;
-}
-
+.comment_action .vote .like.on,
 .comment_action .vote .btn_share.dissent:active,
 .comment_action .vote .btn_share.dissent:focus,
 .comment_action .vote .btn_share.dissent:hover,
 .comment_action .vote .dissent.on {
-  color: #696e7a;
+  color: #ff6464;
 }
 
-.comment_action .vote .btn_share.like {
+.comment_action .vote .btn_share.like,
+.comment_action .vote .btn_share.dissent {
   margin-right: 0;
 }
 
-.comment_action .vote .like_num {
+.comment_action .vote .like_num,
+.comment_action .vote .dissent_num {
   margin-right: 0;
 }
 
