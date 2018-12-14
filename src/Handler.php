@@ -388,7 +388,7 @@ class Handler
                     ->get()->each(function ($child) {
                         $this->trash($child);
                     });
-            } elseif ($config->get('removeType') === static::REMOVE_BlIND) {
+            } elseif ($config->get('removeType') === static::REMOVE_BLIND) {
                 $comment->setDisplay(Comment::DISPLAY_VISIBLE);
             } else {
                 throw new WrongConfigurationException;
