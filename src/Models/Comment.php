@@ -1,9 +1,14 @@
 <?php
 /**
+ * Comment.php
+ *
+ * PHP version 5
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
  * @author      XE Developers <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
- * @license     LGPL-2.1
- * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        https://xpressengine.io
  */
 
@@ -18,28 +23,48 @@ use Xpressengine\User\Models\User;
 use Xpressengine\User\UserInterface;
 
 /**
- * Class Comment
+ * Comment
  *
  * @property User|null $author
  * @property Target $target
  * @property Collection $files
  *
- * @package Xpressengine\Plugins\Comment\Models
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        https://xpressengine.io
  */
 class Comment extends Document
 {
     protected $voteType;
 
+    /**
+     * author
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function author()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * target
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function target()
     {
         return $this->hasOne(Target::class, 'doc_id');
     }
 
+    /**
+     * fiels
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function files()
     {
         $file = new File;
@@ -60,6 +85,11 @@ class Comment extends Document
         return $author;
     }
 
+    /**
+     * get content
+     *
+     * @return string
+     */
     public function getContent()
     {
         if ($this->status === static::STATUS_TRASH || $this->approved === static::APPROVED_REJECTED) {
@@ -69,21 +99,43 @@ class Comment extends Document
         return $this->content;
     }
 
+    /**
+     * check assented
+     *
+     * @return bool
+     */
     public function isAssented()
     {
         return $this->voteType === 'assent';
     }
 
+    /**
+     * check dissent
+     *
+     * @return bool
+     */
     public function isDissented()
     {
         return $this->voteType === 'dissent';
     }
 
+    /**
+     * set vote type
+     *
+     * @param string $type vote type
+     *
+     * @return void
+     */
     public function setVoteType($type)
     {
         $this->voteType = $type;
     }
 
+    /**
+     * get target
+     *
+     * @return mixed|null
+     */
     public function getTarget()
     {
         if ($target = $this->getRelationValue('target')) {
@@ -96,7 +148,7 @@ class Comment extends Document
     /**
      * get display status name
      *
-     * @param int $displayCode
+     * @param int $displayCode display status code
      *
      * @return string
      */
@@ -114,7 +166,7 @@ class Comment extends Document
     /**
      * get approve status name
      *
-     * @param int $approveCode
+     * @param int $approveCode approve status code
      *
      * @return string
      */

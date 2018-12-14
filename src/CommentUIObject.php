@@ -1,11 +1,14 @@
 <?php
 /**
- * This file is comment ui object class
+ * CommentUIObject.php
  *
- * @author      XE Developers (jhyeon1010) <cjh1010@xpressengine.com>
- * @copyright   2015 Copyright (C) NAVER Crop. <http://www.navercorp.com>
- * @license     LGPL-2.1
- * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * PHP version 5
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        https://xpressengine.io
  */
 
@@ -19,7 +22,14 @@ use XeEditor;
 use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
 
 /**
- * 댓글 ui object 랜더링
+ * CommentUIObject
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        https://xpressengine.io
  */
 class CommentUIObject extends AbstractUIObject
 {
@@ -100,8 +110,7 @@ class CommentUIObject extends AbstractUIObject
             ];
 
             $editorConfig = XeEditor::getConfig($instanceId);
-            if ($editorConfig->getPure('height') == null)
-            {
+            if ($editorConfig->getPure('height') == null) {
                 $props['config']['editor']['options']['height'] = '160';
             }
         }
@@ -116,15 +125,23 @@ class CommentUIObject extends AbstractUIObject
             'inner' => $view,
             'props' => $props
         ]);
-
-
     }
 
+    /**
+     * load dependencies
+     *
+     * @return void
+     */
     protected function loadDependencies()
     {
         XeFrontend::js('assets/core/xe-ui-component/js/xe-page.js')->load();
     }
 
+    /**
+     * init assets
+     *
+     * @return void
+     */
     protected function initAssets()
     {
         XeFrontend::js('plugins/comment/assets/js/service.js')->appendTo('head')->load();

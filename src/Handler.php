@@ -1,9 +1,14 @@
 <?php
 /**
+ * Handler.php
+ *
+ * PHP version 5
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
  * @author      XE Developers <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
- * @license     LGPL-2.1
- * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        https://xpressengine.io
  */
 
@@ -24,6 +29,16 @@ use Xpressengine\User\GuardInterface as Authenticator;
 use Xpressengine\Counter\Counter;
 use Xpressengine\Plugins\Comment\Plugin as CommentPlugin;
 
+/**
+ * Handler
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        https://xpressengine.io
+ */
 class Handler
 {
     const PLUGIN_PREFIX = 'comment';
@@ -50,7 +65,12 @@ class Handler
 
     const REMOVE_BATCH = 'batch';
 
+    /**
+     * @deprecated since rc.8. instead use Handler::REMOVE_BLIND
+     */
     const REMOVE_BlIND = 'blind';
+
+    const REMOVE_BLIND = 'blind';
 
     const REMOVE_UNABLE = 'unable';
 
@@ -65,6 +85,17 @@ class Handler
         'reverse' => false
     ];
 
+    /**
+     * Handler constructor.
+     *
+     * @param DocumentHandler   $documents   document handler
+     * @param SessionStore      $session     session store
+     * @param Counter           $counter     counter
+     * @param Authenticator     $auth        auth
+     * @param PermissionHandler $permissions permission handler
+     * @param ConfigManager     $configs     config manager
+     * @param Keygen            $keygen      keygen
+     */
     public function __construct(
         DocumentHandler $documents,
         SessionStore $session,
@@ -73,8 +104,7 @@ class Handler
         PermissionHandler $permissions,
         ConfigManager $configs,
         Keygen $keygen
-    )
-    {
+    ) {
         $this->documents = $documents;
         $this->session = $session;
         $this->counter = $counter;
@@ -88,7 +118,8 @@ class Handler
      * 새로운 인스턴스 설정
      *
      * @param string $targetInstanceId target instance identifier
-     * @param bool   $division if true, set table division
+     * @param bool   $division         if true, set table division
+     *
      * @return void
      */
     public function createInstance($targetInstanceId, $division = false)
@@ -114,6 +145,7 @@ class Handler
      *
      * @param string $targetInstanceId  target instance identifier
      * @param string $commentInstanceId comment instance identifier
+     *
      * @return void
      */
     protected function instanceMapping($targetInstanceId, $commentInstanceId)
@@ -148,6 +180,7 @@ class Handler
      * Get instance id by target instance id
      *
      * @param string $targetInstanceId target instance identifier
+     *
      * @return string|null
      */
     public function getInstanceId($targetInstanceId)
@@ -161,6 +194,7 @@ class Handler
      * Get target instance id by comment instance id
      *
      * @param string $instanceId comment instance identifier
+     *
      * @return string|null
      */
     public function getTargetInstanceId($instanceId)
@@ -177,6 +211,7 @@ class Handler
      * Get key for config
      *
      * @param string|null $instanceId comment instance identifier
+     *
      * @return string
      */
     protected function getKeyForConfig($instanceId = null)
@@ -189,6 +224,7 @@ class Handler
      *
      * @param string $instanceId  comment instance identifier
      * @param array  $information config data
+     *
      * @return void
      */
     public function configure($instanceId, array $information)
@@ -215,6 +251,7 @@ class Handler
      * 인스턴스 유무
      *
      * @param string $instanceId instance identifier
+     *
      * @return bool
      */
     public function existInstance($instanceId)
@@ -226,6 +263,7 @@ class Handler
      * instance 에 속한 comment 를 제거함, table 도 삭제 됨
      *
      * @param string $instanceId instance identifier
+     *
      * @return void
      * @throws \Exception
      */
@@ -249,6 +287,7 @@ class Handler
      * Get config
      *
      * @param string|null $instanceId comment instance identifier
+     *
      * @return \Xpressengine\Config\ConfigEntity
      */
     public function getConfig($instanceId = null)
@@ -270,6 +309,7 @@ class Handler
      *
      * @param array              $inputs inputs
      * @param UserInterface|null $user   user object
+     *
      * @return Comment
      */
     public function create(array $inputs, UserInterface $user = null)
@@ -312,6 +352,7 @@ class Handler
      * 수정
      *
      * @param Comment $comment comment object
+     *
      * @return Comment
      */
     public function put(Comment $comment)
@@ -327,6 +368,7 @@ class Handler
      * 휴지통으로 이동
      *
      * @param Comment $comment comment object
+     *
      * @return Comment
      */
     public function trash(Comment $comment)
@@ -362,6 +404,7 @@ class Handler
      * 휴지통에서 복구
      *
      * @param Comment $comment comment object
+     *
      * @return Comment|false
      */
     public function restore(Comment $comment)
@@ -384,9 +427,11 @@ class Handler
 
     /**
      * 삭제
-     * 
+     *
      * @param Comment $comment comment object
+     *
      * @return bool
+     * @throws \Exception
      */
     public function remove(Comment $comment)
     {
@@ -408,8 +453,9 @@ class Handler
 
     /**
      * 승인
-     * 
+     *
      * @param Comment $comment comment object
+     *
      * @return Comment
      */
     public function approve(Comment $comment)
@@ -419,8 +465,9 @@ class Handler
 
     /**
      * 승인 반려
-     * 
+     *
      * @param Comment $comment comment object
+     *
      * @return Comment
      */
     public function reject(Comment $comment)
@@ -436,17 +483,19 @@ class Handler
 
     /**
      * 자식에 해당하는 댓글이 있는지 확인
+     *
      * @param Comment $comment comment object
+     *
      * @return bool
      */
     protected function hasChild(Comment $comment)
     {
         return $this->createModel($comment->instance_id)->newQuery()
-            ->where('head', $comment->head)
-            ->where('reply', 'like', $comment->reply . str_repeat('_', Comment::getReplyCharLen()))
-            ->count() > 0;
+                ->where('head', $comment->head)
+                ->where('reply', 'like', $comment->reply . str_repeat('_', Comment::getReplyCharLen()))
+                ->count() > 0;
     }
-    
+
     /**
      * session 에서 사용될 key 를 반환
      *
@@ -461,6 +510,7 @@ class Handler
      * 현재 사용자에 해당 댓글이 인증되었다고 표시함
      *
      * @param Comment $comment comment instance
+     *
      * @return void
      */
     public function certified(Comment $comment)
@@ -478,6 +528,7 @@ class Handler
      * 현재 사용자가 해당 댓글에 인증이 되었는지 판별
      *
      * @param Comment $comment comment instance
+     *
      * @return bool
      */
     public function isCertified(Comment $comment)
@@ -493,6 +544,7 @@ class Handler
      * @param Comment            $comment comment entity
      * @param string             $option  'assent' or 'dissent'
      * @param UserInterface|null $author  user instance
+     *
      * @return bool
      */
     public function addVote(Comment $comment, $option, UserInterface $author = null)
@@ -531,8 +583,9 @@ class Handler
      * 반대 or 비추천 or 싫어요
      *
      * @param Comment            $comment comment entity
-     * @param string             $option 'assent' or 'dissent'
-     * @param UserInterface|null $author user instance
+     * @param string             $option  'assent' or 'dissent'
+     * @param UserInterface|null $author  user instance
+     *
      * @return bool
      */
     public function removeVote(Comment $comment, $option, UserInterface $author = null)
@@ -555,8 +608,9 @@ class Handler
 
     /**
      * 값에 따른 컬럼명 반환
-     * 
+     *
      * @param string $opt 'assent' or 'dissent'
+     *
      * @return string
      */
     private function voteOptToColumn($opt)
@@ -574,9 +628,10 @@ class Handler
 
     /**
      * 투표자 목록 반환
-     * 
+     *
      * @param Comment $comment comment object
      * @param string  $option  'assent' or 'dissent'
+     *
      * @return array
      */
     public function voteUsers(Comment $comment, $option)
@@ -586,9 +641,10 @@ class Handler
 
     /**
      * 투표자 수 반환
-     * 
+     *
      * @param Comment $comment comment object
      * @param string  $option  'assent' or 'dissent'
+     *
      * @return int
      */
     public function voteUserCount(Comment $comment, $option)
@@ -598,8 +654,9 @@ class Handler
 
     /**
      * 현재 사용자의 투표정보 주입
-     * 
+     *
      * @param Comment $comment comment object
+     *
      * @return void
      */
     public function bindUserVote(Comment $comment)
@@ -611,11 +668,12 @@ class Handler
 
     /**
      * 투표 목록
-     * 
+     *
      * @param Comment     $comment comment object
      * @param string      $option  'assent' or 'dissent'
      * @param string|null $startId start id
      * @param int         $limit   limit count
+     *
      * @return mixed
      */
     public function votedList(Comment $comment, $option, $startId = null, $limit = 10)
@@ -634,6 +692,7 @@ class Handler
      * 대상 객체에 속하는 댓글을 이동시킴
      *
      * @param CommentUsable $target comment usable instance
+     *
      * @return void
      * @throws \Exception
      */
@@ -657,7 +716,7 @@ class Handler
 
     /**
      * Get default config information
-     * 
+     *
      * @return array
      */
     public function getDefaultConfig()
@@ -667,8 +726,9 @@ class Handler
 
     /**
      * Get key for permission
-     * 
+     *
      * @param string|null $instanceId comment instance id
+     *
      * @return string
      */
     public function getKeyForPerm($instanceId = null)
@@ -696,7 +756,7 @@ class Handler
             $instanceId = substr(str_replace('-', '', $this->keygen->generate()), 0, 12);
 
             $try++;
-        } while(array_search($instanceId, $map) !== false);
+        } while (array_search($instanceId, $map) !== false);
 
         return $instanceId;
     }
@@ -705,6 +765,7 @@ class Handler
      * Create model
      *
      * @param string $instanceId comment instance id
+     *
      * @return Comment
      */
     public function createModel($instanceId = null)
@@ -735,6 +796,7 @@ class Handler
      * Set model
      *
      * @param string $model comment model class
+     *
      * @return void
      */
     public function setModel($model)

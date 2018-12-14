@@ -1,11 +1,14 @@
 <?php
 /**
- * This file is comment usable interface
+ * CommentUsable.php
  *
- * @author      XE Developers (jhyeon1010) <cjh1010@xpressengine.com>
- * @copyright   2015 Copyright (C) NAVER Crop. <http://www.navercorp.com>
- * @license     LGPL-2.1
- * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * PHP version 5
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        https://xpressengine.io
  */
 
@@ -14,7 +17,14 @@ namespace Xpressengine\Plugins\Comment;
 use Xpressengine\Routing\InstanceRoute;
 
 /**
- * comment 를 사용하는 대상 객체 기능을 정의 함
+ * CommentUsable
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        https://xpressengine.io
  */
 interface CommentUsable
 {
@@ -43,6 +53,7 @@ interface CommentUsable
      * Returns the link
      *
      * @param InstanceRoute $route route instance
+     *
      * @return string
      */
     public function getLink(InstanceRoute $route);

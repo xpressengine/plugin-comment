@@ -4,8 +4,8 @@
  *
  * PHP version 5
  *
- * @category
- * @package
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
  * @author      XE Developers <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
  * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
@@ -25,6 +25,16 @@ use XePresenter;
 use Xpressengine\Http\Request;
 use Xpressengine\Permission\PermissionSupport;
 
+/**
+ * SettingController
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        https://xpressengine.io
+ */
 class SettingController extends Controller
 {
     use PermissionSupport;
@@ -33,6 +43,9 @@ class SettingController extends Controller
 
     protected $handler;
 
+    /**
+     * SettingController constructor.
+     */
     public function __construct()
     {
         $this->plugin = app('xe.plugin.comment');
@@ -40,6 +53,13 @@ class SettingController extends Controller
         XePresenter::setSettingsSkinTargetId($this->plugin->getId());
     }
 
+    /**
+     * get config
+     *
+     * @param string $targetInstanceId target instance id
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function getConfig($targetInstanceId)
     {
         $config = $this->handler->getConfig($this->handler->getInstanceId($targetInstanceId));
@@ -50,6 +70,14 @@ class SettingController extends Controller
         ]);
     }
 
+    /**
+     * post config
+     *
+     * @param Request $request          request
+     * @param string  $targetInstanceId target instance id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function postConfig(Request $request, $targetInstanceId)
     {
         $this->validate($request, ['perPage' => 'Numeric']);
@@ -59,6 +87,13 @@ class SettingController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * get perm
+     *
+     * @param string $targetInstanceId target instance id
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function getPerm($targetInstanceId)
     {
         $permArgs = $this->getPermArguments(
@@ -72,6 +107,14 @@ class SettingController extends Controller
         ]);
     }
 
+    /**
+     * post perm
+     *
+     * @param Request $request          request
+     * @param string  $targetInstanceId target instance id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function postPerm(Request $request, $targetInstanceId)
     {
         $this->permissionRegister(
@@ -83,6 +126,13 @@ class SettingController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * get skin
+     *
+     * @param string $targetInstanceId target instance id
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function getSkin($targetInstanceId)
     {
         return XePresenter::make('instance.skin', [
@@ -90,6 +140,13 @@ class SettingController extends Controller
         ]);
     }
 
+    /**
+     * get editor
+     *
+     * @param string $targetInstanceId target instance id
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function getEditor($targetInstanceId)
     {
         return XePresenter::make('instance.editor', [
@@ -97,6 +154,13 @@ class SettingController extends Controller
         ]);
     }
 
+    /**
+     * get DF
+     *
+     * @param string $targetInstanceId target instance id
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function getDF($targetInstanceId)
     {
         $section = new DynamicFieldSection(
@@ -109,18 +173,40 @@ class SettingController extends Controller
         ]);
     }
 
+    /**
+     * get TM
+     *
+     * @param string $targetInstanceId target instance id
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function getTM($targetInstanceId)
     {
         return XePresenter::make('instance.tm', [
-            'section' => new ToggleMenuSection($this->plugin->getId(), $this->handler->getInstanceId($targetInstanceId)),
+            'section' => new ToggleMenuSection(
+                $this->plugin->getId(),
+                $this->handler->getInstanceId($targetInstanceId)
+            ),
         ]);
     }
 
+    /**
+     * get global config
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function getGlobalConfig()
     {
         return XePresenter::make('global.config', ['config' => $this->handler->getConfig()]);
     }
 
+    /**
+     * post global config
+     *
+     * @param Request $request request
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function postGlobalConfig(Request $request)
     {
         $this->validate($request, ['perPage' => 'Numeric']);
@@ -130,6 +216,11 @@ class SettingController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * get global perm
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function getGlobalPerm()
     {
         $permArgs = $this->getPermArguments($this->handler->getKeyForPerm(), ['create', 'manage']);
@@ -137,6 +228,13 @@ class SettingController extends Controller
         return XePresenter::make('global.perm', ['permArgs' => $permArgs]);
     }
 
+    /**
+     * post global perm
+     *
+     * @param Request $request request
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function postGlobalPerm(Request $request)
     {
         $this->permissionRegister($request, $this->handler->getKeyForPerm(), ['create', 'manage']);
@@ -146,6 +244,10 @@ class SettingController extends Controller
 
     /**
      * config 설정 페이지로 redirection
+     *
+     * @param string $targetInstanceId target instance id
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function redirectToConfig($targetInstanceId)
     {
@@ -154,6 +256,8 @@ class SettingController extends Controller
 
     /**
      * global 페이지로 redirection
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function redirectToGlobal()
     {

@@ -1,9 +1,14 @@
 <?php
 /**
+ * ManagerController.php
+ *
+ * PHP version 5
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
  * @author      XE Developers <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
- * @license     LGPL-2.1
- * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        https://xpressengine.io
  */
 
@@ -17,9 +22,20 @@ use Xpressengine\Http\Request;
 use Xpressengine\Menu\MenuHandler;
 use Xpressengine\Menu\Models\MenuItem;
 use Xpressengine\Permission\PermissionSupport;
+use Xpressengine\Plugins\Comment\Handler;
 use Xpressengine\Plugins\Comment\Models\Comment;
 use Xpressengine\Support\Exceptions\InvalidArgumentException;
 
+/**
+ * ManagerController
+ *
+ * @category Comment
+ * @package  Xpressengine\Plugins\Comment\Controllers
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        https://xpressengine.io
+ */
 class ManagerController extends Controller
 {
     use PermissionSupport;
@@ -31,6 +47,9 @@ class ManagerController extends Controller
      */
     protected $handler;
 
+    /**
+     * ManagerController constructor.
+     */
     public function __construct()
     {
         $this->plugin = app('xe.plugin.comment');
@@ -38,6 +57,11 @@ class ManagerController extends Controller
         XePresenter::setSettingsSkinTargetId($this->plugin->getId());
     }
 
+    /**
+     * get instances
+     *
+     * @return array
+     */
     protected function getInstances()
     {
         $map = XeConfig::get('comment_map');
@@ -49,6 +73,14 @@ class ManagerController extends Controller
         return $instanceIds;
     }
 
+    /**
+     * index
+     *
+     * @param Request     $request request
+     * @param MenuHandler $menus   menu handler
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function index(Request $request, MenuHandler $menus)
     {
         $request->flash();
@@ -142,6 +174,13 @@ class ManagerController extends Controller
         ]);
     }
 
+    /**
+     * set approve
+     *
+     * @param Request $request request
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function approve(Request $request)
     {
         $approved = $request->get('approved');
@@ -160,7 +199,7 @@ class ManagerController extends Controller
             case Comment::APPROVED_REJECTED:
                 $method = 'reject';
                 break;
-            default :
+            default:
                 throw new InvalidArgumentException;
                 break;
         }
@@ -172,6 +211,13 @@ class ManagerController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * to trash
+     *
+     * @param Request $request request
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function toTrash(Request $request)
     {
         $commentIds = $request->get('id');
@@ -189,6 +235,14 @@ class ManagerController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * trash
+     *
+     * @param Request     $request request
+     * @param MenuHandler $menus   menu handler
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function trash(Request $request, MenuHandler $menus)
     {
         $request->flash();
@@ -217,6 +271,13 @@ class ManagerController extends Controller
         ]);
     }
 
+    /**
+     * destroy
+     *
+     * @param Request $request request
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Request $request)
     {
         $commentIds = $request->get('id');
@@ -232,6 +293,13 @@ class ManagerController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * restore
+     *
+     * @param Request $request request
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function restore(Request $request)
     {
         $commentIds = $request->get('id');
@@ -249,16 +317,35 @@ class ManagerController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * make where
+     *
+     * @param Comment $query   query
+     * @param Request $request request
+     *
+     * @return mixed
+     */
     protected function makeWhere($query, $request)
     {
         if ($request->get('search_target') == 'content') {
-            $query = $query->where('pure_content', 'like', sprintf('%%%s%%', implode('%', explode(' ', $request->get('search_keyword')))));
+            $query = $query->where(
+                'pure_content',
+                'like',
+                sprintf(
+                    '%%%s%%',
+                    implode('%', explode(' ', $request->get('search_keyword')))
+                )
+            );
         }
         if ($request->get('search_target') == 'author') {
             $query = $query->where('writer', 'like', sprintf('%%%s%%', $request->get('search_keyword')));
         }
         if ($request->get('search_target') == 'ip') {
-            $query = $query->where('ipaddress', 'like', sprintf('%%%s%%', implode('%', explode(' ', $request->get('search_keyword')))));
+            $query = $query->where(
+                'ipaddress',
+                'like',
+                sprintf('%%%s%%', implode('%', explode(' ', $request->get('search_keyword'))))
+            );
         }
 
         return $query;

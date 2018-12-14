@@ -1,9 +1,14 @@
 <?php
 /**
+ * Target.php
+ *
+ * PHP version 5
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
  * @author      XE Developers <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
- * @license     LGPL-2.1
- * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        https://xpressengine.io
  */
 
@@ -15,12 +20,17 @@ use Xpressengine\User\Models\User;
 use Xpressengine\User\UserInterface;
 
 /**
- * Class Target
+ * Target
  *
  * @property Comment $comment
  * @property User|null $author
  *
- * @package Xpressengine\Plugins\Comment\Models
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        https://xpressengine.io
  */
 class Target extends DynamicModel
 {
@@ -40,6 +50,11 @@ class Target extends DynamicModel
      */
     public $timestamps = false;
 
+    /**
+     * comment
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function comment()
     {
         return $this->belongsTo(Comment::class, 'doc_id');

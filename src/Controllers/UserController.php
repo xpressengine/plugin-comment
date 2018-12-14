@@ -1,9 +1,14 @@
 <?php
 /**
+ * UserController.php
+ *
+ * PHP version 5
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
  * @author      XE Developers <developers@xpressengine.com>
  * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
- * @license     LGPL-2.1
- * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
  * @link        https://xpressengine.io
  */
 
@@ -26,6 +31,7 @@ use Xpressengine\Http\Request;
 use Xpressengine\Permission\Instance;
 use Xpressengine\Plugins\Comment\CommentUsable;
 use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
+use Xpressengine\Plugins\Comment\Handler;
 use Xpressengine\Plugins\Comment\Plugin;
 use Xpressengine\Support\Purifier;
 use Xpressengine\Plugins\Comment\Exceptions\BadRequestException;
@@ -36,6 +42,16 @@ use XeDynamicField;
 use Xpressengine\Support\PurifierModules\Html5;
 use Xpressengine\User\Models\UnknownUser;
 
+/**
+ * UserController
+ *
+ * @category    Comment
+ * @package     Xpressengine\Plugins\Comment
+ * @author      XE Developers <developers@xpressengine.com>
+ * @copyright   2015 Copyright (C) NAVER Corp. <http://www.navercorp.com>
+ * @license     http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html LGPL-2.1
+ * @link        https://xpressengine.io
+ */
 class UserController extends Controller
 {
     /**
@@ -43,12 +59,22 @@ class UserController extends Controller
      */
     protected $handler;
 
+    /**
+     * UserController constructor.
+     */
     public function __construct()
     {
         $plugin = app('xe.plugin.comment');
         $this->handler = $plugin->getHandler();
     }
 
+    /**
+     * index
+     *
+     * @param Request $request request
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function index(Request $request)
     {
         $targetId = $request->get('target_id');
@@ -70,7 +96,6 @@ class UserController extends Controller
 
         // 댓글 총 수
         $totalCount = $query->count();
-
 
         $direction = $config->get('reverse') === true ? 'asc' : 'desc';
 
@@ -117,6 +142,13 @@ class UserController extends Controller
         ]));
     }
 
+    /**
+     * append assets to param
+     *
+     * @param array $param parameters
+     *
+     * @return array
+     */
     protected function appendAssetsToParam(array $param)
     {
         return array_merge($param, [
@@ -127,6 +159,14 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * store
+     *
+     * @param Request $request request
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     * @throws AuthorizationException
+     */
     public function store(Request $request)
     {
         // purifier 에 의해 몇몇 태그 속성이 사라짐
@@ -202,6 +242,14 @@ class UserController extends Controller
         ]));
     }
 
+    /**
+     * update
+     *
+     * @param Request $request request
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     * @throws AuthorizationException
+     */
     public function update(Request $request)
     {
         // purifier 에 의해 몇몇 태그 속성이 사라짐
@@ -280,6 +328,14 @@ class UserController extends Controller
         ]));
     }
 
+    /**
+     * destroy
+     *
+     * @param Request $request request
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     * @throws AuthorizationException
+     */
     public function destroy(Request $request)
     {
         $instanceId = $request->get('instance_id');
@@ -323,6 +379,14 @@ class UserController extends Controller
         return XePresenter::makeApi(array_merge($data, ['success' => true]));
     }
 
+    /**
+     * vote on
+     *
+     * @param Request $request request
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     * @throws \Exception
+     */
     public function voteOn(Request $request)
     {
         $instanceId = $request->get('instance_id');
@@ -355,6 +419,14 @@ class UserController extends Controller
         return XePresenter::makeApi($data);
     }
 
+    /**
+     * vote off
+     *
+     * @param Request $request request
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     * @throws \Exception
+     */
     public function voteOff(Request $request)
     {
         $instanceId = $request->get('instance_id');
@@ -387,6 +459,13 @@ class UserController extends Controller
         return XePresenter::makeApi($data);
     }
 
+    /**
+     * get voted user list
+     *
+     * @param Request $request request
+     *
+     * @return mixed
+     */
     public function votedUser(Request $request)
     {
         $instanceId = $request->get('instance_id');
@@ -409,6 +488,13 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * voted modal
+     *
+     * @param Request $request request
+     *
+     * @return mixed
+     */
     public function votedModal(Request $request)
     {
         $instanceId = $request->get('instance_id');
@@ -418,7 +504,6 @@ class UserController extends Controller
         $model = $this->handler->createModel($instanceId);
         $comment = $model->newQuery()->where('instance_id', $instanceId)->where('id', $id)->first();
         $count = $this->handler->voteUserCount($comment, $option);
-
 
         return api_render(Plugin::getId() . '::views.skin.user.default.votedModal', [
             'count' => $count,
@@ -430,6 +515,13 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * voted list
+     *
+     * @param Request $request request
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     public function votedList(Request $request)
     {
         $instanceId = $request->get('instance_id');
@@ -469,6 +561,13 @@ class UserController extends Controller
         ]);
     }
 
+    /**
+     * form
+     *
+     * @param Request $request request
+     *
+     * @return mixed
+     */
     public function form(Request $request)
     {
         $mode = $request->get('mode');
@@ -478,6 +577,13 @@ class UserController extends Controller
         return $this->$method($request);
     }
 
+    /**
+     * get create form
+     *
+     * @param Request $request request
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     protected function getCreateForm(Request $request)
     {
         $targetId = $request->get('target_id');
@@ -508,6 +614,14 @@ class UserController extends Controller
         return XePresenter::makeApi($data);
     }
 
+    /**
+     * get edit form
+     *
+     * @param Request $request request
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     * @throws AuthorizationException
+     */
     protected function getEditForm(Request $request)
     {
         $instanceId = $request->get('instance_id');
@@ -538,9 +652,19 @@ class UserController extends Controller
             'fieldTypes' => $fieldTypes,
         ])->render();
 
-        return XePresenter::makeApi(['mode' => 'edit', 'html' => $content, 'etc' => ['files' => \XeEditor::getFiles($comment->getKey())]]);
+        return XePresenter::makeApi(
+            ['mode' => 'edit', 'html' => $content, 'etc' => ['files' => \XeEditor::getFiles($comment->getKey())]]
+        );
     }
 
+    /**
+     * get reply form
+     *
+     * @param Request $request request
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     * @throws AuthorizationException
+     */
     protected function getReplyForm(Request $request)
     {
         $id = $request->get('id');
@@ -569,6 +693,14 @@ class UserController extends Controller
         return XePresenter::makeApi(['mode' => 'reply', 'html' => $content]);
     }
 
+    /**
+     * get certify form
+     *
+     * @param string  $mode    mode
+     * @param Comment $comment comment model
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
     protected function getCertifyForm($mode, $comment)
     {
         $skin = XeSkin::getAssigned([Plugin::getId(), $comment->instanceId]);
@@ -580,6 +712,14 @@ class UserController extends Controller
         return XePresenter::makeApi(['mode' => 'certify', 'html' => $content]);
     }
 
+    /**
+     * certify
+     *
+     * @param Request $request request
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     * @throws AuthorizationException
+     */
     public function certify(Request $request)
     {
         $rules = [
@@ -592,12 +732,13 @@ class UserController extends Controller
         $inputs = $this->validate($request, $rules);
 
         $model = $this->handler->createModel($inputs['instance_id']);
-        if (!$comment = $model->newQuery()->where('instance_id', $inputs['instance_id'])->where('id', $inputs['id'])->first()) {
+        if (!$comment = $model->newQuery()->where('instance_id', $inputs['instance_id'])
+            ->where('id', $inputs['id'])->first()
+        ) {
             throw new UnknownIdentifierException;
         }
 
-        if (
-            $inputs['email'] !== $comment->email
+        if ($inputs['email'] !== $comment->email
             || Hash::check($inputs['certify_key'], $comment->certifyKey) === false
         ) {
             throw new NotMatchCertifyKeyException;
