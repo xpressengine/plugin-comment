@@ -33,7 +33,7 @@
                     </div>
                 @endif
                 <div class="comment_form_btn">
-                    <a href="#" class="xe-btn xe-btn-primary bd_btn btn_submit __xe_comment_btn_submit">{{ xe_trans('comment::save') }}</a>
+                    <button type="submit" class="xe-btn xe-btn-primary bd_btn btn_submit __xe_comment_btn_submit">{{ xe_trans('comment::save') }}</button>
                 </div>
             </div>
         </div>

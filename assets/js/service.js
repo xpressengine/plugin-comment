@@ -637,8 +637,8 @@
     //     $(this.dom).fadeOut('slow', callback);
     // },
     setVoteCnt: function (data) {
-      $('.__xe_comment_count.__xe_assent', this.dom).text(data.assent);
-      $('.__xe_comment_count.__xe_dissent', this.dom).text(data.dissent);
+      $('.__xe_comment_count.__xe_assent', this.dom).text(data.assent)
+      $('.__xe_comment_count.__xe_dissent', this.dom).text(data.dissent)
     },
     currentVoteType: function (elem) {
       if ($(elem).hasClass('__xe_assent')) {
@@ -749,18 +749,22 @@
           submitting = true
         }
 
-        window.XE.post($(this).attr('action'), $(this).serialize()).then(function (response) {
-          self.callback(response.data)
+        window.XE.post($(this).attr('action'), $(this).serialize())
+          .then(function (response) {
+            self.callback(response.data)
 
-          $(self._getForm()).trigger('reset')
-          if (self.editor && self.getMode() == 'create') {
-            self.editor.reset()
-          }
+            $(self._getForm()).trigger('reset')
+            if (self.editor && self.getMode() == 'create') {
+              self.editor.reset()
+            }
 
-          $('button, input[type=submit], input[type=button]', self.dom).prop('disabled', false)
-
-          submitting = false
-        })
+            submitting = false
+            $('button, input[type=submit], input[type=button]', self.dom).prop('disabled', false)
+          })
+          .catch(function () {
+            submitting = false
+            $('button, input[type=submit], input[type=button]', self.dom).prop('disabled', false)
+          })
       })
     }
   }
