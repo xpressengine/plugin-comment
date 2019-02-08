@@ -3,7 +3,7 @@
   <img src="https://raw.githubusercontent.com/xpressengine/plugin-comment/master/icon.png">
  </p>
  
- # plugin-comment
+# XE3 Comment Plugin
 이 어플리케이션은 Xpressengine3(이하 XE3)의 플러그인 입니다.
 
 이 플러그인은 XE3에서 댓글 기능을 제공합니다.
