@@ -1,4 +1,9 @@
-# plugin-comment
+
+<p align="center"> 
+  <img src="https://raw.githubusercontent.com/xpressengine/plugin-comment/master/icon.png">
+ </p>
+ 
+ # plugin-comment
 이 어플리케이션은 Xpressengine3(이하 XE3)의 플러그인 입니다.
 
 이 플러그인은 XE3에서 댓글 기능을 제공합니다.
@@ -22,7 +27,7 @@ $ php artisan plugin:install comment
 - 프로젝트의 `plugins` 디렉토리 아래 `comment` 디렉토리명으로 압축해제
 - `comment` 디렉토리 이동 후 `composer dump` 명령 실행
 
-#Usage
+# Usage
 ## Interface
 특정페이지에 댓글이 표시되기위해서는 해당페이지를 정보를 가지는 객체가 `Xpressengine\Plugins\Comment\CommentUsable` 인터페이스에 의해 구현되어야 합니다.
 ```php
