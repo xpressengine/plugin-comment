@@ -215,6 +215,10 @@ class UserController extends Controller
             $e->setMessage(xe_trans('comment::unknownTargetObject'));
             throw $e;
         }
+        // 댓글이 허용되지않은 게시물일 경우 잘못된 요청 에러 처리
+        if(!$targetModel->boardData->allow_comment){
+            abort(500, xe_trans('comment::notAllowedComment'));
+        }
         $inputs['target_author_id'] = $targetModel->getAuthor()->getId();
 
 

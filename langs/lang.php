@@ -361,4 +361,8 @@ return [
         'ko' => '삭제된 게시물',
         'en' => 'Deleted post'
     ],
+    'notAllowedComment' => [
+        'ko' => '해당 게시물이 댓글을 허용하지 않습니다.',
+        'en' => 'This document does not allow comments.'
+    ]
 ];
