@@ -202,7 +202,7 @@ class Plugin extends AbstractPlugin
                 'ordering' => 3010
             ],
             'contents.comment.trash' => [
-                'title' => 'comment::trash',
+                'title' => 'comment::trashManage',
                 'display' => true,
                 'description' => '',
                 'ordering' => 3020

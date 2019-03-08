@@ -9,8 +9,8 @@ return [
         'ko' => '댓글 관리',
         'en' => 'Comment Manage',
     ],
-    'trash' => [
-        'ko' => '휴지통',
+    'trashManage' => [
+        'ko' => '휴지통 관리',
         'en' => 'Trash Manage',
     ],
     'manage' => [
