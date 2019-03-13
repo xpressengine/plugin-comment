@@ -12,12 +12,16 @@ use Xpressengine\User\Rating;
         <div class="comment_entity_body">
             <div class="comment_entity_body_meta">
                 <!-- [D] 클릭시 클래스 on 적용 -->
-                <span class="mb_author xe-dropdown">
-                    <a href="{{ sprintf('/@%s', $item->user_id) }}" class="author {{ $item->getAuthor()->getRating() !== Rating::GUEST ? '__xe_user' : '' }}"
-                       data-toggle="xe-page-toggle-menu"
-                       data-url="{{ route('toggleMenuPage') }}"
-                       data-data='{!! json_encode(['id'=>$item->user_id, 'type'=>'user']) !!}'>{{ $item->writer }}</a>
-               </span>
+                @if ($item->author != null)
+                    <span class="mb_author xe-dropdown">
+                        <a href="{{ sprintf('/@%s', $item->user_id) }}" class="author {{ $item->getAuthor()->getRating() !== Rating::GUEST ? '__xe_user' : '' }}"
+                           data-toggle="xe-page-toggle-menu"
+                           data-url="{{ route('toggleMenuPage') }}"
+                           data-data='{!! json_encode(['id'=>$item->user_id, 'type'=>'user']) !!}'>{{ $item->writer }}</a>
+                   </span>
+                @else
+                    <span class="mb_author">{{ $item->writer }}</span>
+                @endif
                 <span class="date" data-xe-timeago="{{ $item->created_at }}" title="{{ $item->created_at }}">{{ $item->created_at }}</span>
 
                 @if($item->display == Comment::DISPLAY_SECRET)
