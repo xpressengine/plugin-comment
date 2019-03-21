@@ -2,7 +2,7 @@
   "name": "xpressengine-plugin/comment",
   "description": "XpressEngine's plugin for bundle (XE)",
   "keywords": ["xpressengine bundle", "comment", "comment service"],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "support": {
     "email": "developers@xpressengine.com"
   },
