@@ -353,7 +353,8 @@
   height: 20px;
   color: #bebebe;
   text-align: center;
-  font-size: 18px;
+  font-size: 13px;
+  text-decoration: none;
 }
 
 .comment_entity .comment_more_view.on+.ly_popup {
