@@ -1,6 +1,6 @@
 {
   "name": "xpressengine-plugin/comment",
-  "description": "XpressEngine's plugin for bundle (XE)",
+  "description": "댓글 기능을 제공하는 플러그인 입니다.",
   "keywords": ["xpressengine bundle", "comment", "comment service"],
   "version": "1.0.1",
   "support": {
@@ -10,7 +10,7 @@
     {
       "name": "XE Developers",
       "email": "developers@xpressengine.com",
-      "homepage": "http://xpressengine.io",
+      "homepage": "https://store.xehub.io/plugins/comment",
       "role": "Developer"
     }
   ],
