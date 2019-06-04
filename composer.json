@@ -2,7 +2,7 @@
   "name": "xpressengine-plugin/comment",
   "description": "댓글 기능을 제공하는 플러그인 입니다.",
   "keywords": ["xpressengine bundle", "comment", "comment service"],
-  "version": "1.0.1",
+  "version": "1.0.2",
   "support": {
     "email": "developers@xpressengine.com"
   },
@@ -44,6 +44,7 @@
     }
   },
   "require": {
+    "xpressengine/xpressengine": "~3.0.2",
     "xpressengine-plugin/ckeditor": "*"
   },
   "require-dev": {
