@@ -2,7 +2,7 @@
   "name": "xpressengine-plugin/comment",
   "description": "댓글 기능을 제공하는 플러그인 입니다.",
   "keywords": ["xpressengine bundle", "comment", "comment service"],
-  "version": "1.0.2",
+  "version": "1.0.3",
   "support": {
     "email": "developers@xpressengine.com"
   },
@@ -14,7 +14,7 @@
       "role": "Developer"
     }
   ],
-  "license": "LGPL-2.1-or-later",
+  "license": "LGPL-3.0-or-later",
   "type": "xpressengine-plugin",
   "extra": {
     "xpressengine": {
