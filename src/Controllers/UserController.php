@@ -77,6 +77,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        $targetType = $request->get('target_type');
         $targetId = $request->get('target_id');
         $instanceId = $request->get('instance_id');
 
@@ -88,8 +89,8 @@ class UserController extends Controller
         $take = $request->get('perPage', $config['perPage']);
 
         $model = $this->handler->createModel($instanceId);
-        $query = $model->newQuery()->whereHas('target', function ($query) use ($targetId) {
-            $query->where('target_id', $targetId);
+        $query = $model->newQuery()->whereHas('target', function ($query) use ($targetId, $targetType) {
+            $query->where('target_id', $targetId)->where('target_type', $targetType);
         })
 //            ->where('approved', Comment::APPROVED_APPROVED)
             ->where('display', '!=', Comment::DISPLAY_HIDDEN);
@@ -215,10 +216,7 @@ class UserController extends Controller
             $e->setMessage(xe_trans('comment::unknownTargetObject'));
             throw $e;
         }
-        // 댓글이 허용되지않은 게시물일 경우 잘못된 요청 에러 처리
-        if(!$targetModel->boardData->allow_comment){
-            abort(500, xe_trans('comment::notAllowedComment'));
-        }
+        
         $inputs['target_author_id'] = $targetModel->getAuthor()->getId();
 
 

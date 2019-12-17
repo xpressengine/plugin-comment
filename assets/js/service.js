@@ -99,7 +99,8 @@
       var that = this
       var data = {
         target_id: $(this.container).data('target_id'),
-        instance_id: $(this.container).data('instance_id')
+        instance_id: $(this.container).data('instance_id'),
+        target_type: $(this.container).data('target_type')
       }
 
       if (this.items.length > 0) {
