@@ -89,6 +89,6 @@ class Target extends DynamicModel
      */
     public function commentable()
     {
-        return $this->morphTo('target');
+        return $this->morphTo(null, 'target_type', 'target_id');
     }
 }
