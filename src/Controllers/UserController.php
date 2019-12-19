@@ -30,6 +30,8 @@ use Xpressengine\Editor\PurifierModules\EditorContent;
 use Xpressengine\Http\Request;
 use Xpressengine\Permission\Instance;
 use Xpressengine\Plugins\Comment\CommentUsable;
+use Xpressengine\Plugins\Comment\Events\CommentCreateEvent;
+use Xpressengine\Plugins\Comment\Events\CommentRetrievedEvent;
 use Xpressengine\Plugins\Comment\Exceptions\InvalidArgumentException;
 use Xpressengine\Plugins\Comment\Handler;
 use Xpressengine\Plugins\Comment\Plugin;
@@ -85,6 +87,8 @@ class UserController extends Controller
         $offsetReply = !empty($request->get('offsetReply')) ? $request->get('offsetReply') : null;
 
         $config = $this->handler->getConfig($instanceId);
+
+        \Event::dispatch(new CommentRetrievedEvent($request));
 
         $take = $request->get('perPage', $config['perPage']);
 
@@ -219,6 +223,7 @@ class UserController extends Controller
         
         $inputs['target_author_id'] = $targetModel->getAuthor()->getId();
 
+        \Event::dispatch(new CommentCreateEvent($request));
 
         /** @var Comment $comment */
         $comment = $this->handler->create($inputs);
