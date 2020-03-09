@@ -140,7 +140,7 @@ class ManagerController extends Controller
             $query = $this->makeWhere($query, $request);
         }
 
-        $comments = $query->orderBy(Comment::CREATED_AT)->with('target')->paginate();
+        $comments = $query->orderBy(Comment::CREATED_AT, 'desc')->with('target')->paginate()->appends($request->except('page'));
 
         $map = $this->handler->getInstanceMap();
         $menuItems = $menus->items()->fetchIn(array_keys($map), 'route')->getDictionary();
@@ -251,7 +251,7 @@ class ManagerController extends Controller
         $comments = $model->newQuery()
             ->whereIn('instance_id', $this->getInstances())
             ->where('status', Comment::STATUS_TRASH)
-            ->orderBy(Comment::CREATED_AT)->paginate();
+            ->orderBy(Comment::CREATED_AT, 'desc')->paginate()->appends($request->except('page'));
 
         $map = $this->handler->getInstanceMap();
         $menuItems = $menus->items()->fetchIn(array_keys($map), 'route')->getDictionary();
