@@ -90,7 +90,7 @@ class ManagerController extends Controller
             ->whereIn('instance_id', $this->getInstances())
             ->where('status', '!=', Comment::STATUS_TRASH);
 
-        $totalCount = count($query->get());
+        $totalCount = $query->count();
 
         $statusMessage = xe_trans('comment::status');
 
