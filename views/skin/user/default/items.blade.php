@@ -53,7 +53,7 @@ use Xpressengine\User\Rating;
                 {!! compile($item->instance_id, $item->getContent(), $item->format === Comment::FORMAT_HTML) !!}
                 @else
                     @if($item->display == Comment::DISPLAY_SECRET)
-                        {{ xe_trans('comment::SecretContent') }}
+                        {{ xe_trans('comment::secretContent') }}
                     @else
                         {{ xe_trans('comment::NotAllowContent') }}
                     @endif
