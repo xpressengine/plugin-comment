@@ -2,7 +2,12 @@
   "private": true,
   "scripts": {
     "eslint": "./node_modules/eslint/bin/eslint.js ./assets/js",
-    "eslint-fix": "./node_modules/eslint/bin/eslint.js --fix ./assets/js"
+    "eslint-fix": "./node_modules/eslint/bin/eslint.js --fix ./assets/js",
+    "dev": "gulp",
+    "lint": "gulp lint",
+    "fix-style": "gulp lint:fix-style",
+    "watch": "gulp watch",
+    "build": "NODE_ENV=production gulp build"
   },
   "devDependencies": {
     "eslint": "^4.17.0",
@@ -10,7 +15,26 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-standard": "^3.0.1"
+    "eslint-plugin-standard": "^3.0.1",
+    "@babel/preset-env": "^7.7.7",
+    "@babel/register": "^7.7.7",
+    "babel-plugin-transform-builtin-extend": "^1.1.2",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^7.0.1",
+    "gulp-babel": "^8.0.0",
+    "gulp-browserify": "^0.5.1",
+    "gulp-if": "^3.0.0",
+    "gulp-load-plugins": "^2.0.1",
+    "gulp-plumber": "^1.2.1",
+    "gulp-rename": "^2.0.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-stylelint": "^11.0.0",
+    "gulp-util": "^3.0.8",
+    "gulp-posthtml": "^3.0.4",
+    "posthtml": "^0.11.6",
+    "posthtml-extend": "^0.3.0",
+    "posthtml-include": "^1.2.0"
   },
   "eslintConfig": {
     "extends": "standard",
@@ -26,5 +50,8 @@
   },
   "eslintIgnore": [
     "tests/"
-  ]
+  ],
+  "dependencies": {
+    "bootstrap": "^4.4.1"
+  }
 }
