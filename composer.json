@@ -31,6 +31,11 @@
           "name": "기본 스킨",
           "description": "댓글 기본 스킨 입니다."
         },
+        "comment/skin/comment@new_default": {
+          "class": "Xpressengine\\Plugins\\Comment\\Skins\\NewDefaultUserSkin",
+          "name": "신규 기본 스킨",
+          "description": "신규 댓글 기본 스킨 입니다."
+        },
         "comment/settingsSkin/comment@default": {
           "class": "Xpressengine\\Plugins\\Comment\\Skins\\ManagerSkin",
           "name": "관리자 기본 스킨",
