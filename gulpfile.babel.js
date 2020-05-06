@@ -22,7 +22,7 @@ taskSass.displayName = 'sass'
 
 const taskPosthtml = function () {
   const options = {
-    root: '../markup/new_skin/src'
+    root: './markup/new_skin/src'
   }
 
   const plugins = [
@@ -30,9 +30,9 @@ const taskPosthtml = function () {
     require('posthtml-include')(options)
   ]
 
-  return gulp.src(['../markup/new_skin/src/**/*.html', '!**/_*.html'])
+  return gulp.src(['./markup/new_skin/src/*.html', '!**/_*.html'])
     .pipe($.posthtml(plugins))
-    .pipe(gulp.dest('../markup/new_skin/'))
+    .pipe(gulp.dest('./markup/new_skin/'))
 }
 taskPosthtml.displayName = 'posthtml'
 
