@@ -12,7 +12,7 @@ use Xpressengine\User\Rating;
          data-indent="{{ $item->getDepth() }}">
         <div class="xf-profile-img-box">
             <div class="xf-profile-img"
-                 style="background-image: url('/assets/core/user/img/default_avatar.jpg')"></div>
+                 style="background-image: url({{ $item->user->getProfileImage() }});"></div>
         </div>
         <div class="xf-comment-contents-box">
             <div class="xf-comment-info-box">
