@@ -17,7 +17,16 @@ use Xpressengine\User\Rating;
         <div class="xf-comment-contents-box">
             <div class="xf-comment-info-box">
                 <div class="xf-profile-box">
-                    <span class="xf-comment-nickname">{{ $item->writer }}</span>
+                    @if ($item->author != null)
+                        <a href="#" class="xf-profile__link xf-a xe-dropdown {{ $item->getAuthor()->getRating() !== Rating::GUEST ? '__xe_user' : '' }}"
+                           data-toggle="xe-page-toggle-menu"
+                           data-url="{{ route('toggleMenuPage') }}"
+                           data-data='{!! json_encode(['id'=>$item->user_id, 'type'=>'user']) !!}'>
+                            <span class="xf-comment-nickname">{{ $item->writer }}</span>
+                        </a>
+                    @else
+                        <span class="xf-comment-nickname">{{ $item->writer }}</span>
+                    @endif
                     <span class="xf-comment-date">{{ $item->created_at->format('Y.m.d') }}</span>
                 </div>
                 <div class="xf-comment-edit-box xf-list">

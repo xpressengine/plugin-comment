@@ -1,8 +1,17 @@
 @charset "UTF-8";
 /* 코멘트 */
 .xf-comment-box {
+  margin-top: 40px;
+}
+
+@media (min-width: 992px) {
+  .xf-comment-box {
+    margin-top: 60px;
+  }
+}
+
+.xf-comment-box * {
   outline: none;
-  vertical-align: middle;
 }
 
 .xf-comment-box .xf-list {
@@ -157,11 +166,13 @@
 
 .xf-comment-box .xf-comment-contents .xf-comment-item .xf-comment-contents-box .xf-comment-info-box .xf-profile-box {
   flex: 1;
+  font-size: 13px;
 }
 
 .xf-comment-box .xf-comment-contents .xf-comment-item .xf-comment-contents-box .xf-comment-info-box .xf-profile-box .xf-comment-nickname {
   color: #141414;
   margin-right: 6px;
+  font-size: 13px;
 }
 
 .xf-comment-box .xf-comment-contents .xf-comment-item .xf-comment-contents-box .xf-comment-info-box .xf-profile-box .xf-comment-date {
@@ -330,6 +341,22 @@
   width: 100%;
 }
 
+.xf-comment-box .xf-comment-contents .xf-comment-item .comment_action_area.modify {
+  padding-top: 20px;
+}
+
+.xf-comment-box .xf-comment-contents .xf-comment-item .comment_action_area .comment_action_area_avatar {
+  padding: 20px 0 10px 0;
+}
+
+
+.xf-comment-box .xf-comment-contents .xf-comment-item .comment_action_area .comment_action_area_avatar img {
+  height: 34px;
+  width: 34px;
+  border-radius: 50%;
+  border: 1px solid #e0e0e0;
+}
+
 .xf-comment-box .xf-comment-contents .xf-comment-item p {
   font-size: 14px;
   line-height: 20px;
@@ -373,12 +400,15 @@
   margin-bottom: 15px;
 }
 
+.xf-comment-box .comment_form_ckeditor .file-attach-group {
+  margin-top: -1px;
+}
+
 .xf-comment-box .comment_form_controller {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   outline: none;
-  padding: 0 15px;
   font-size: 15px;
   line-height: 26px;
   letter-spacing: -0.2px;
@@ -404,13 +434,15 @@
   outline: none;
   padding: 10px 25px;
   font-size: 15px;
-  line-height: 26px;
   letter-spacing: -0.2px;
 }
 
 .xf-comment-box .xe-dropdown-menu {
+  font-size: 13px;
+}
+
+.xf-comment-box .xf-comment-edit-box .xe-dropdown-menu {
   position: absolute;
   right: 0;
   left: auto;
-  font-size: 13px;
 }
