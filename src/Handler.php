@@ -708,7 +708,7 @@ class Handler
         })->get();
 
         foreach ($comments as $comment) {
-            $comment->instanceId = $newInstanceId;
+            $comment->instance_id = $newInstanceId;
 
             $this->documents->put($comment);
         }
