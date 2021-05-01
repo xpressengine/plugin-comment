@@ -93,7 +93,7 @@ class Comment extends Document
     public function getContent()
     {
         if ($this->status === static::STATUS_TRASH || $this->approved === static::APPROVED_REJECTED) {
-            return xe_trans('comment::RemoveContent');
+            return xe_trans('comment::removeContent');
         }
         
         return $this->content;
