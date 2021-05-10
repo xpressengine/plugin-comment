@@ -93,6 +93,7 @@ class CommentUIObject extends AbstractUIObject
 
         $props = [
             'config' => [
+                'removeType' => $config->get('removeType'),
                 'reverse' => $config->get('reverse'),
                 'editor' => null,
             ]
@@ -146,6 +147,6 @@ class CommentUIObject extends AbstractUIObject
     {
         XeFrontend::js('plugins/comment/assets/js/service.js')->appendTo('head')->load();
 
-        XeFrontend::translation(['xe::autoSave', 'xe::confirmDelete', 'comment::msgRemoveUnable']);
+        XeFrontend::translation(['xe::autoSave', 'xe::confirmDelete', 'comment::msgRemoveUnable', 'comment::removeContent']);
     }
 }
