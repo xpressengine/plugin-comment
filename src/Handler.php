@@ -256,6 +256,12 @@ class Handler
      */
     public function existInstance($instanceId)
     {
+        $commentMap = $this->configs->get('comment_map')->all();
+
+        if (array_key_exists($instanceId, $commentMap)) {
+            return true;
+        }
+
         return $this->configs->get($this->getKeyForConfig($instanceId)) !== null;
     }
 
