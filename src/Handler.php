@@ -14,9 +14,12 @@
 
 namespace Xpressengine\Plugins\Comment;
 
+use Illuminate\Pagination\Paginator;
 use Illuminate\Session\Store as SessionStore;
+use Xpressengine\Config\ConfigEntity;
 use Xpressengine\Config\ConfigManager;
 use Xpressengine\Document\DocumentHandler;
+use Xpressengine\Http\Request;
 use Xpressengine\Keygen\Keygen;
 use Xpressengine\Permission\Grant;
 use Xpressengine\Permission\PermissionHandler;
@@ -808,5 +811,43 @@ class Handler
     public function setModel($model)
     {
         $this->model = '\\' . ltrim($model, '\\');
+    }
+
+    /**
+     * Get Comment Items
+     *
+     * @param Request $request
+     * @param ConfigEntity $config
+     * @param $query
+     * @return Paginator
+     */
+    public function getItems(Request $request, ConfigEntity $config, $query)
+    {
+        $offsetHead = !empty($request->get('offsetHead')) ? $request->get('offsetHead') : null;
+        $offsetReply = !empty($request->get('offsetReply')) ? $request->get('offsetReply') : null;
+
+        $take = $request->get('perPage', $config['perPage']);
+        $direction = $config->get('reverse') === true ? 'asc' : 'desc';
+
+        if ($offsetHead !== null) {
+            $query->where(function ($query) use ($offsetHead, $offsetReply, $direction) {
+                $query->where('head', $offsetHead);
+                $operator = $direction == 'desc' ? '<' : '>';
+                $offsetReply = $offsetReply ?: '';
+
+                $query->where('reply', $operator, $offsetReply);
+                $query->orWhere('head', '<', $offsetHead);
+            });
+        }
+
+        $query->orderBy('head', 'desc')->orderBy('reply', $direction)->take($take + 1);
+
+        $comments = $query->with('target.commentable')->get();
+
+        foreach ($comments as $comment) {
+            $this->bindUserVote($comment);
+        }
+
+        return new Paginator($comments, $take);
     }
 }
