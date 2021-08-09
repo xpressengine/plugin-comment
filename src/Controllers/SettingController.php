@@ -257,6 +257,18 @@ class SettingController extends Controller
     }
 
     /**
+     * get global TM
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
+    public function getGlobalTM()
+    {
+        return XePresenter::make('global.tm', [
+            'section' => new ToggleMenuSection($this->plugin->getId()),
+        ]);
+    }
+
+    /**
      * config 설정 페이지로 redirection
      *
      * @param string $targetInstanceId target instance id
