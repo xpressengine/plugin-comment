@@ -562,7 +562,7 @@
       })
     },
     getListBox: function () {
-      return $('.__xe_comment_list', this.container)
+      return $(this.container).find('.__xe_comment_list')
     },
     getFormBox: function () {
       return $('.__xe_comment_form', this.container)
