@@ -69,7 +69,6 @@
 
         var dom = $.parseHTML(data.html)
         var form = new CommentForm(dom, 'create', function (data) {
-          that.items = []
           that._assetLoad(data.XE_ASSET_LOAD)
 
           var items = that.makeItems($.parseHTML(data.items, document, true))
@@ -110,6 +109,7 @@
       }
 
       window.XE.get($(this.container).data('urls').index, data).then(function (response) {
+        that.items = [];
         that._assetLoad(response.data.XE_ASSET_LOAD)
 
         var items = that.makeItems($.parseHTML(response.data.items, document, true))
