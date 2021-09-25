@@ -36,6 +36,16 @@
           "name": "관리자 기본 스킨",
           "description": "댓글 관리자 기본스킨 입니다.",
           "screenshot" : []
+        },
+        "comment/toggleMenu/comment@deleteItem": {
+          "class": "Xpressengine\\Plugins\\Comment\\ToggleMenus\\Comments\\DeleteItem",
+          "name": "댓글 삭제",
+          "description": "댓글 삭제에 대한 토글 메뉴"
+        },
+        "comment/toggleMenu/comment@editItem": {
+          "class": "Xpressengine\\Plugins\\Comment\\ToggleMenus\\Comments\\EditItem",
+          "name": "댓글 수정",
+          "description": "댓글 수정에 대한 토글 메뉴"
         }
       }
     },
