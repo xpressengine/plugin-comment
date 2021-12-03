@@ -466,7 +466,14 @@
             return
           }
 
-          self.removeItem(item)
+          if(self.props.config.hasOwnProperty('removeType') && self.props.config.removeType === 'blind') {
+            var _item = $(item.dom)
+            _item.find('xe-content').html(window.XE.Lang.trans('comment::removeContent'))
+            _item.find('.comment_entity_tool').remove()
+            _item.find('.comment_action').remove()
+          }else {
+            self.removeItem(item)
+          }
 
           fire('deleted', self, [item, null])
           comment.$$emit('item.deleted', { item: item })
