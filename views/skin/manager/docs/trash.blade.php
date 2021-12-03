@@ -46,7 +46,19 @@
                                         </strong>
                                         {{ str_limit($comment->pure_content, 100) }}
                                     </td>
-                                    <td><a href="#">{{ $comment->writer }}</a></td>
+                                    <td>
+                                        @if ($comment->user !== null)
+                                            <a href="#"
+                                               data-toggle="xe-page-toggle-menu"
+                                               data-url="{{ route('toggleMenuPage') }}"
+                                               data-data='{!! json_encode(['id' => $comment->user->getId(), 'type'=>'user']) !!}'
+                                               data-text="{{ $comment->writer }}">
+                                                {{ $comment->writer }}
+                                            </a>
+                                        @else
+                                            <span>{{ $comment->writer }}</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $comment->assent_count }} / {{ $comment->dissent_count }}</td>
                                     <td><a href="#">{{ str_replace('-', '.', substr($comment->created_at, 0, 16)) }}</a></td>
                                     <td><a href="#">{{ str_replace('-', '.', substr($comment->deleted_at, 0, 16)) }}</a></td>

@@ -45,6 +45,7 @@ class ManagerSkin extends AbstractSkin
 
         $segment = explode('/', pathinfo($view->getPath(), PATHINFO_DIRNAME));
         $type = array_pop($segment);
+
         if (in_array($type, ['global', 'instance'])) {
             return view(
                 sprintf('%s.%s.%s', $prefix, $type, '_frame'),

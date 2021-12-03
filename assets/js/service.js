@@ -110,6 +110,7 @@
       }
 
       window.XE.get($(this.container).data('urls').index, data).then(function (response) {
+        that.items = [];
         that._assetLoad(response.data.XE_ASSET_LOAD)
 
         var items = that.makeItems($.parseHTML(response.data.items, document, true))
@@ -569,7 +570,7 @@
       })
     },
     getListBox: function () {
-      return $('.__xe_comment_list', this.container)
+      return $(this.container).find('.__xe_comment_list')
     },
     getFormBox: function () {
       return $('.__xe_comment_form', this.container)

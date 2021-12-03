@@ -37,6 +37,8 @@ Route::settings('comment', function () {
 
         Route::get('perm', ['as' => 'perm', 'uses' => 'SettingController@getGlobalPerm']);
         Route::post('perm', ['as' => 'perm', 'uses' => 'SettingController@postGlobalPerm']);
+
+        Route::get('tm', ['as' => 'tm', 'uses' => 'SettingController@getGlobalTM']);
     });
 });
 

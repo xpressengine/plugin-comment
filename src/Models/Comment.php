@@ -68,7 +68,10 @@ class Comment extends Document
     public function files()
     {
         $file = new File;
-        return $this->belongsToMany(File::class, $file->getFileableTable(), 'fileable_id', 'file_id');
+
+        return $this->belongsToMany(File::class, $file->getFileableTable(), 'fileable_id', 'file_id')
+            ->withPivot('created_at')
+            ->orderBy('pivot_' . 'created_at', 'asc');
     }
 
     /**

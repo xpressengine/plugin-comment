@@ -1,5 +1,11 @@
 @section('page_title')
-    <h2>{{xe_trans('comment::manage.detailSetting')}}</h2>
+    <h2>
+        @if ($menuItem)
+            {{ xe_trans($menuItem->title) }} -
+        @endif
+
+        {{xe_trans('comment::manage.detailSetting')}}
+    </h2>
 @endsection
 
 @section('page_description')

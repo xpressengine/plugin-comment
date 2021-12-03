@@ -3,6 +3,7 @@
         <div class="panel-heading">
             <div class="pull-left">
                 <h3 class="panel-title">{{xe_trans('xe::permission')}}</h3>
+                <small><a href="{{ route('comment::setting.global.perm') }}" target="_blank">{{xe_trans('xe::moveToParentSettingPage')}}</a></small>
             </div>
         </div>
         <div id="commentBasic" class="panel-collapse collapse in">

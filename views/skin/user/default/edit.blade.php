@@ -7,9 +7,7 @@
 
         <div class="comment_form_editor">
             <div class="comment_form_ckeditor __xe_content">
-                <textarea name="content" placeholder="Write your opinion to here">
-                    {!! $comment->content !!}
-                </textarea>
+                <textarea name="content" placeholder="Write your opinion to here">{!! $comment->content !!}</textarea>
             </div>
             <p>
                 <!-- dynamic field area start -->

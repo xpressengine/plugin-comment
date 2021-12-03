@@ -19,11 +19,13 @@ use App\Http\Sections\DynamicFieldSection;
 use App\Http\Sections\EditorSection;
 use App\Http\Sections\SkinSection;
 use App\Http\Sections\ToggleMenuSection;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use XeDB;
 use XeMenu;
 use XePresenter;
 use Xpressengine\Http\Request;
 use Xpressengine\Permission\PermissionSupport;
+use Xpressengine\Plugins\Comment;
 
 /**
  * SettingController
@@ -39,8 +41,10 @@ class SettingController extends Controller
 {
     use PermissionSupport;
 
+    /** @var Comment\Plugin  */
     protected $plugin;
 
+    /** @var Comment\Handler  */
     protected $handler;
 
     /**
@@ -51,6 +55,16 @@ class SettingController extends Controller
         $this->plugin = app('xe.plugin.comment');
         $this->handler = $this->plugin->getHandler();
         XePresenter::setSettingsSkinTargetId($this->plugin->getId());
+
+        $this->middleware(function ($request, $next) {
+            if ($targetInstanceId = $request->route()->parameter('targetInstanceId')) {
+                if (! $this->handler->existInstance($targetInstanceId)) {
+                    throw new NotFoundHttpException(sprintf("Not Found Comment %s Instance", $targetInstanceId));
+                }
+            }
+
+            return $next($request);
+        });
     }
 
     /**
@@ -240,6 +254,18 @@ class SettingController extends Controller
         $this->permissionRegister($request, $this->handler->getKeyForPerm(), ['create', 'manage']);
 
         return redirect()->back();
+    }
+
+    /**
+     * get global TM
+     *
+     * @return mixed|\Xpressengine\Presenter\Presentable
+     */
+    public function getGlobalTM()
+    {
+        return XePresenter::make('global.tm', [
+            'section' => new ToggleMenuSection($this->plugin->getId()),
+        ]);
     }
 
     /**
