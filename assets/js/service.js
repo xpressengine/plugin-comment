@@ -53,6 +53,7 @@
     this.container = container
     this.props = $.extend({}, defaultProps, $(container).data('props'))
     this.state = {ing: false}
+    this.items = []
   }
 
   Comment.prototype = {
