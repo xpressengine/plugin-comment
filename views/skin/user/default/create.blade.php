@@ -29,7 +29,7 @@
             @endif
             @if($config->get('secret') === true && !Auth::guest())
             <div class="comment_form_option">
-                <input type="checkbox" name="display" value="secret" id="private_text"><label for="private_text">{{ xe_trans('comment::secret') }}</label>
+                <input type="checkbox" name="display" value="secret" id="private_text--{{ $targetId }}--{{ $instanceId }}--{{ $targetType }}"><label for="private_text--{{ $targetId }}--{{ $instanceId }}--{{ $targetType }}">{{ xe_trans('comment::secret') }}</label>
             </div>
             @endif
             <div class="comment_form_btn">
