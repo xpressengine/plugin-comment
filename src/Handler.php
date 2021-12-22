@@ -842,7 +842,12 @@ class Handler
 
         $query->orderBy('head', 'desc')->orderBy('reply', $direction)->take($take + 1);
 
-        $comments = $query->with('target.commentable')->get();
+        $query->with([
+            'author',
+            'target.commentable'
+        ]);
+
+        $comments = $query->get();
 
         foreach ($comments as $comment) {
             $this->bindUserVote($comment);
