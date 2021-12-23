@@ -853,6 +853,7 @@ class Handler
 
         $query->with([
             'author',
+            'files',
             'target.commentable'
         ]);
 
