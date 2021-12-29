@@ -25,9 +25,12 @@
                     </div>
                 @endif
                 @if($config->get('secret') === true && !Auth::guest())
+                @php
+                $htmlIdPrivateText = app('xe.keygen')->generate();
+                @endphp
                     <div class="comment_form_option">
-                        <input type="checkbox" name="display" value="secret" id="private_text--{{ $instanceId }}--{{ $comment->id }}" {{ $comment->display === Xpressengine\Plugins\Comment\Models\Comment::DISPLAY_SECRET ? 'checked' : '' }}>
-                        <label for="private_text--{{ $instanceId }}--{{ $comment->id }}">{{ xe_trans('comment::secret') }}</label>
+                        <input type="checkbox" name="display" value="secret" id="private_text--{{ $htmlIdPrivateText }}" {{ $comment->display === Xpressengine\Plugins\Comment\Models\Comment::DISPLAY_SECRET ? 'checked' : '' }}>
+                        <label for="private_text--{{ $htmlIdPrivateText }}">{{ xe_trans('comment::secret') }}</label>
                     </div>
                 @endif
                 <div class="comment_form_btn">
