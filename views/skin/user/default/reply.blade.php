@@ -31,9 +31,12 @@
                 </div>
                 @endif
                 @if($config->get('secret') === true && !Auth::guest())
+                @php
+                $htmlIdPrivateTextReply = app('xe.keygen')->generate();
+                @endphp
                 <div class="comment_form_option">
                     <!-- [D] id, for 값 동일하게 적용 -->
-                    <input type="checkbox" name="display" value="secret" id="private_text_reply--{{ $comment->instance_id }}--{{ $comment->target->target_id }}--{{ $comment->id }}--{{ $targetType }}"><label for="private_text_reply--{{ $comment->instance_id }}--{{ $comment->target->target_id }}--{{ $comment->id }}--{{ $targetType }}">{{ xe_trans('comment::secret') }}</label>
+                    <input type="checkbox" name="display" value="secret" id="private_text_reply--{{ $htmlIdPrivateTextReply }}"><label for="private_text_reply--{{ $htmlIdPrivateTextReply }}">{{ xe_trans('comment::secret') }}</label>
                 </div>
                 @endif
                 <div class="comment_form_btn">
