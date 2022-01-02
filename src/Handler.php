@@ -845,9 +845,13 @@ class Handler
                 $operator = $direction == 'desc' ? '<' : '>';
                 $offsetReply = $offsetReply ?: '';
 
-                $query->where('head', $offsetHead);
-                $query->where('reply', $operator, $offsetReply);
-                $query->orWhere('head', '<', $offsetHead);
+                $query->where(
+                    function ($query) use ($offsetHead, $operator, $offsetReply) {
+                        $query->where('head', $offsetHead);
+                        $query->where('reply', $operator, $offsetReply);
+                        $query->orWhere('head', '<', $offsetHead);
+                    }
+                );
             }
         );
 
