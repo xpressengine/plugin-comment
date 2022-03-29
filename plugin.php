@@ -14,6 +14,7 @@
 
 namespace Xpressengine\Plugins\Comment;
 
+use Illuminate\Console\Application as Artisan;
 use Xpressengine\Permission\Grant;
 use Xpressengine\Plugin\AbstractPlugin;
 use Xpressengine\Plugins\Comment\Migrations\Migration;
@@ -149,6 +150,14 @@ class Plugin extends AbstractPlugin
         XeSkin::setDefaultSettingsSkin('comment', 'comment/settingsSkin/comment@default');
 
         XeTrash::register(RecycleBin::class);
+
+        $commands = [
+            Console\Commands\MakeCommentSkin::class
+        ];
+
+        Artisan::starting(static function ($artisan) use ($commands) {
+            $artisan->resolveCommands($commands);
+        });
     }
 
     public function register()
@@ -177,7 +186,7 @@ class Plugin extends AbstractPlugin
     {
         intercept(
             'XeComment@createInstance',
-             'comment::setEditor',
+            'comment::setEditor',
             function ($func, $targetInstanceId, $division = false) {
                 $func($targetInstanceId, $division);
 
@@ -287,7 +296,7 @@ class Plugin extends AbstractPlugin
     /**
      * @return boolean
      */
-    public function checkUpdated($installedVersion = NULL)
+    public function checkUpdated($installedVersion = null)
     {
         // ver 0.9.1
         if (XeConfig::get(XeToggleMenu::getConfigKey('comment', null)) == null) {

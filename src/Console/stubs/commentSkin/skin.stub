@@ -1,0 +1,28 @@
+<?php
+
+namespace DummyNamespace;
+
+use View;
+use Illuminate\Contracts\Support\Renderable;
+use Xpressengine\Skin\GenericSkin;
+
+/**
+ * Class DummyClass
+ *
+ * @package DummyNamespace
+ */
+class DummyClass extends GenericSkin
+{
+    protected static $path = 'DummyPluginId/DummySkinDirname';
+
+    /**
+     * render
+     *
+     * @return Renderable|string
+     */
+    public function render()
+    {
+        $view = View::make(sprintf('%s/views/' . $this->view, static::$path), $this->data);
+        return $view->render();
+    }
+}
