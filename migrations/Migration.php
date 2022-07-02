@@ -19,14 +19,17 @@ use Illuminate\Database\Schema\Blueprint;
 use Schema;
 use XeDB;
 
-class Migration
+class Migration extends \Xpressengine\Support\Migration
 {
     private $table = 'comment_target';
 
     /**
-     * @return void
+     * 서비스에 필요한 자체 환경(타 서비스와 연관이 없는 환경)을 구축한다.
+     * 서비스의 db table 생성과 같은 migration 코드를 작성한다.
+     *
+     * @return mixed
      */
-    public function up()
+    public function install()
     {
         Schema::create($this->table, function (Blueprint $table) {
             $table->engine = "InnoDB";
@@ -39,17 +42,24 @@ class Migration
 
             $table->unique('doc_id');
             $table->index('target_id');
+
+            $table->foreign('doc_id')->references('id')->on('documents');
+            $table->foreign('target_author_id')->references('id')->on('user');
         });
     }
 
     /**
+     * drop table when plugin uninstall
      * @return void
      */
-    public function down()
+    public function uninstall()
     {
         Schema::dropIfExists($this->table);
     }
 
+    /**
+     * @return bool
+     */
     public function tableExists()
     {
         return Schema::hasTable($this->table);

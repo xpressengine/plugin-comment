@@ -96,7 +96,7 @@ class Plugin extends AbstractPlugin
 
             // pivot table
             // schema 처리는 transaction 에 의해 롤백 되지 않으므로 가장 마지막에 수행 함
-            (new Migration())->up();
+            (new Migration())->install();
         });
     }
 
@@ -129,7 +129,7 @@ class Plugin extends AbstractPlugin
 
             // drop pivot table
             // schema 처리는 transaction 에 의해 롤백 되지 않으므로 가장 마지막에 수행 함
-            (new Migration())->down();
+            (new Migration())->uninstall();
         });
     }
 
