@@ -35,10 +35,10 @@ class Migration extends \Xpressengine\Support\Migration
             $table->engine = "InnoDB";
 
             $table->increments('id');
-            $table->string('doc_id', 36);
-            $table->string('target_id', 36);
-            $table->string('target_author_id', 36)->nullable();
-            $table->string('target_type')->nullable();
+            $table->string('doc_id', 36)->comment('document ID');
+            $table->string('target_id', 36)->comment('타겟 ID');
+            $table->string('target_author_id', 36)->nullable()->comment('타겟 소유자 유저 ID');
+            $table->string('target_type')->nullable()->comment('타겟 타입');
 
             $table->unique('doc_id');
             $table->index('target_id');
