@@ -211,6 +211,10 @@
   bottom: -9px;
 }
 
+.comment_form_controller {
+  margin-top: 10px;
+}
+
 .comment_form_controller:after {
   display: block;
   clear: both;
@@ -233,6 +237,10 @@
   min-width: 80px;
   margin-left: 6px;
   font-size: 15px;
+}
+
+.comment_form_editor .comment_form_btn > button:first-child {
+  margin-left: 0;
 }
 
 .comment_form_controller .comment_form_btn .btn_submit {
@@ -299,6 +307,7 @@
   margin-bottom: 9px;
   padding: 9px 0;
   font-size: 14px;
+  padding-left: 20px;
 }
 
 .comment_entity:before {

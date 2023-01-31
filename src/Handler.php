@@ -18,6 +18,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Session\Store as SessionStore;
 use Xpressengine\Config\ConfigEntity;
 use Xpressengine\Config\ConfigManager;
+use Xpressengine\Counter\Models\CounterLog;
 use Xpressengine\Document\DocumentHandler;
 use Xpressengine\Http\Request;
 use Xpressengine\Keygen\Keygen;
@@ -823,29 +824,67 @@ class Handler
      */
     public function getItems(Request $request, ConfigEntity $config, $query)
     {
-        $offsetHead = !empty($request->get('offsetHead')) ? $request->get('offsetHead') : null;
-        $offsetReply = !empty($request->get('offsetReply')) ? $request->get('offsetReply') : null;
+        $counterName = $this->counter->getName();
+
+        $useDissent = $config->get('useDissent', false);
+        $useApprove = $config->get('useApprove', false);
+        $useVote = $useDissent === true || $useApprove === true;
+
+        $offsetHead = $request->get('offsetHead');
+        $offsetHead = empty($offsetHead) === false ? $offsetHead : null;
+
+        $offsetReply = $request->get('offsetReply');
+        $offsetReply = empty($offsetReply) === false ? $offsetReply : null;
 
         $take = $request->get('perPage', $config['perPage']);
         $direction = $config->get('reverse') === true ? 'asc' : 'desc';
 
-        if ($offsetHead !== null) {
-            $query->where(function ($query) use ($offsetHead, $offsetReply, $direction) {
-                $query->where('head', $offsetHead);
+        $query->when(
+            $offsetHead !== null,
+            function ($query) use ($offsetHead, $offsetReply, $direction) {
                 $operator = $direction == 'desc' ? '<' : '>';
                 $offsetReply = $offsetReply ?: '';
 
-                $query->where('reply', $operator, $offsetReply);
-                $query->orWhere('head', '<', $offsetHead);
+                $query->where(
+                    function ($query) use ($offsetHead, $operator, $offsetReply) {
+                        $query->where('head', $offsetHead);
+                        $query->where('reply', $operator, $offsetReply);
+                        $query->orWhere('head', '<', $offsetHead);
+                    }
+                );
+            }
+        );
+
+        $query->with([
+            'author',
+            'files',
+            'target.commentable'
+        ]);
+
+        $query->orderBy('head', 'desc')->orderBy('reply', $direction);
+
+        $comments = $query->take($take + 1)->get();
+
+        if ($this->auth->guest() === false && $useVote === true) {
+            $commentVoteCounterLogQuery = $this->counter->newModel()->newQuery();
+
+            $commentVoteCounterLogs = $commentVoteCounterLogQuery
+                ->where('counter_name', $counterName)
+                ->where('user_id', $this->auth->id())
+                ->whereIn('target_id', $comments->pluck('id'))
+                ->get();
+
+            $comments->each(function (Comment $comment) use ($commentVoteCounterLogs) {
+                $commentVoteCounterLog = $commentVoteCounterLogs->first(
+                    function(CounterLog $counterLog) use ($comment) {
+                        return $counterLog->target_id === $comment->id;
+                    }
+                );
+
+                if ($commentVoteCounterLog !== null) {
+                    $comment->setVoteType($commentVoteCounterLog->counter_option);
+                }
             });
-        }
-
-        $query->orderBy('head', 'desc')->orderBy('reply', $direction)->take($take + 1);
-
-        $comments = $query->with('target.commentable')->get();
-
-        foreach ($comments as $comment) {
-            $this->bindUserVote($comment);
         }
 
         return new Paginator($comments, $take);
