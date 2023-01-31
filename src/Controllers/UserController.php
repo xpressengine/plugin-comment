@@ -86,7 +86,7 @@ class UserController extends Controller
 
         $config = $this->handler->getConfig($instanceId);
 
-        \Event::fire('xe.plugin.comment.retrieved', [$request]);
+        \Event::dispatch('xe.plugin.comment.retrieved', [$request]);
 
         $take = $request->get('perPage', $config['perPage']);
 
@@ -203,7 +203,7 @@ class UserController extends Controller
 
         $inputs['target_author_id'] = $targetModel->getAuthor()->getId();
 
-        \Event::fire('xe.plugin.comment.create', [$request]);
+        \Event::dispatch('xe.plugin.comment.create', [$request]);
 
         /** @var Comment $comment */
         $comment = $this->handler->create($inputs);
