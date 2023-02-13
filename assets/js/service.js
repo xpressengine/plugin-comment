@@ -715,12 +715,24 @@
         appEditor.getEditor(that.editorData.name).then(function createEditor (editor) {
           that.editor = editor.create(id, that.editorData.options, that.editorData.customOptions, that.editorData.tools)
 
-          that.editor.on('focus', function focusCallback () {
-            $(id).triggerHandler('focus')
-          })
-          that.editor.on('change', function changeCallback () {
-            $(id).triggerHandler('input')
-          })
+          if(that.editor instanceof Promise) {
+            that.editor.then(editor => {
+              that.editor = editor;
+              that.editor.on('focus', function focusCallback () {
+                $(id).triggerHandler('focus')
+              })
+              that.editor.on('change', function changeCallback () {
+                $(id).triggerHandler('input')
+              })
+            })
+          } else {
+            that.editor.on('focus', function focusCallback () {
+              $(id).triggerHandler('focus')
+            })
+            that.editor.on('change', function changeCallback () {
+              $(id).triggerHandler('input')
+            })
+          }
         })
       })
     },
