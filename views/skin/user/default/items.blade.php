@@ -73,7 +73,7 @@ use Xpressengine\User\Rating;
                         <ul>
                             @foreach($item->files as $file)
                                 <li>
-                                    <a href="{{ route('editor.file.download', ['instanceId' => $item->instance_id, 'fileId' => $file->id]) }}">
+                                    <a href="{{ route('editor.file.download', ['instanceId' => $item->instance_id, 'id' => $file->id]) }}">
                                         <i class="xi-download"></i> {{ $file->clientname }} <span class="file_size">({{ bytes($file->size) }})</span>
                                     </a>
                                 </li>
