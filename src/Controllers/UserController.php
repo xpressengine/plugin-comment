@@ -726,7 +726,7 @@ class UserController extends Controller
         }
 
         if ($inputs['email'] !== $comment->email
-            || Hash::check($inputs['certify_key'], $comment->certifyKey) === false
+            || Hash::check($inputs['certify_key'], $comment->certify_key) === false
         ) {
             throw new NotMatchCertifyKeyException;
         }
