@@ -28,8 +28,11 @@
             </div>
             @endif
             @if($config->get('secret') === true && !Auth::guest())
+            @php
+            $htmlIdPrivateText = app('xe.keygen')->generate();
+            @endphp
             <div class="comment_form_option">
-                <input type="checkbox" name="display" value="secret" id="private_text"><label for="private_text">{{ xe_trans('comment::secret') }}</label>
+                <input type="checkbox" name="display" value="secret" id="private_text--{{ $htmlIdPrivateText }}"><label for="private_text--{{ $$htmlIdPrivateText }}">{{ xe_trans('comment::secret') }}</label>
             </div>
             @endif
             <div class="comment_form_btn">
