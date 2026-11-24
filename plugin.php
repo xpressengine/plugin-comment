@@ -93,11 +93,10 @@ class Plugin extends AbstractPlugin
             XeConfig::set('comment', $handler->getDefaultConfig());
 
             XeToggleMenu::setActivates('comment', null, []);
-
-            // pivot table
-            // schema 처리는 transaction 에 의해 롤백 되지 않으므로 가장 마지막에 수행 함
-            (new Migration())->up();
         });
+
+        // MySQL과 MariaDB는 테이블 생성 시 진행 중인 트랜잭션을 암묵적으로 커밋한다.
+        (new Migration())->up();
     }
 
     public function checkInstalled()
@@ -126,11 +125,10 @@ class Plugin extends AbstractPlugin
             XeConfig::removeByName('comment_map');
             // 최상위 설정 제거
             XeConfig::removeByName(XeToggleMenu::getConfigKey('comment', null));
-
-            // drop pivot table
-            // schema 처리는 transaction 에 의해 롤백 되지 않으므로 가장 마지막에 수행 함
-            (new Migration())->down();
         });
+
+        // 데이터 정리가 커밋된 뒤 연결 테이블을 삭제한다.
+        (new Migration())->down();
     }
 
     public function boot()
