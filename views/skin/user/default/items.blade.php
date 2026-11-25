@@ -51,6 +51,12 @@ use Xpressengine\User\Rating;
             <div class="xe_content __xe_comment_edit_toggle">
                 @can('read', $item)
                 {!! compile($item->instance_id, $item->getContent(), $item->format === Comment::FORMAT_HTML) !!}
+
+                <p>
+                    @foreach($fieldTypes as $fieldType)
+                        {!! $fieldType->getSkin()->show($item->getAttributes()) !!}
+                    @endforeach
+                </p>
                 @else
                     @if($item->display == Comment::DISPLAY_SECRET)
                         {{ xe_trans('comment::secretContent') }}
@@ -58,14 +64,9 @@ use Xpressengine\User\Rating;
                         {{ xe_trans('comment::NotAllowContent') }}
                     @endif
                 @endcan
-
-                <p>
-                    @foreach($fieldTypes as $fieldType)
-                        {!! $fieldType->getSkin()->show($item->getAttributes()) !!}
-                    @endforeach
-                </p>
             </div>
             <div class="comment_action __xe_comment_edit_toggle">
+                @can('read', $item)
                 @if(count($item->files) > 0)
                     <div class="comment_file_list">
                         <!-- [D] 클릭시 클래스 on 적용 -->
@@ -81,6 +82,7 @@ use Xpressengine\User\Rating;
                         </ul>
                     </div>
                 @endif
+                @endcan
 
                 @if($config->get('useAssent') === true)
                     <div class="vote">
